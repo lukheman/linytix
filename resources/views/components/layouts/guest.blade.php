@@ -1,5 +1,5 @@
 @props([
-    'title' => 'AdminPro - Modern Admin Dashboard',
+    'title' => 'LinyTix - Modern Admin Dashboard',
     'description' => 'A beautiful, modern admin dashboard template built with Laravel and Bootstrap',
     'type' => 'guest',
 ])
@@ -24,37 +24,48 @@
 
     <style>
         :root {
-            --bs-primary: #6366f1;
-            --bs-primary: #4f46e5;
-            --primary-light: #818cf8;
-            --bs-secondary: #0ea5e9;
-            --bs-success: #10b981;
-            --bs-warning: #f59e0b;
-            --bs-danger: #ef4444;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --bg-light: #f8fafc;
+            --bs-primary: #0f766e;
+            --bs-primary-rgb: 15, 118, 110;
+            --primary-light: #5eead4;
+            --bs-secondary: #5b625f;
+            --bs-secondary-rgb: 91, 98, 95;
+            --bs-success: #15803d;
+            --bs-warning: #b45309;
+            --bs-danger: #b91c1c;
+            --text-primary: #141614;
+            --text-secondary: #565b58;
+            --text-muted: #8a908c;
+            --border-color: #e0e1dd;
+            --bg-light: #f6f6f4;
             --bg-white: #ffffff;
         }
 
         [data-theme="dark"] {
-            --bs-primary: #818cf8;
-            --bs-primary: #6366f1;
-            --primary-light: #a5b4fc;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --bg-light: #0f172a;
-            --bg-white: #1e293b;
+            --bs-primary: #2dd4bf;
+            --bs-primary-rgb: 45, 212, 191;
+            --primary-light: #5eead4;
+            --text-primary: #eceeec;
+            --text-secondary: #a7aeaa;
+            --text-muted: #7c837f;
+            --border-color: #2a2f2d;
+            --bg-light: #0c0e0d;
+            --bg-white: #141716;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        *,
+        *::before,
+        *::after {
+            border-radius: 0 !important;
+        }
+
+        .rounded-circle {
+            border-radius: 0 !important;
         }
 
         html {
@@ -172,14 +183,13 @@
         }
 
         .btn-nav-primary {
-            background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary) 100%);
+            background: var(--bs-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: none;
         }
 
         .btn-nav-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            background: #0b5c56;
             color: white;
         }
 
@@ -267,14 +277,13 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-primary) 100%);
+            background: var(--bs-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: none;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            background: #0b5c56;
         }
 
         .btn-lg {
@@ -499,16 +508,16 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px rgba(15, 118, 110, 0.4);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% {
-                box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+                box-shadow: 0 10px 30px rgba(15, 118, 110, 0.4);
             }
             50% {
-                box-shadow: 0 10px 40px rgba(99, 102, 241, 0.6);
+                box-shadow: 0 10px 40px rgba(15, 118, 110, 0.6);
             }
         }
 
@@ -540,12 +549,12 @@
             padding: 1rem 1rem 1rem 3rem;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: #f8fafc;
+            background: var(--bg-light);
         }
 
         .form-floating .form-control:focus {
             border-color: var(--bs-primary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
             background: white;
         }
 
@@ -593,7 +602,7 @@
         }
 
         .form-check-input:focus {
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
             border-color: var(--bs-primary);
         }
 
@@ -641,7 +650,7 @@
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 10px 30px rgba(15, 118, 110, 0.4);
         }
 
         .btn-login:hover::before {
@@ -710,7 +719,7 @@
 
         .btn-social:hover {
             border-color: var(--bs-primary);
-            background: #f8fafc;
+            background: var(--bg-light);
             transform: translateY(-2px);
         }
 
@@ -772,7 +781,7 @@
         input:-webkit-autofill,
         input:-webkit-autofill:hover,
         input:-webkit-autofill:focus {
-            -webkit-box-shadow: 0 0 0px 1000px #f8fafc inset;
+            -webkit-box-shadow: 0 0 0px 1000px var(--bg-light) inset;
             -webkit-text-fill-color: var(--text-primary);
             transition: background-color 5000s ease-in-out 0s;
         }
@@ -787,7 +796,7 @@
         <div class="site-navbar-container">
             <a href="/" class="site-brand">
                 <i class="fas fa-layer-group"></i>
-                <span>AdminPro</span>
+                <span>LinyTix</span>
             </a>
 
             <ul class="site-nav">
@@ -833,7 +842,7 @@
                     <div class="footer-brand">
                         <a href="/" class="site-brand">
                             <i class="fas fa-layer-group"></i>
-                            <span>AdminPro</span>
+                            <span>LinyTix</span>
                         </a>
                         <p>A modern, elegant admin dashboard template built with Laravel and Bootstrap.</p>
                     </div>
@@ -870,7 +879,7 @@
                 </div>
 
                 <div class="footer-bottom">
-                    <p>&copy; {{ date('Y') }} AdminPro. All rights reserved.</p>
+                    <p>&copy; {{ date('Y') }} LinyTix. All rights reserved.</p>
                     <div class="footer-social">
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-github"></i></a>

@@ -51,7 +51,7 @@
 
     .custom-radio .form-check-input:focus {
         border-color: var(--bs-primary);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
     }
 
     .custom-radio .form-check-input:disabled {

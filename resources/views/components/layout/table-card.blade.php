@@ -9,10 +9,10 @@
     @if($title || $viewAllHref)
         <div class="d-flex justify-content-between align-items-center mb-3">
             @if($title)
-                <h5 class="mb-0" style="color: #1e293b; font-weight: 600;">{{ $title }}</h5>
+                <h5 class="mb-0" style="color: var(--text-primary); font-weight: 600;">{{ $title }}</h5>
             @endif
             @if($viewAllHref)
-                <a href="{{ $viewAllHref }}" class="btn btn-sm" style="color: var(--bs-primary); background: rgba(99, 102, 241, 0.1); border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 500;">
+                <a href="{{ $viewAllHref }}" class="btn btn-sm" style="color: var(--bs-primary); background: rgba(15, 118, 110, 0.1); border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 500;">
                     {{ $viewAllText }}
                 </a>
             @elseif(isset($actions))

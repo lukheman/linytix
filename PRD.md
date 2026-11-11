@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versi** | 1.2 |
-| **Tanggal** | 10 November 2026 |
+| **Versi** | 1.11 |
+| **Tanggal** | 11 November 2026 |
 | **Status** | Draft untuk review |
 | **Dokumen terkait** | `schema.sql`, `erd.mmd`, `BACKLOG.md` |
 | **Referensi UX** | mortix.id (inspirasi alur dan tampilan, bukan acuan teknis) |
@@ -15,6 +15,15 @@
 | 1.0 | Draft awal |
 | 1.1 | Diselaraskan dengan repo Laravel 12: stack, database MySQL, skema aktual, keputusan arsitektur, state machine, metrik, dan pemisahan skema aktual vs rencana perluasan |
 | 1.2 | Tahap 0 dan 1 diimplementasikan: perluasan skema, role/policy, payment abstraction, CI, halaman publik event, filter, detail, dan halaman informasi |
+| 1.3 | Tahap 2 diimplementasikan: registrasi/login/verifikasi email, login Google, lupa/reset password, akun, riwayat pesanan, tiket saya, dan akses guest via signed URL |
+| 1.4 | Landing page `/` diubah dari katalog sewa alat menjadi beranda discovery event: hero + pencarian, kategori, event unggulan, event mendatang, cara beli, dan CTA akses guest |
+| 1.5 | Tahap awal E3 diimplementasikan: pemilihan tiket, order pending dengan reservasi stok atomik, guest checkout, inisiasi pembayaran (FakeGateway), dan halaman status pembayaran; menambah `orders.idempotency_key` dan `orders.holder_names` |
+| 1.6 | Webhook pembayaran idempoten, expiry order, rekonsiliasi pembayaran, dan late payment (termasuk refund otomatis + notifikasi) diimplementasikan |
+| 1.7 | Penerbitan tiket idempoten setelah pembayaran, QR unik, dan pengiriman email e-tiket via queue dengan `notification_logs` |
+| 1.8 | PDF e-tiket per order (event, tanggal, venue, jenis tiket, pemegang, kode, QR) tersedia untuk unduhan akun/guest/admin dan dilampirkan pada email; admin dapat melihat status email dan mengirim ulang; `notification_logs.order_id` ditambahkan |
+| 1.9 | Panel refund admin: refund penuh order `paid` dengan alasan wajib, lifecycle `requested`/`processing`/`succeeded`/`failed`, retry refund gagal, pembatalan event dengan refund batch, notifikasi email, dan audit log; `refunds.error` ditambahkan |
+| 1.10 | Polling status pembayaran setiap 5 detik (maksimal 15 menit) dengan endpoint JSON bertanda tangan, tombol cek status manual, dan tampilan status paid/expired |
+| 1.11 | Dashboard organizer dan profil organizer: edit identitas, kontak, logo, rekening, slug unik dengan redirect 301 dari slug lama, verifikasi admin dengan catatan, audit log dengan masking rekening, serta halaman publik organizer; tabel `organizer_slug_redirects` ditambahkan |
 
 ---
 
@@ -22,7 +31,7 @@
 
 Platform web untuk menjual tiket event dan konser musik secara online. Pengunjung dapat menjelajahi event, memilih jenis tiket, membayar, dan menerima e-tiket ber-QR. Organizer dapat membuat event, mengatur penjualan tiket, serta memantau penjualan dan kehadiran. Admin mengelola pengguna, moderasi event, master data, transaksi, dan refund.
 
-Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema) serta Tahap 1 (halaman publik event) sudah diimplementasikan; alur checkout, tiket, organizer, staff, dan admin ticketing menyusul pada tahap berikutnya.
+Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema), Tahap 1 (halaman publik event), serta Tahap 2 (auth, akun, dan akses guest) sudah diimplementasikan. Tahap 3 selesai: checkout, pembayaran, webhook, expiry, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email admin, panel refund admin, dan polling status pembayaran sudah tersedia. Epik 4 berjalan: dashboard dan profil organizer sudah tersedia; pengelolaan event dan tiket menyusul.
 
 ---
 
@@ -289,7 +298,7 @@ Aturan:
 | Storage | Local public disk | S3-compatible | Poster, banner, galeri |
 | Pembayaran | Belum ada | Midtrans utama, abstraksi gateway | Xendit dapat ditambahkan tanpa ubah domain |
 | Email | Laravel Mail | Provider transaksional (Resend/SES) | Diputuskan sebelum MVP |
-| Auth | Controller auth kustom | Laravel auth + Socialite (Google) | Tambah verifikasi email dan reset password |
+| Auth | Controller auth kustom + Socialite (Google), verifikasi email, reset password, rate limit | Sama + kebijakan password produksi | Login Google memakai `laravel/socialite`; QR tiket dirender inline dengan `bacon/bacon-qr-code` |
 | Hosting | Lokal | VPS + Docker/Nginx + PHP-FPM | Worker dan scheduler terpisah |
 | CI/CD | GitHub Actions (Pint, Pest, build) | GitHub Actions + deploy staging | Deploy staging belum ada |
 | Observability | Job + scheduler; log dasar | Sentry + log + uptime monitor | Sentry/alert wajib sebelum launch |
@@ -299,7 +308,8 @@ Aturan:
 - Repo berisi template admin Laravel dan modul konten legacy: `services`, `rental_items`, `collaborations`, `testimonials`, `site_settings`, `social_links`, `team_members`.
 - Model dan migration ticketing sudah ada: `Event`, `Organizer`, `Venue`, `TicketType`, `Voucher`, `Order`, `OrderItem`, `Payment`, `Ticket`, `CheckIn`, `VoucherUsage`, `Banner`, `Faq`, `ContactMessage`, `AuditLog`.
 - Halaman publik event sudah tersedia: `/events`, `/events/{slug}`, filter, dan halaman informasi.
-- Route/controller checkout, tiket, organizer, staff, dan admin ticketing **belum ada**.
+- Auth, akun, dan akses guest sudah tersedia: `/login`, `/register`, `/forgot-password`, `/reset-password`, `/auth/google/*`, `/email/verify*`, `/akun`, `/akun/pesanan`, `/akun/tiket`, `/pesanan/cari`, dan signed URL `/pesanan/{order}`.
+- Checkout dan pembayaran sudah tersedia: form pilih tiket, order pending dengan reservasi stok, guest checkout, inisiasi pembayaran, halaman status dengan polling otomatis, webhook idempoten, expiry otomatis, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email, serta panel refund admin (refund penuh, retry, dan pembatalan event dengan refund batch). Dashboard dan profil organizer sudah tersedia; pengelolaan event/tiket, staff, dan admin ticketing masih menunggu kelanjutan Epik 4–6.
 - Skema aktual ada di `schema.sql`; ERD domain ada di `erd.mmd`.
 - Perluasan skema P0 sudah diterapkan dan didokumentasikan di §10.3 serta `BACKLOG.md` Epik 0.
 
@@ -311,7 +321,7 @@ Aturan:
 - Tidak ada `env()` di luar config; tidak ada query mentah kecuali operasi atomik stok/check-in.
 - Semua route memakai named route dan middleware auth/role/policy.
 - Payment gateway dibungkus interface: `createCharge`, `handleWebhook`, `refund`, `getStatus`.
-- Tidak menambah dependency produksi tanpa persetujuan; paket PDF/QR dipilih saat implementasi.
+- Dependency produksi yang dipakai: `laravel/socialite` untuk login Google dan `bacon/bacon-qr-code` untuk QR SVG. Paket PDF e-tiket dipilih saat Epik 3.
 
 ---
 
@@ -351,16 +361,16 @@ Perluasan berikut **sudah ada** di migration, `schema.sql`, dan `erd.mmd`:
 | Area | Perubahan |
 |---|---|
 | Pengguna & role | `users.phone`, `users.google_id` (unique nullable), `users.is_active`, `users.last_login_at`; tabel `roles`, `role_user` |
-| Organizer | `logo_url`, `contact_email`, `contact_phone`, `bank_name`, `bank_account_no`, `bank_account_name`, `verified_at`, `verified_by`, `verification_note` |
+| Organizer | `logo_url`, `contact_email`, `contact_phone`, `bank_name`, `bank_account_no`, `bank_account_name`, `verified_at`, `verified_by`, `verification_note`; tabel `organizer_slug_redirects` untuk redirect 301 slug lama |
 | Venue | `latitude`, `longitude`, `maps_url` |
 | Event | `short_desc`, `terms`, `poster_url`, `banner_url`, `doors_open_at`, `online_url`, `timezone`, `is_featured`, `require_identity`, `view_count`, `published_at`, `approved_by`, `approved_at`, `rejection_reason` |
 | Ticket type | `description`, `min_per_order`, `max_per_order`, `sale_start_at`, `sale_end_at` |
 | Voucher (P1) | `max_discount`, `min_purchase`, `usage_limit`, `per_user_limit`, `used_count`, `valid_from`, `valid_until` |
 | Payment | `expires_at` |
-| Refund | Tabel `refunds`: order, payment, amount, reason, status, gateway_ref, requested_by, processed_by, processed_at |
+| Refund | Tabel `refunds`: order, payment, amount, reason, status, gateway_ref, error, requested_by, processed_by, processed_at |
 | Webhook | Tabel `webhook_events`: gateway, external_id, event_type, payload, signature_valid, status, processed_at, error; unique `(gateway, external_id)` |
 | Notifikasi | Tabel `notification_logs`: channel, recipient, template, status, provider_ref, error, sent_at |
-| Index | `orders(status, expires_at)`, `events(status, start_at)`, `ticket_types(event_id, is_active)`, `tickets(event_id, status)`, `tickets(order_id)`, `check_ins(event_id, scanned_at)`, `check_ins(ticket_id)`, `payments(order_id, status)`, `voucher_usages(voucher_id, user_id)` |
+| Index | `orders(status, expires_at)`, `events(status, start_at)`, `ticket_types(event_id, is_active)`, `tickets(event_id, status)`, `tickets(order_id)`, `check_ins(event_id, scanned_at)`, `check_ins(ticket_id)`, `payments(order_id, status)`, `voucher_usages(voucher_id, user_id)`, `refunds(status)` |
 | P1 | Tabel `payouts` untuk pencairan organizer |
 
 Setiap perubahan skema berikutnya wajib memperbarui `schema.sql` dan `erd.mmd` pada PR yang sama.
@@ -371,22 +381,29 @@ Setiap perubahan skema berikutnya wajib memperbarui `schema.sql` dan `erd.mmd` p
 
 | Rute | Halaman | Akses |
 |---|---|---|
-| `/` | Landing page legacy (sewa alat) | Publik |
+| `/` | Beranda discovery event (hero, pencarian, kategori, event unggulan) | Publik |
 | `/events` | Beranda event, daftar + filter | Publik |
 | `/events/{slug}` | Detail event | Publik |
+| `/events/{slug}/checkout` | Form pilih tiket & data pembeli | Publik |
+| `/checkout/{order}` | Status & instruksi pembayaran | Pemilik/signed URL |
 | `/faq`, `/tentang-kami`, `/hubungi-kami`, `/privacy-policy`, `/terms`, `/refund-policy` | Informasi | Publik |
 | `/pesanan/cari` | Cari pesanan guest | Publik |
 | `/pesanan/{order}` | Detail pesanan guest (signed URL) | Signed URL |
+| `/pesanan/{order}/pdf` | Unduh PDF e-tiket guest (signed URL) | Signed URL |
 | `/login`, `/register` | Autentikasi | Publik |
 | `/forgot-password`, `/reset-password/{token}` | Lupa/reset password | Publik |
 | `/email/verify`, `/email/verify/{id}/{hash}` | Verifikasi email | Auth |
-| `/checkout/{order}` | Checkout & status pembayaran | Pemilik/signed |
-| `/pembayaran/{order}/status` | Polling status pembayaran | Pemilik/signed |
+| `/checkout/{order}/pay` | Inisiasi pembayaran | Pemilik/signed |
+| `/webhooks/payment/{gateway}` | Webhook gateway pembayaran | Gateway (signature) |
+| `/checkout/{order}/status` | Polling status pembayaran | Pemilik/signed |
 | `/akun/tiket` | Tiket saya | Customer |
 | `/akun/pesanan` | Riwayat pesanan | Customer |
 | `/akun/pesanan/{order}` | Detail pesanan | Customer |
+| `/akun/pesanan/{order}/pdf` | Unduh PDF e-tiket pesanan | Customer |
+| `/akun/tiket/{ticket}/pdf` | Unduh PDF e-tiket | Customer |
 | `/organizer` | Dashboard organizer | Organizer |
 | `/organizer/profil` | Profil & rekening | Organizer |
+| `/organizers/{slug}` | Halaman publik organizer | Publik |
 | `/organizer/events` | Daftar event | Organizer |
 | `/organizer/events/create` | Buat event | Organizer |
 | `/organizer/events/{event}/edit` | Edit event | Organizer (owner) |
@@ -398,6 +415,8 @@ Setiap perubahan skema berikutnya wajib memperbarui `schema.sql` dan `erd.mmd` p
 | `/admin/events`, `/admin/events/{event}/review` | Moderasi event | Admin |
 | `/admin/categories`, `/admin/venues`, `/admin/faqs`, `/admin/banners` | Master data | Admin |
 | `/admin/orders`, `/admin/payments` | Monitoring transaksi | Admin |
+| `/admin/pesanan`, `/admin/pesanan/{order}/pdf` | Monitoring pesanan & unduh e-tiket | Admin |
+| `/admin/pesanan/{order}/kirim-tiket` | Kirim ulang email e-tiket | Admin |
 | `/admin/refunds` | Refund | Admin |
 | `/admin/payouts` | Pencairan | Admin (P1) |
 | `/admin/contact-messages`, `/admin/audit-logs` | Kontak & audit | Admin (P1) |
@@ -457,7 +476,7 @@ Asumsi tim: 2 backend Laravel, 1 frontend/design, QA part-time. Jika solo, estim
 | D10 | Biaya layanan berupa persentase dengan batas minimum/maksimum, nilainya di config (bukan hardcode) |
 | D11 | Harga tiket dianggap termasuk PPN; biaya layanan dikenakan PPN; konfirmasi ke konsultan pajak |
 | D12 | Email provider dipilih sebelum MVP; wajib SPF/DKIM/DMARC |
-| D13 | `/` tetap menjadi landing page legacy agar situs lama tidak rusak; katalog event berada di `/events`. Jika bisnis ingin `/` menjadi beranda event, keputusan diambil sebelum launch dengan redirect dan pembaruan test |
+| D13 | `/` menjadi beranda discovery event; katalog sewa alat tetap tersedia melalui `/layanan/{service:slug}`. Navigasi dan test lama diperbarui mengikuti keputusan ini |
 
 ### 14.2 Pertanyaan yang masih perlu konfirmasi bisnis
 

@@ -2,6 +2,7 @@
     $start = $event->startsAtLocal();
     $end = $event->endsAtLocal();
     $soldOut = $event->isSoldOut();
+    $hasAvailableTicket = $event->ticketTypes->contains(fn ($type) => $type->isOnSaleNow());
     $mapQuery = $event->venue?->maps_url ?: ($event->venue?->coordinates() ? 'https://www.google.com/maps/search/?api=1&query='.urlencode($event->venue->coordinates()) : null);
 @endphp
 
@@ -16,8 +17,8 @@
 >
     @push('styles')
         <style>
-            .detail-hero { padding: 8.5rem 0 3rem; background: linear-gradient(120deg, var(--mint), #fbfcfa 65%); }
-            .detail-poster { border-radius: 1.25rem; overflow: hidden; aspect-ratio: 4 / 3; background: var(--mint); box-shadow: 0 22px 50px rgba(22, 76, 75, .16); }
+            .detail-hero { padding: 8.5rem 0 3rem; background: var(--canvas); }
+            .detail-poster { border-radius: 1.25rem; overflow: hidden; aspect-ratio: 4 / 3; background: var(--mint);  }
             .detail-poster img { width: 100%; height: 100%; object-fit: cover; }
             .meta-pill { display: inline-flex; align-items: center; gap: .5rem; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: .5rem .95rem; font-weight: 600; font-size: .875rem; }
             .ticket-row { border: 1px solid var(--line); border-radius: 1rem; padding: 1rem 1.15rem; background: #fff; }
@@ -173,10 +174,19 @@
                                             <div class="small text-secondary">{{ $ticketType->saleStatusLabel() }}</div>
                                         </div>
                                     </div>
-                                    <div class="small text-secondary mt-2">
-                                        Sisa {{ $ticketType->remainingQuota() }} tiket
-                                        @if ($ticketType->sale_start_at)
-                                            · Jual mulai {{ $ticketType->sale_start_at->format('d M Y, H.i') }}
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+                                        <div class="small text-secondary">
+                                            Sisa {{ $ticketType->remainingQuota() }} tiket
+                                            @if ($ticketType->sale_start_at)
+                                                · Jual mulai {{ $ticketType->sale_start_at->format('d M Y, H.i') }}
+                                            @endif
+                                        </div>
+                                        @if ($ticketType->isOnSaleNow())
+                                            <a class="btn btn-sm btn-main" href="{{ route('checkout.create', ['event' => $event->slug, 'ticket_type' => $ticketType->getKey()]) }}">
+                                                Pilih <i class="fa-solid fa-arrow-right ms-1"></i>
+                                            </a>
+                                        @else
+                                            <button class="btn btn-sm btn-secondary" disabled>{{ $ticketType->saleStatusLabel() }}</button>
                                         @endif
                                     </div>
                                 </div>
@@ -185,11 +195,13 @@
                             @endforelse
 
                             <div class="d-grid mt-3">
-                                @if ($soldOut)
+                                @if ($soldOut || ! $hasAvailableTicket)
                                     <button class="btn btn-secondary btn-lg" disabled>Tiket habis</button>
                                 @else
-                                    <a class="btn btn-main btn-lg" href="#tiket"><i class="fa-solid fa-cart-shopping me-1"></i> Lanjut pilih tiket</a>
-                                    <div class="small text-secondary text-center mt-2">Checkout dan pembayaran tersedia pada tahap berikutnya.</div>
+                                    <a class="btn btn-main btn-lg" href="{{ route('checkout.create', $event->slug) }}">
+                                        <i class="fa-solid fa-cart-shopping me-1"></i> Beli tiket
+                                    </a>
+                                    <div class="small text-secondary text-center mt-2">Pilih jenis tiket dan isi data pembeli pada halaman berikutnya.</div>
                                 @endif
                             </div>
                         </div>
@@ -197,7 +209,7 @@
                         @if ($event->organizer)
                             <div class="card-clean p-4 mt-4">
                                 <div class="small text-secondary mb-1">Diselenggarakan oleh</div>
-                                <div class="fw-semibold">{{ $event->organizer->name }}</div>
+                                <a href="{{ route('organizers.show', $event->organizer->slug) }}" class="fw-semibold text-decoration-none">{{ $event->organizer->name }}</a>
                                 @if ($event->organizer->is_verified)
                                     <div class="small text-success mt-1"><i class="fa-solid fa-circle-check me-1"></i>Organizer terverifikasi</div>
                                 @endif

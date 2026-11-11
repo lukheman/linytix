@@ -161,7 +161,7 @@ class EventController extends Controller
 
     private function siteName(): string
     {
-        return SiteContent::settings()['site_name'] ?? 'Nusa Event';
+        return SiteContent::settings()['site_name'] ?? 'LinyTix';
     }
 
     /**

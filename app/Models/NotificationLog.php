@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotificationLog extends Model
 {
@@ -14,6 +15,7 @@ class NotificationLog extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'order_id',
         'channel',
         'recipient',
         'template',
@@ -28,5 +30,10 @@ class NotificationLog extends Model
         return [
             'sent_at' => 'datetime',
         ];
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 }

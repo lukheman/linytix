@@ -1,4 +1,4 @@
-<x-layouts.app title="Profile - AdminPro">
+<x-layouts.app title="Profile - LinyTix">
     @php
         $user = Auth::user();
         $showPasswordSection = $errors->has('current_password') || $errors->has('password');

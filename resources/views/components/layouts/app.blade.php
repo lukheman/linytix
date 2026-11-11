@@ -1,6 +1,6 @@
 @props([
-    'title' => 'Modern Admin Dashboard',
-    'brandName' => 'AdminPro',
+    'title' => 'LinyTix Admin',
+    'brandName' => 'LinyTix',
     'brandIcon' => 'fas fa-layer-group'
 ])
 
@@ -96,9 +96,10 @@
             color: var(--text-secondary);
             text-decoration: none;
             transition: all 0.2s;
-            margin: 0.25rem 0.75rem;
-            border-radius: 8px;
+            margin: 0.15rem 0.75rem;
+            border-radius: 0;
             font-weight: 500;
+            border-left: 3px solid transparent;
         }
 
         .sidebar-menu a:hover {
@@ -107,8 +108,10 @@
         }
 
         .sidebar-menu a.active {
-            background: var(--bs-primary);
-            color: white;
+            background: var(--accent-soft);
+            color: var(--bs-primary);
+            border-left-color: var(--bs-primary);
+            font-weight: 600;
         }
 
         .sidebar-menu a i {
@@ -125,7 +128,7 @@
         .topbar {
             background: var(--bg-secondary);
             height: var(--topbar-height);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -157,29 +160,28 @@
 
         .modern-card {
             background: var(--bg-secondary);
-            border-radius: 16px;
+            border-radius: 0;
             padding: 1.75rem;
             box-shadow: var(--card-shadow);
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-light);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid var(--border-color);
         }
 
         .modern-card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
+            border-color: var(--bs-primary);
         }
 
         [data-theme="dark"] .modern-card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: var(--card-shadow);
         }
 
         .stat-card {
             background: var(--bg-secondary);
-            border-radius: 16px;
+            border-radius: 0;
             padding: 1.75rem;
             box-shadow: var(--card-shadow);
-            transition: all 0.3s;
-            border: 1px solid var(--border-light);
+            transition: border-color 0.2s ease;
+            border: 1px solid var(--border-color);
             position: relative;
             overflow: hidden;
         }
@@ -189,35 +191,36 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 3px;
             height: 100%;
-            background: var(--accent-color);
+            background: var(--accent-color, var(--bs-primary));
         }
 
         .stat-card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transform: translateY(-4px);
+            border-color: var(--bs-primary);
         }
 
         [data-theme="dark"] .stat-card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: var(--card-shadow);
         }
 
         .stat-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             margin-bottom: 1rem;
+            background: var(--accent-soft);
+            color: var(--bs-primary);
         }
 
         .user-avatar {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
+            border-radius: 0;
             background: var(--bs-primary);
             display: flex;
             align-items: center;
@@ -227,14 +230,22 @@
             font-size: 0.875rem;
         }
 
+        [data-theme="dark"] .user-avatar,
+        [data-theme="dark"] .btn-primary-modern,
+        [data-theme="dark"] .btn-primary-modern:hover {
+            color: #07211e;
+        }
+
         .badge-modern {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0;
+            font-size: 0.72rem;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
         }
 
         .preview-title {
@@ -248,7 +259,7 @@
 
         .btn-modern {
             padding: 0.625rem 1.5rem;
-            border-radius: 8px;
+            border-radius: 0;
             font-weight: 500;
             transition: all 0.2s;
         }
@@ -260,14 +271,13 @@
         }
 
         .btn-primary-modern:hover {
-            background: var(--bs-primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            background: var(--bs-primary-dark);
+            color: white;
         }
 
         .alert-modern {
-            border-radius: 12px;
-            border: none;
+            border-radius: 0;
+            border: 1px solid var(--border-color);
             padding: 1rem 1.25rem;
             display: flex;
             align-items: start;
@@ -275,13 +285,13 @@
         }
 
         .progress-modern {
-            height: 8px;
-            border-radius: 50px;
+            height: 6px;
+            border-radius: 0;
             background: var(--border-light);
         }
 
         .progress-bar-modern {
-            border-radius: 50px;
+            border-radius: 0;
         }
 
         @media (max-width: 768px) {
@@ -325,7 +335,7 @@
         .table-modern tbody tr {
             background: var(--bg-secondary);
             box-shadow: var(--card-shadow);
-            border-radius: 8px;
+            border-radius: 0;
         }
 
         .table-modern tbody td {
@@ -336,13 +346,13 @@
         }
 
         .table-modern tbody tr td:first-child {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
         .table-modern tbody tr td:last-child {
-            border-top-right-radius: 8px;
-            border-bottom-right-radius: 8px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
         }
 
         /* Bootstrap Table Dark Mode Override */
@@ -377,7 +387,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             padding: 0.5rem;
-            border-radius: 8px;
+            border-radius: 0;
             transition: all 0.2s;
             display: flex;
             align-items: center;
@@ -421,11 +431,11 @@
 
         .modal-content-custom {
             background: var(--bg-secondary);
-            border-radius: 16px;
+            border-radius: 0;
             padding: 2rem;
             width: 100%;
             max-width: 500px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border-color);
         }
 
@@ -466,7 +476,7 @@
             background: var(--input-bg);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            border-radius: 8px;
+            border-radius: 0;
             padding: 0.75rem 1rem;
         }
 
@@ -474,7 +484,7 @@
             background: var(--input-bg);
             border-color: var(--bs-primary);
             color: var(--text-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.15);
         }
 
         .form-control::placeholder {
@@ -511,7 +521,7 @@
             background: transparent;
             border: none;
             padding: 0.5rem;
-            border-radius: 6px;
+            border-radius: 0;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -548,24 +558,42 @@
     </style>
 </head>
 <body>
+    @php
+        $authUser = auth()->user();
+        $isAdmin = (bool) $authUser?->isAdmin();
+        $isOrganizer = (bool) $authUser?->isOrganizer() && ! $isAdmin;
+    @endphp
+
     <!-- Sidebar -->
     <x-layout.sidebar :brand-name="$brandName" :brand-icon="$brandIcon">
         <x-layout.sidebar-section title="Main">
-            <x-layout.sidebar-link href="{{ route('dashboard') }}" icon="fas fa-home" :active="request()->routeIs('dashboard')">Dashboard</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Users</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route('admin.content.index', 'rental-items') }}" icon="fas fa-box-open" :active="request()->is('admin/content/rental-items*')">Katalog Sewa</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route('admin.content.index', 'services') }}" icon="fas fa-calendar-check" :active="request()->is('admin/content/services*') || request()->is('admin/content/collaborations*') || request()->is('admin/content/testimonials*') || request()->is('admin/content/social-links*')">Konten EO</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="{{ route('admin.settings') }}" icon="fas fa-sliders" :active="request()->routeIs('admin.settings*')">Profil & Kontak</x-layout.sidebar-link>
+            @if ($isAdmin)
+                <x-layout.sidebar-link href="{{ route('dashboard') }}" icon="fas fa-home" :active="request()->routeIs('dashboard')">Dashboard</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Users</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.organizers') }}" icon="fas fa-building" :active="request()->routeIs('admin.organizers*')">Organizer</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.orders') }}" icon="fas fa-receipt" :active="request()->routeIs('admin.orders*')">Pesanan & E-Tiket</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.refunds') }}" icon="fas fa-rotate-left" :active="request()->routeIs('admin.refunds*')">Refund</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.settings') }}" icon="fas fa-sliders" :active="request()->routeIs('admin.settings*')">Pengaturan Ticketing</x-layout.sidebar-link>
+            @elseif ($isOrganizer)
+                <x-layout.sidebar-link href="{{ route('organizer.dashboard') }}" icon="fas fa-home" :active="request()->routeIs('organizer.dashboard')">Dashboard</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('organizer.profile') }}" icon="fas fa-building" :active="request()->routeIs('organizer.profile*')">Profil Organizer</x-layout.sidebar-link>
+            @endif
         </x-layout.sidebar-section>
 
         <x-layout.sidebar-section title="Account">
-            <x-layout.sidebar-link href="{{ route('admin.profile') }}" icon="fas fa-user-circle" :active="request()->routeIs('admin.profile')">Profile</x-layout.sidebar-link>
-            <x-layout.sidebar-link href="#settings" icon="fas fa-cog">Settings</x-layout.sidebar-link>
+            @if ($isAdmin)
+                <x-layout.sidebar-link href="{{ route('admin.profile') }}" icon="fas fa-user-circle" :active="request()->routeIs('admin.profile')">Profile</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="#settings" icon="fas fa-cog">Settings</x-layout.sidebar-link>
+            @elseif ($isOrganizer)
+                <x-layout.sidebar-link href="{{ route('organizer.profile') }}" icon="fas fa-user-circle" :active="request()->routeIs('organizer.profile*')">Profil Organizer</x-layout.sidebar-link>
+            @endif
         </x-layout.sidebar-section>
 
-        <x-layout.sidebar-section title="Developer">
-            <x-layout.sidebar-link href="{{ route('admin.components') }}" icon="fas fa-cubes" :active="request()->routeIs('admin.components')">Components</x-layout.sidebar-link>
-        </x-layout.sidebar-section>
+        @if ($isAdmin)
+            <x-layout.sidebar-section title="Developer">
+                <x-layout.sidebar-link href="{{ route('admin.components') }}" icon="fas fa-cubes" :active="request()->routeIs('admin.components')">Components</x-layout.sidebar-link>
+            </x-layout.sidebar-section>
+        @endif
     </x-layout.sidebar>
 
     <!-- Main Content -->
@@ -573,9 +601,10 @@
         <!-- Top Bar -->
         <x-layout.topbar
             :user-name="Auth::user()?->name ?? 'Guest'"
-            user-role="Administrator"
+            :user-role="$isAdmin ? 'Administrator' : ($isOrganizer ? 'Organizer' : 'Staff')"
             :notification-count="0"
             :show-logout="true"
+            :profile-url="$isOrganizer ? route('organizer.profile') : route('admin.profile')"
         />
 
         <!-- Content Area -->
@@ -655,7 +684,7 @@
                         background: "var(--bg-secondary)",
                         border: `2px solid ${borderColors[@json($toastVariant)] || "var(--bs-secondary)"}`,
                         color: "var(--text-primary)",
-                        borderRadius: "12px",
+                        borderRadius: "0",
                         boxShadow: "var(--card-shadow)"
                     },
                 }).showToast();

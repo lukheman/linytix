@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Collaboration;
-use App\Models\RentalItem;
-use App\Models\Testimonial;
+use App\Models\Event;
+use App\Models\Order;
+use App\Models\Ticket;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -17,12 +17,12 @@ class DashboardController extends Controller
     {
         return view('admin.dashboard', [
             'stats' => [
-                'rental_items' => RentalItem::query()->count(),
-                'active_rental_items' => RentalItem::query()->where('is_active', true)->count(),
-                'collaborations' => Collaboration::query()->count(),
-                'testimonials' => Testimonial::query()->count(),
+                'events' => Event::query()->count(),
+                'published_events' => Event::query()->published()->count(),
+                'orders' => Order::query()->count(),
+                'tickets' => Ticket::query()->count(),
             ],
-            'recentItems' => RentalItem::query()->latest()->limit(5)->get(),
+            'recentOrders' => Order::query()->with('event')->latest()->limit(5)->get(),
         ]);
     }
 }

@@ -1,89 +1,55 @@
 <?php
 
-use App\Models\Collaboration;
-use App\Models\RentalItem;
-use App\Models\Service;
-use App\Models\SiteSetting;
-use App\Models\SocialLink;
-use App\Models\Testimonial;
+use App\Models\Category;
+use App\Models\Event;
+use App\Models\TicketType;
+use App\Models\Venue;
 
-it('shows public event organizer pages', function () {
-    $this->get('/')->assertSuccessful()->assertSee('Sewa perlengkapan acara, lengkap dan siap pakai.');
-    $this->get('/tentang')->assertSuccessful()->assertSee('Tentang kami');
-    $this->get('/layanan')->assertSuccessful()->assertSee('Layanan');
-    $this->get('/kontak')->assertSuccessful()->assertSee('Mari bicarakan acara Anda.');
+it('shows ticketing public pages', function () {
+    $this->get('/')->assertSuccessful()->assertSee('Temukan event yang bikin harimu berkesan.');
+    $this->get('/events')->assertSuccessful()->assertSee('Temukan pengalaman berikutnya.');
+    $this->get('/faq')->assertSuccessful()->assertSee('FAQ');
+    $this->get('/tentang-kami')->assertSuccessful()->assertSee('Tentang Kami');
 });
 
-it('shows rental catalog with live items and whatsapp cta', function () {
-    SiteSetting::create(['key' => 'whatsapp_number', 'value' => '628111222333']);
-    SocialLink::create(['platform' => 'Instagram', 'url' => 'https://instagram.com/nusaevent', 'icon' => 'fa-brands fa-instagram', 'sort_order' => 1]);
+it('shows upcoming events, categories, and search on the landing page', function () {
+    $music = Category::factory()->create(['name' => 'Musik', 'slug' => 'musik', 'sort_order' => 1]);
+    $jakarta = Venue::factory()->create(['city' => 'Jakarta']);
 
-    $rentalService = Service::factory()->create([
-        'category' => 'penyewaan',
-        'name' => 'Sewa Alat',
-        'slug' => 'sewa-alat',
+    $event = Event::factory()->featured()->create([
+        'title' => 'Konser Beranda',
+        'category_id' => $music->id,
+        'venue_id' => $jakarta->id,
     ]);
-    $item = RentalItem::create([
-        'service_id' => $rentalService->id,
-        'category' => 'sound',
-        'name' => 'Sound System Test',
-        'description' => 'Sound system untuk acara.',
-        'sort_order' => 1,
-        'is_active' => true,
-    ]);
-    $collaboration = Collaboration::create([
-        'partner_name' => 'PT Contoh',
-        'event_name' => 'Seminar Contoh',
-        'slug' => 'seminar-contoh',
-        'event_date' => now(),
-        'description' => 'Kegiatan contoh.',
-    ]);
-    $testimonial = Testimonial::create([
-        'name' => 'Sari Contoh',
-        'organization' => 'Instansi Contoh',
-        'comment' => 'Peralatan lengkap dan datang tepat waktu.',
-        'rating' => 5,
-    ]);
+    TicketType::factory()->forEvent($event)->create(['price' => 175000]);
 
     $this->get('/')
-        ->assertSuccessful()
-        ->assertSee('Pilih alat, cek jadwal, kami antar.')
-        ->assertSee('Alat kami sudah mendukung berbagai acara')
-        ->assertSee('Kata mereka yang sudah menyewa')
-        ->assertSee($item->name)
-        ->assertSee('Sound System')
-        ->assertSee($collaboration->event_name)
-        ->assertSee($testimonial->name)
-        ->assertSee('Instagram')
-        ->assertSee('wa.me/628111222333', false)
-        ->assertSee('Sound+System+Test', false);
+        ->assertOk()
+        ->assertSee('Konser Beranda')
+        ->assertSee('Rp 175.000')
+        ->assertSee('Musik')
+        ->assertSee('Jakarta')
+        ->assertSee('name="q"', false)
+        ->assertSee('action="'.route('events.index').'"', false)
+        ->assertSee('href="'.route('events.show', $event->slug).'"', false)
+        ->assertSee('Cara beli tiket');
 });
 
-it('renders dummy rental image assets for seeded catalog items', function () {
-    $this->seed();
+it('hides draft and past events from the landing page', function () {
+    Event::factory()->create(['title' => 'Event Beranda Terbit']);
+    Event::factory()->draft()->create(['title' => 'Event Beranda Draft']);
+    Event::factory()->past()->create(['title' => 'Event Beranda Lewat']);
 
     $this->get('/')
-        ->assertSuccessful()
-        ->assertSee('/assets/dummy-rental/tenda.svg', false)
-        ->assertSee('/assets/dummy-rental/sound.svg', false)
-        ->assertSee('/assets/dummy-rental/lighting.svg', false);
+        ->assertOk()
+        ->assertSee('Event Beranda Terbit')
+        ->assertDontSee('Event Beranda Draft')
+        ->assertDontSee('Event Beranda Lewat');
 });
 
-it('hides inactive rental items from the public catalog', function () {
-    $rentalService = Service::factory()->create(['category' => 'penyewaan', 'slug' => 'sewa-alat']);
-    RentalItem::create([
-        'service_id' => $rentalService->id,
-        'category' => 'tenda',
-        'name' => 'Tenda Tersembunyi',
-        'sort_order' => 1,
-        'is_active' => false,
-    ]);
-
-    $this->get('/')->assertSuccessful()->assertDontSee('Tenda Tersembunyi');
-});
-
-it('shows service detail by slug', function () {
-    $service = Service::factory()->create(['slug' => 'event-test', 'name' => 'Event Test', 'is_active' => true]);
-
-    $this->get(route('services.show', $service))->assertSuccessful()->assertSee('Event Test');
+it('shows a friendly empty state when no events are available', function () {
+    $this->get('/')
+        ->assertOk()
+        ->assertSee('Event baru segera hadir')
+        ->assertSee('Belum ada event mendatang');
 });

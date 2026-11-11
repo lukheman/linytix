@@ -94,16 +94,53 @@ trait HasRoles
     /**
      * Halaman awal setelah login berdasarkan peran.
      *
-     * Dashboard lama tetap menjadi tujuan default agar alur admin yang sudah
-     * ada tidak berubah. Organizer diarahkan ke katalog event sampai dashboard
-     * organizer tersedia pada tahap berikutnya.
+     * Organizer diarahkan ke dashboard organizer; admin dan peran lain tetap
+     * menggunakan dashboard lama agar alur yang sudah ada tidak berubah.
      */
     public function homeRouteName(): string
     {
         if ($this->isOrganizer() && ! $this->isAdmin()) {
-            return 'events.index';
+            return 'organizer.dashboard';
         }
 
         return 'dashboard';
+    }
+
+    /**
+     * Apakah pengguna boleh membuka URL tertentu berdasarkan middleware role.
+     *
+     * Dipakai agar redirect "intended" setelah login tidak melempar pengguna
+     * ke halaman yang memang bukan haknya (mis. organizer ke /admin/pesanan).
+     */
+    public function canAccessUrl(string $url): bool
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: '/';
+
+        // Organizer selalu diarahkan ke area organizer, bukan area admin.
+        if ($this->isOrganizer() && ! $this->isAdmin() && str_starts_with($path, '/admin')) {
+            return false;
+        }
+
+        try {
+            $route = app('router')->getRoutes()->match(
+                \Illuminate\Http\Request::create($url, 'GET')
+            );
+        } catch (\Throwable) {
+            return false;
+        }
+
+        foreach ($route->gatherMiddleware() as $middleware) {
+            if (! is_string($middleware) || ! str_starts_with($middleware, 'role:')) {
+                continue;
+            }
+
+            $roles = array_values(array_filter(explode(',', substr($middleware, 5))));
+
+            if ($roles !== [] && ! $this->hasAnyRole($roles)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

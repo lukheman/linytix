@@ -1,4 +1,4 @@
-<x-layouts.app title="Component Documentation - AdminPro">
+<x-layouts.app title="Component Documentation - LinyTix">
     {{-- Page Header --}}
     <div class="docs-header mb-4">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">

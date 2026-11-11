@@ -4,9 +4,11 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Models\TicketType;
+use App\Notifications\OrderExpired;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class ExpireOrders implements ShouldQueue
 {
@@ -28,7 +30,9 @@ class ExpireOrders implements ShouldQueue
 
     private function expire(Order $order): void
     {
-        DB::transaction(function () use ($order): void {
+        $expired = false;
+
+        DB::transaction(function () use ($order, &$expired): void {
             $locked = Order::query()->whereKey($order->getKey())->lockForUpdate()->first();
 
             // Idempotensi: hanya order yang masih pending yang diproses.
@@ -49,6 +53,12 @@ class ExpireOrders implements ShouldQueue
             }
 
             $locked->forceFill(['status' => Order::STATUS_EXPIRED])->save();
+            $expired = true;
         });
+
+        if ($expired) {
+            Notification::route('mail', $order->buyer_email)
+                ->notify(new OrderExpired($order->loadMissing('event')));
+        }
     }
 }

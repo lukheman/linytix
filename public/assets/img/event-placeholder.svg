@@ -7,10 +7,10 @@
         </linearGradient>
     </defs>
     <rect width="1200" height="800" fill="url(#g)"/>
-    <circle cx="980" cy="120" r="220" fill="#d99b4b" opacity="0.18"/>
-    <circle cx="180" cy="700" r="260" fill="#e6f3ef" opacity="0.10"/>
-    <g fill="#e6f3ef" font-family="Archivo, sans-serif" text-anchor="middle">
-        <text x="600" y="370" font-size="96" font-weight="800" letter-spacing="-3">NUSA EVENT</text>
+    <circle cx="980" cy="120" r="220" fill="#0f766e" opacity="0.18"/>
+    <circle cx="180" cy="700" r="260" fill="#edefec" opacity="0.10"/>
+    <g fill="#edefec" font-family="Archivo, sans-serif" text-anchor="middle">
+        <text x="600" y="370" font-size="96" font-weight="800" letter-spacing="-3">LinyTix</text>
         <text x="600" y="450" font-size="34" font-weight="600" opacity="0.75">Poster event segera hadir</text>
     </g>
 </svg>

@@ -93,7 +93,7 @@
     }
 
     .toggle-switch input:focus + .toggle-slider {
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
     }
 
     .toggle-switch input:disabled + .toggle-slider {

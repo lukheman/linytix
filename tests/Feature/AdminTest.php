@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Storage;
 test('the landing page renders with its styles', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('Sewa perlengkapan acara, lengkap dan siap pakai.')
+        ->assertSee('Temukan event yang bikin harimu berkesan.')
         ->assertSee('.hero {', false);
 });
 
 test('guests can view the login and register pages', function () {
     $this->get('/login')
         ->assertOk()
-        ->assertSee('Sign in to continue to AdminPro')
+        ->assertSee('Sign in to continue to LinyTix')
         ->assertSee('function togglePassword', false);
 
     $this->get('/register')
@@ -35,7 +35,7 @@ test('authenticated users can view the admin pages', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $this->actingAs($user)->get('/admin/dashboard')->assertOk()->assertSee('Dashboard Overview');
+    $this->actingAs($user)->get('/admin/dashboard')->assertOk()->assertSee('Dashboard Ticketing');
     $this->actingAs($user)->get('/admin/users')->assertOk()->assertSee('User Management');
     $this->actingAs($user)->get('/admin/profile')
         ->assertOk()

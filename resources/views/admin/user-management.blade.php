@@ -1,4 +1,4 @@
-<x-layouts.app title="User Management - AdminPro">
+<x-layouts.app title="User Management - LinyTix">
     @php
         $indexQuery = array_filter([
             'q' => $search,

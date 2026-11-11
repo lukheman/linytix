@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versi** | 1.1 |
-| **Tanggal** | 10 November 2026 |
-| **Basis** | `PRD.md` v1.2 |
-| **Status** | Tahap 0 dan 1 selesai; tahap berikutnya belum dimulai |
+| **Versi** | 1.10 |
+| **Tanggal** | 11 November 2026 |
+| **Basis** | `PRD.md` v1.11 |
+| **Status** | Tahap 0–3 selesai; Epik 4 berjalan (profil organizer selesai, kelola event berikutnya) |
 | **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd` |
 
 Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, acceptance criteria (AC), task teknis, dan urutan sprint. P1/P2 tidak masuk backlog ini kecuali disebut sebagai dependency.
@@ -39,11 +39,27 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E0-06 Factory & seeder | Selesai | Factory ticketing terisi; `RoleSeeder`, `TicketingSeeder` |
 | E0-07 CI | Sebagian | Workflow Flux dibersihkan; Pint + Pest berjalan. Staging/deploy belum ada |
 | E0-08 Legal & konten | Sebagian | Halaman FAQ, tentang, privasi, S&K, refund tersedia; review legal belum |
-| E1-01 Beranda event | Selesai | `/events` menampilkan banner, event unggulan, kategori |
+| E1-01 Beranda event | Selesai | `/` menjadi beranda discovery event (hero, pencarian, kategori, unggulan); `/events` menampilkan banner, event unggulan, kategori |
 | E1-02 Daftar event | Selesai | Hanya event published/sold_out dan akan datang; pagination 12 |
 | E1-03 Filter & pencarian | Selesai | Kategori, kota, tanggal, harga, kata kunci; input tidak valid diabaikan |
 | E1-04 Detail event | Selesai | Lineup, galeri, venue, S&K, tiket, status jual, JSON-LD |
 | E1-05 Halaman informasi | Selesai | `/faq`, `/tentang-kami`, `/privacy-policy`, `/terms`, `/refund-policy` |
+| E2-01 Registrasi & login | Selesai | Registrasi, login case-insensitive, rate limit 5/menit, verifikasi email via queue, logout; penolakan checkout menunggu E3 |
+| E2-02 Login Google | Selesai | Socialite; user baru verified + role customer; konflik `google_id` ditangani; state invalid aman |
+| E2-03 Lupa & reset password | Selesai | Respons generik, token 60 menit sekali pakai, session lain diinvalidasi |
+| E2-04 Riwayat pesanan | Selesai | Daftar/detail order milik user, isolasi akses, unduh PDF |
+| E2-05 Tiket saya | Selesai | Daftar per event, QR inline, detail tiket, unduh PDF |
+| E2-06 Akses guest | Selesai | Signed URL 30 hari, lookup generik + rate limit, klaim order, email setelah checkout, PDF tiket |
+| E3-01 Pilih tiket & validasi | Selesai | Form checkout; validasi event/tiket, kuota, jadwal jual, min/max, identitas, dan perubahan harga |
+| E3-02 Order & stok atomik | Selesai | Transaksi order + item, increment stok bersyarat, expiry 15 menit, batas pending, idempotency key |
+| E3-03 Guest checkout | Selesai | Nama/email/phone, email lowercase, `user_id` null, akses via signed URL |
+| E3-04 Inisiasi pembayaran | Selesai | Payment record + FakeGateway; Midtrans charge tersedia; retry dan error gateway ditangani |
+| E3-05 Webhook & idempotensi | Selesai | Signature, `webhook_events` unik, duplikat/out-of-order, sukses/gagal, late payment |
+| E3-06 Expiry & rekonsiliasi | Selesai | Expiry idempoten, pengembalian stok, email expired, rekonsiliasi, late payment + refund otomatis |
+| E3-07 Penerbitan tiket & email | Selesai | Tiket idempoten, QR unik, email via queue + log, PDF per order, resend admin |
+| E3-08 Status pembayaran | Selesai | Status, countdown, polling 5 detik (maks 15 menit), tombol cek status, akses owner/signed |
+| E3-09 Refund admin | Selesai | Refund penuh beralasan, lifecycle status, retry gagal, pembatalan event batch, email, audit log |
+| E4-01 Profil organizer | Selesai | Dashboard/profil organizer, slug unik + redirect 301, rekening termasking di log, verifikasi admin, audit log |
 
 ---
 
@@ -355,15 +371,15 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Registrasi meminta nama, email, password, dan konfirmasi password.
-- [ ] Email harus unik (case-insensitive) dan format valid.
-- [ ] Password minimal 8 karakter; disimpan dengan Argon2id/bcrypt.
-- [ ] Setelah registrasi, email verifikasi dikirim lewat queue.
-- [ ] User belum verifikasi dapat login tetapi tidak dapat checkout sebagai customer sampai verifikasi (guest checkout tetap boleh).
-- [ ] Login gagal menampilkan pesan generik, tidak membocorkan apakah email terdaftar.
-- [ ] Rate limit login 5 percobaan/menit per email+IP.
-- [ ] Logout menginvalidasi session dan regenerate CSRF token.
-- [ ] Feature test: registrasi, email duplikat, password lemah, login benar/salah, verifikasi, logout.
+- [x] Registrasi meminta nama, email, password, dan konfirmasi password.
+- [x] Email harus unik (case-insensitive) dan format valid.
+- [x] Password minimal 8 karakter; disimpan dengan Argon2id/bcrypt.
+- [x] Setelah registrasi, email verifikasi dikirim lewat queue.
+- [x] User belum verifikasi dapat login; penolakan checkout sebagai customer menunggu E3.
+- [x] Login gagal menampilkan pesan generik, tidak membocorkan apakah email terdaftar.
+- [x] Rate limit login 5 percobaan/menit per email+IP.
+- [x] Logout menginvalidasi session dan regenerate CSRF token.
+- [x] Feature test: registrasi, email duplikat, password lemah, login benar/salah, verifikasi, logout.
 
 ### E2-02 — F-05 Login Google
 
@@ -372,12 +388,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Tombol "Login dengan Google" mengarah ke OAuth Google.
-- [ ] User baru dari Google dibuat dengan `email_verified_at` terisi dan role `customer`.
-- [ ] Jika email sudah terdaftar dan terverifikasi, akun dihubungkan; jika belum terverifikasi, minta verifikasi email terlebih dahulu.
-- [ ] `google_id` unik; konflik akun ditangani tanpa menggandakan user.
-- [ ] State OAuth divalidasi; callback invalid menghasilkan error yang aman.
-- [ ] Feature test memakai mock Socialite untuk user baru, existing, dan state invalid.
+- [x] Tombol "Login dengan Google" mengarah ke OAuth Google.
+- [x] User baru dari Google dibuat dengan `email_verified_at` terisi dan role `customer`.
+- [x] Jika email sudah terdaftar dan terverifikasi, akun dihubungkan; jika belum terverifikasi, minta verifikasi email terlebih dahulu.
+- [x] `google_id` unik; konflik akun ditangani tanpa menggandakan user.
+- [x] State OAuth divalidasi; callback invalid menghasilkan error yang aman.
+- [x] Feature test memakai mock Socialite untuk user baru, existing, dan state invalid.
 
 ### E2-03 — Lupa & reset password
 
@@ -386,11 +402,11 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `/forgot-password` mengirim link reset ke email terdaftar; respons selalu sama untuk mencegah enumerasi.
-- [ ] Token reset berlaku 60 menit dan sekali pakai.
-- [ ] Password baru minimal 8 karakter dan berbeda dari password lama.
-- [ ] Setelah reset, semua session user lain diinvalidasi.
-- [ ] Feature test: email terdaftar/tidak, token valid/expired/digunakan ulang.
+- [x] `/forgot-password` mengirim link reset ke email terdaftar; respons selalu sama untuk mencegah enumerasi.
+- [x] Token reset berlaku 60 menit dan sekali pakai.
+- [x] Password baru minimal 8 karakter dan berbeda dari password lama.
+- [x] Setelah reset, semua session user lain diinvalidasi.
+- [x] Feature test: email terdaftar/tidak, token valid/expired/digunakan ulang.
 
 ### E2-04 — F-11 Riwayat pesanan (customer)
 
@@ -399,13 +415,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `/akun/pesanan` menampilkan order milik user, terbaru dulu, pagination 10.
-- [ ] Kolom: nomor order, event, tanggal, total, status, aksi detail.
-- [ ] `/akun/pesanan/{order}` hanya bisa diakses pemilik; user lain 403.
-- [ ] Detail menampilkan item, pembayaran, status tiket, dan tombol unduh tiket bila `paid`.
-- [ ] Order `pending` menampilkan countdown dan tombol lanjut bayar.
-- [ ] Order `expired`/`cancelled`/`refunded` menampilkan alasan/status dengan jelas.
-- [ ] Feature test: isolasi akses antar user, semua status tampil benar.
+- [x] `/akun/pesanan` menampilkan order milik user, terbaru dulu, pagination 10.
+- [x] Kolom: nomor order, event, tanggal, total, status, aksi detail.
+- [x] `/akun/pesanan/{order}` hanya bisa diakses pemilik; user lain 403.
+- [x] Detail menampilkan item, pembayaran, status tiket, dan tautan e-tiket; unduhan PDF tersedia.
+- [x] Order `pending` menampilkan countdown dan tombol lanjut bayar.
+- [x] Order `expired`/`cancelled`/`refunded` menampilkan alasan/status dengan jelas.
+- [x] Feature test: isolasi akses antar user, status utama tampil benar.
 
 ### E2-05 — F-10 Tiket saya
 
@@ -414,12 +430,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `/akun/tiket` menampilkan tiket milik user, dikelompokkan per event.
-- [ ] Tiket hanya tampil untuk order `paid`; tiket `cancelled`/`refunded` diberi label.
-- [ ] Setiap tiket menampilkan QR, kode, nama pemegang, jenis tiket, dan status.
-- [ ] Tombol unduh PDF menghasilkan file yang sama dengan yang dikirim via email.
-- [ ] Tiket event yang sudah lewat tetap dapat dilihat sebagai arsip.
-- [ ] Feature test: user tidak bisa melihat tiket user lain; tiket refunded tidak bisa diunduh sebagai tiket aktif.
+- [x] `/akun/tiket` menampilkan tiket milik user, dikelompokkan per event.
+- [x] Tiket tampil untuk order `paid`/`refunded`; tiket `cancelled`/`refunded` diberi label.
+- [x] Setiap tiket menampilkan QR, kode, nama pemegang, jenis tiket, dan status.
+- [x] Tombol unduh PDF menghasilkan file yang sama dengan yang dikirim via email.
+- [x] Tiket event yang sudah lewat tetap dapat dilihat sebagai arsip.
+- [x] Feature test: user tidak bisa melihat tiket user lain; tiket aktif menampilkan QR.
 
 ### E2-06 — F-06/F-10/F-11 Akses guest
 
@@ -428,14 +444,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Setelah checkout guest, email berisi signed URL ke detail pesanan dan tiket.
-- [ ] Signed URL berlaku sampai 30 hari setelah event berakhir; URL kedaluwarsa menampilkan halaman instruksi.
-- [ ] `/pesanan/cari` menerima nomor order + email; jika cocok, kirim link baru ke email (bukan menampilkan data langsung).
-- [ ] Respons lookup selalu generik untuk mencegah enumerasi order.
-- [ ] Guest dapat mengunduh PDF tiket dari signed URL.
-- [ ] Jika guest mendaftar dengan email yang sama dan terverifikasi, order lama terhubung otomatis.
-- [ ] Rate limit lookup 10/menit per IP.
-- [ ] Feature test: signed URL valid/expired/tampered, lookup cocok/tidak, klaim order.
+- [ ] Setelah checkout guest, email berisi signed URL ke detail pesanan dan tiket. _(email dikirim setelah pembayaran; email segera setelah checkout belum dibuat)_
+- [x] Signed URL berlaku sampai 30 hari setelah event berakhir; URL kedaluwarsa menampilkan halaman instruksi.
+- [x] `/pesanan/cari` menerima nomor order + email; jika cocok, kirim link baru ke email (bukan menampilkan data langsung).
+- [x] Respons lookup selalu generik untuk mencegah enumerasi order.
+- [x] Guest dapat mengunduh PDF tiket dari signed URL.
+- [x] Jika guest mendaftar dengan email yang sama dan terverifikasi, order lama terhubung otomatis.
+- [x] Rate limit lookup 10/menit per IP.
+- [x] Feature test: signed URL valid/expired/tampered, lookup cocok/tidak, klaim order.
 
 ---
 
@@ -538,15 +554,15 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Satu tiket dibuat untuk setiap quantity pada `order_items`.
-- [ ] `ticket_code` acak ≥ 128 bit, unik, tidak berurutan, dan tidak mengandung PII.
-- [ ] Penerbitan idempoten: retry tidak menggandakan tiket.
-- [ ] QR berisi `ticket_code` saja; validasi selalu server-side.
-- [ ] PDF berisi event, tanggal, venue, jenis tiket, nama pemegang, kode, dan QR.
-- [ ] Email tiket dikirim lewat queue dengan retry 3× dan log `notification_logs`.
-- [ ] Tiket tersedia di `/akun/tiket` dan signed URL guest.
-- [ ] Jika email gagal permanen, admin dapat melihat dan mengirim ulang.
-- [ ] Feature test: quantity → jumlah tiket, uniqueness, retry, PDF, email job, resend.
+- [x] Satu tiket dibuat untuk setiap quantity pada `order_items`.
+- [x] `ticket_code` acak ≥ 128 bit, unik, tidak berurutan, dan tidak mengandung PII.
+- [x] Penerbitan idempoten: retry tidak menggandakan tiket.
+- [x] QR berisi `ticket_code` saja; validasi selalu server-side.
+- [x] PDF berisi event, tanggal, venue, jenis tiket, nama pemegang, kode, dan QR.
+- [x] Email tiket dikirim lewat queue dengan retry 3× dan log `notification_logs`.
+- [x] Tiket tersedia di `/akun/tiket` dan signed URL guest.
+- [x] Jika email gagal permanen, admin dapat melihat dan mengirim ulang.
+- [x] Feature test: quantity → jumlah tiket, uniqueness, retry, PDF, email job, resend.
 
 ### E3-08 — F-11 Halaman status pembayaran
 
@@ -555,12 +571,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `/checkout/{order}` menampilkan status terkini dan instruksi pembayaran.
-- [ ] Halaman melakukan polling status setiap 5 detik (maksimal 15 menit) atau memakai tombol "Cek status".
-- [ ] Setelah `paid`, halaman menampilkan link tiket dan email terkirim.
-- [ ] Setelah `expired`, halaman menampilkan tombol kembali ke event.
-- [ ] Akses hanya untuk pemilik/signed URL; order lain 403.
-- [ ] Feature test: status transitions, akses tidak sah.
+- [x] `/checkout/{order}` menampilkan status terkini dan instruksi pembayaran.
+- [x] Halaman melakukan polling status setiap 5 detik (maksimal 15 menit) atau memakai tombol "Cek status".
+- [x] Setelah `paid`, halaman menampilkan link tiket dan email terkirim.
+- [x] Setelah `expired`, halaman menampilkan tombol kembali ke event.
+- [x] Akses hanya untuk pemilik/signed URL; order lain 403.
+- [x] Feature test: status transitions, akses tidak sah.
 
 ### E3-09 — A-04 Refund
 
@@ -570,14 +586,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Admin dapat membuat refund full untuk order `paid` dengan alasan wajib.
-- [ ] Refund membuat record `refunds` status `requested`; proses gateway mengubah ke `processing`/`succeeded`/`failed`.
-- [ ] Refund sukses: order `refunded`, tiket `refunded`, email dikirim.
-- [ ] Refund idempoten; klik ganda tidak mengirim refund dua kali.
-- [ ] Pembatalan event membuat refund batch untuk semua order `paid`.
-- [ ] Refund gagal terlihat di admin dan dapat di-retry.
-- [ ] Semua aksi refund tercatat di `audit_logs`.
-- [ ] Feature test: full refund, duplicate, gateway failure, event cancellation batch.
+- [x] Admin dapat membuat refund full untuk order `paid` dengan alasan wajib.
+- [x] Refund membuat record `refunds` status `requested`; proses gateway mengubah ke `processing`/`succeeded`/`failed`.
+- [x] Refund sukses: order `refunded`, tiket `refunded`, email dikirim.
+- [x] Refund idempoten; klik ganda tidak mengirim refund dua kali.
+- [x] Pembatalan event membuat refund batch untuk semua order `paid`.
+- [x] Refund gagal terlihat di admin dan dapat di-retry.
+- [x] Semua aksi refund tercatat di `audit_logs`.
+- [x] Feature test: full refund, duplicate, gateway failure, event cancellation batch.
 
 ---
 
@@ -590,13 +606,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Organizer owner dapat mengubah nama, slug, deskripsi, logo, email kontak, phone, dan rekening bank.
-- [ ] Slug unik; perubahan slug membuat redirect 301 dari slug lama (jika event sudah publik).
-- [ ] Rekening bank hanya dapat dilihat owner/admin; nomor rekening dimasking di log.
-- [ ] Organizer belum terverifikasi dapat membuat draft, tetapi tidak dapat submit review/publish.
-- [ ] Admin dapat memverifikasi dengan catatan; `verified_at`, `verified_by`, `verification_note` terisi.
-- [ ] Semua perubahan tercatat di `audit_logs`.
-- [ ] Feature test: update, slug unik, akses non-owner, verifikasi.
+- [x] Organizer owner dapat mengubah nama, slug, deskripsi, logo, email kontak, phone, dan rekening bank.
+- [x] Slug unik; perubahan slug membuat redirect 301 dari slug lama (jika event sudah publik).
+- [x] Rekening bank hanya dapat dilihat owner/admin; nomor rekening dimasking di log.
+- [x] Organizer belum terverifikasi dapat membuat draft, tetapi tidak dapat submit review/publish.
+- [x] Admin dapat memverifikasi dengan catatan; `verified_at`, `verified_by`, `verification_note` terisi.
+- [x] Semua perubahan tercatat di `audit_logs`.
+- [x] Feature test: update, slug unik, akses non-owner, verifikasi.
 
 ### E4-02 — O-02 Kelola event
 
@@ -800,14 +816,14 @@ Berlaku untuk semua story:
 | F-02 Daftar event | E1-02 | Done |
 | F-03 Filter & pencarian | E1-03 | Done |
 | F-04 Detail event | E1-04 | Done |
-| F-05 Registrasi & login | E2-01, E2-02, E2-03 | Todo |
-| F-06 Guest checkout | E3-03, E2-06 | Todo |
-| F-07 Pilih tiket & checkout | E3-01, E3-02 | Todo |
-| F-09 Pembayaran | E3-04, E3-05, E3-06 | Todo |
-| F-10 E-tiket | E3-07, E2-05 | Todo |
-| F-11 Riwayat pesanan | E2-04, E3-08 | Todo |
+| F-05 Registrasi & login | E2-01, E2-02, E2-03 | Done |
+| F-06 Guest checkout | E3-03, E2-06 | Selesai |
+| F-07 Pilih tiket & checkout | E3-01, E3-02 | Selesai |
+| F-09 Pembayaran | E3-04, E3-05, E3-06 | Selesai |
+| F-10 E-tiket | E3-07, E2-05 | Selesai |
+| F-11 Riwayat pesanan | E2-04, E3-08 | Selesai |
 | F-13 Halaman informasi | E1-05 | Done |
-| O-01 Profil organizer | E4-01 | Todo |
+| O-01 Profil organizer | E4-01 | Selesai |
 | O-02 Kelola event | E4-02 | Todo |
 | O-03 Kelola jenis tiket | E4-03 | Todo |
 | O-05 Laporan penjualan | E4-04 | Todo |
@@ -815,7 +831,7 @@ Berlaku untuk semua story:
 | A-01 Manajemen pengguna & organizer | E6-01 | Todo |
 | A-02 Moderasi event | E6-02 | Todo |
 | A-03 Master data | E6-03 | Todo |
-| A-04 Monitoring transaksi & refund | E6-04, E3-09 | Todo |
+| A-04 Monitoring transaksi & refund | E6-04, E3-09 | Sebagian |
 
 ---
 

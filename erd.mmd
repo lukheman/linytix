@@ -30,6 +30,7 @@ erDiagram
     orders ||--o{ payments : "dibayar"
     orders ||--o{ tickets : "menerbitkan"
     orders ||--o{ refunds : "direfund"
+    orders ||--o{ notification_logs : "mencatat"
     order_items ||--o{ tickets : "menghasilkan"
     ticket_types ||--o{ order_items : "dibeli"
     ticket_types ||--o{ tickets : "bertipe"
@@ -84,6 +85,14 @@ erDiagram
         timestamp verified_at
         bigint verified_by FK
         text verification_note
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    organizer_slug_redirects {
+        bigint id PK
+        uuid organizer_id FK
+        string slug UK
         timestamp created_at
         timestamp updated_at
     }
@@ -203,12 +212,14 @@ erDiagram
     orders {
         uuid id PK
         string order_number UK
+        string idempotency_key UK
         bigint user_id FK
         uuid event_id FK
         uuid voucher_id FK
         string buyer_name
         string buyer_email
         string buyer_phone
+        json holder_names
         bigint subtotal
         bigint discount_amount
         bigint admin_fee
@@ -257,6 +268,7 @@ erDiagram
         text reason
         string status
         string gateway_ref
+        text error
         bigint requested_by FK
         bigint processed_by FK
         timestamp processed_at
@@ -376,6 +388,7 @@ erDiagram
 
     notification_logs {
         uuid id PK
+        uuid order_id FK
         string channel
         string recipient
         string template

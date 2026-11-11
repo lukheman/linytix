@@ -1,46 +1,113 @@
+/* ==========================================================================
+   Design tokens — modern minimal
+   Neutral canvas + satu aksen teal. Sudut tegas (radius 0), tanpa dekorasi.
+   Dipakai bersama oleh layout admin (app) dan halaman publik.
+   ========================================================================== */
+
 :root {
-    --sidebar-width: 280px;
-    --topbar-height: 70px;
+    --sidebar-width: 272px;
+    --topbar-height: 68px;
 
-    /* Bootstrap overrides — palet alam */
-    --bs-primary: #4a6741;
-    --bs-primary-rgb: 74, 103, 65;
-    --bs-secondary: #8a6e3a;
-    --bs-secondary-rgb: 138, 110, 58;
-    --bs-success: #5a8a3a;
-    --bs-success-rgb: 90, 138, 58;
-    --bs-warning: #c8a050;
-    --bs-warning-rgb: 200, 160, 80;
-    --bs-danger: #c05a3a;
-    --bs-danger-rgb: 192, 90, 58;
-    --bs-info: #4a7a8a;
-    --bs-info-rgb: 74, 122, 138;
+    /* Aksen tunggal */
+    --bs-primary: #0f766e;
+    --bs-primary-rgb: 15, 118, 110;
+    --bs-primary-dark: #0b5c56;
+    --bs-secondary: #5b625f;
+    --bs-secondary-rgb: 91, 98, 95;
+    --bs-success: #15803d;
+    --bs-success-rgb: 21, 128, 61;
+    --bs-warning: #b45309;
+    --bs-warning-rgb: 180, 83, 9;
+    --bs-danger: #b91c1c;
+    --bs-danger-rgb: 185, 28, 28;
+    --bs-info: #0369a1;
+    --bs-info-rgb: 3, 105, 161;
 
-    /* Light theme — pasir & daun kering */
-    --bg-primary: #f5f0e8;
-    --bg-secondary: #ede8d8;
-    --bg-tertiary: #f9f6ee;
-    --text-primary: #2d2a1e;
-    --text-secondary: #7a6e52;
-    --text-muted: #a09070;
-    --border-color: #c8b99a;
-    --border-light: #ddd4bc;
-    --input-bg: #f9f6ee;
-    --hover-bg: #ede8d8;
-    --card-shadow: 0 1px 3px rgba(74, 60, 30, 0.10), 0 1px 2px rgba(74, 60, 30, 0.14);
+    /* Sudut: tegas, tanpa corner-radius */
+    --bs-border-radius: 0;
+    --bs-border-radius-sm: 0;
+    --bs-border-radius-lg: 0;
+    --bs-border-radius-xl: 0;
+    --bs-border-radius-xxl: 0;
+    --bs-border-radius-pill: 0;
+
+    /* Permukaan terang */
+    --bg-primary: #f6f6f4;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f0f0ed;
+    --text-primary: #141614;
+    --text-secondary: #565b58;
+    --text-muted: #8a908c;
+    --border-color: #e0e1dd;
+    --border-light: #ebebe7;
+    --input-bg: #ffffff;
+    --hover-bg: #f1f2ef;
+    --accent-soft: #eef4f2;
+    --card-shadow: 0 1px 2px rgba(20, 22, 20, 0.04);
 }
 
 [data-theme="dark"] {
-    /* Dark theme — hutan malam & tanah gelap */
-    --bg-primary: #1a1f14;
-    --bg-secondary: #252d1e;
-    --bg-tertiary: #2e3828;
-    --text-primary: #e8f0d8;
-    --text-secondary: #b0c49a;
-    --text-muted: #7a9060;
-    --border-color: #3a4830;
-    --border-light: #4a5a3a;
-    --input-bg: #252d1e;
-    --hover-bg: #2e3828;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.45);
+    --bs-primary: #2dd4bf;
+    --bs-primary-rgb: 45, 212, 191;
+    --bs-primary-dark: #5eead4;
+    --bs-secondary: #a1a1aa;
+    --bs-secondary-rgb: 161, 161, 170;
+
+    --bg-primary: #0c0e0d;
+    --bg-secondary: #141716;
+    --bg-tertiary: #1b1f1d;
+    --text-primary: #eceeec;
+    --text-secondary: #a7aeaa;
+    --text-muted: #7c837f;
+    --border-color: #2a2f2d;
+    --border-light: #222624;
+    --input-bg: #141716;
+    --hover-bg: #1e2321;
+    --accent-soft: #16302d;
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Pastikan tidak ada sudut membulat di mana pun */
+*,
+*::before,
+*::after {
+    border-radius: 0 !important;
+}
+
+.rounded-circle {
+    border-radius: 0 !important;
+}
+
+/* Selaraskan komponen Bootstrap dengan aksen baru */
+.btn-primary {
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-bg: var(--bs-primary-dark);
+    --bs-btn-hover-border-color: var(--bs-primary-dark);
+    --bs-btn-active-bg: var(--bs-primary-dark);
+    --bs-btn-active-border-color: var(--bs-primary-dark);
+    --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-bg: var(--bs-primary);
+    --bs-btn-hover-border-color: var(--bs-primary);
+    --bs-btn-active-bg: var(--bs-primary);
+    --bs-btn-active-border-color: var(--bs-primary);
+    --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+
+.text-primary { color: var(--bs-primary) !important; }
+.bg-primary { background-color: var(--bs-primary) !important; }
+.border-primary { border-color: var(--bs-primary) !important; }
+.link-primary { color: var(--bs-primary) !important; }
+
+[data-theme="dark"] .btn-primary {
+    --bs-btn-color: #07211e;
+    --bs-btn-hover-color: #07211e;
+    --bs-btn-active-color: #07211e;
 }

@@ -18,18 +18,18 @@ class TicketingSeeder extends Seeder
     {
         $organizerUser = User::query()->firstOrCreate(
             ['email' => 'organizer@example.com'],
-            ['name' => 'Nusa Event Organizer', 'password' => 'password'],
+            ['name' => 'LinyTix', 'password' => 'password'],
         );
         $organizerUser->assignRole(Role::ORGANIZER);
         $organizerUser->forceFill(['is_active' => true])->save();
 
         $organizer = Organizer::query()->updateOrCreate(
-            ['slug' => 'nusa-event'],
+            ['slug' => 'LinyTix'],
             [
                 'owner_user_id' => $organizerUser->id,
-                'name' => 'Nusa Event',
+                'name' => 'LinyTix',
                 'description' => 'Penyelenggara konser, seminar, dan festival di Indonesia.',
-                'contact_email' => 'halo@nusaevent.id',
+                'contact_email' => 'halo@LinyTix.id',
                 'contact_phone' => '6281234567890',
                 'is_verified' => true,
                 'verified_at' => now(),

@@ -1,6 +1,6 @@
 @php
     $sections = [
-        'Identitas & Beranda' => [
+        'Identitas & Beranda Ticketing' => [
             'site_name' => ['label' => 'Nama Situs', 'type' => 'text'],
             'footer_tagline' => ['label' => 'Tagline Footer', 'type' => 'text'],
             'hero_eyebrow' => ['label' => 'Hero — Label Kecil', 'type' => 'text'],
@@ -8,24 +8,16 @@
             'hero_subtitle' => ['label' => 'Hero — Subjudul', 'type' => 'textarea'],
             'hero_note' => ['label' => 'Hero — Catatan Kepercayaan', 'type' => 'text'],
         ],
-        'Profil' => [
-            'about' => ['label' => 'Tentang Kami', 'type' => 'textarea'],
-            'vision' => ['label' => 'Visi', 'type' => 'textarea'],
-            'mission' => ['label' => 'Misi', 'type' => 'textarea'],
-        ],
-        'Kontak & Lokasi' => [
-            'address' => ['label' => 'Alamat', 'type' => 'text'],
-            'email' => ['label' => 'Email', 'type' => 'email'],
+        'Bantuan Pembeli' => [
+            'email' => ['label' => 'Email Dukungan', 'type' => 'email'],
             'whatsapp_number' => ['label' => 'Nomor WhatsApp', 'type' => 'text', 'hint' => 'Gunakan format internasional, contoh 6281234567890.'],
             'whatsapp_template' => ['label' => 'Template Pesan WhatsApp', 'type' => 'textarea'],
-            'operating_hours' => ['label' => 'Jam Operasional', 'type' => 'text'],
-            'map_embed' => ['label' => 'Google Maps Embed URL', 'type' => 'text', 'hint' => 'Tempel URL dari menu "Embed a map" Google Maps.'],
         ],
     ];
 @endphp
 
-<x-layouts.app title="Profil & Kontak - Admin">
-    <x-layout.page-header title="Profil & Kontak" subtitle="Kelola identitas website, teks beranda, profil, dan informasi kontak." />
+<x-layouts.app title="Pengaturan Ticketing - Admin">
+    <x-layout.page-header title="Pengaturan Ticketing" subtitle="Kelola identitas platform dan kanal bantuan pembeli." />
 
     <form method="POST" action="{{ route('admin.settings.update') }}">
         @csrf

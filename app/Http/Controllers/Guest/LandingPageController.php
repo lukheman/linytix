@@ -3,45 +3,91 @@
 namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
-use App\Models\Collaboration;
-use App\Models\RentalItem;
-use App\Models\Service;
-use App\Models\Testimonial;
+use App\Models\Category;
+use App\Models\Event;
+use App\Models\Organizer;
+use App\Models\Venue;
 use App\Support\SiteContent;
+use Illuminate\View\View;
 
 class LandingPageController extends Controller
 {
     /**
-     * Display the public landing page.
+     * Halaman beranda: discovery event dan pintu masuk pembelian tiket.
      */
-    public function __invoke()
+    public function __invoke(): View
     {
-        $collaborations = Collaboration::query()
-            ->where('is_active', true)
-            ->with('photos')
-            ->latest('event_date')
-            ->limit(3)
+        $settings = SiteContent::settings();
+
+        $eventRelations = [
+            'organizer',
+            'category',
+            'venue',
+            'ticketTypes' => fn ($query) => $query->where('is_active', true),
+        ];
+
+        $featured = Event::query()
+            ->visible()
+            ->featured()
+            ->with($eventRelations)
+            ->orderBy('start_at')
+            ->limit(6)
             ->get();
 
-        $rentalItems = RentalItem::query()
-            ->where('is_active', true)
-            ->whereHas('service', fn ($query) => $query->where('category', 'penyewaan')->where('is_active', true))
-            ->orderBy('sort_order')
+        $upcoming = Event::query()
+            ->visible()
+            ->with($eventRelations)
+            ->orderBy('start_at')
+            ->limit(8)
             ->get();
+
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->whereHas('events', fn ($query) => $query->visible())
+            ->withCount(['events' => fn ($query) => $query->visible()])
+            ->orderBy('sort_order')
+            ->limit(8)
+            ->get();
+
+        $cities = Venue::query()
+            ->whereHas('events', fn ($query) => $query->visible())
+            ->orderBy('city')
+            ->pluck('city')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $siteName = $settings['site_name'] ?? 'LinyTix';
 
         return view('guest.landing-page', [
-            'rentalItems' => $rentalItems,
-            'rentalCategories' => $rentalItems->pluck('category')->filter()->unique()->values(),
-            'services' => Service::query()->where('is_active', true)->where('category', '!=', 'penyewaan')->orderBy('sort_order')->get(),
-            'collaborations' => $collaborations,
-            'testimonials' => Testimonial::query()->where('is_active', true)->latest()->limit(3)->get(),
+            'featured' => $featured,
+            'upcoming' => $upcoming,
+            'categories' => $categories,
+            'cities' => $cities,
+            'settings' => $settings,
             'stats' => [
-                'rental_items' => $rentalItems->count(),
-                'rental_categories' => $rentalItems->pluck('category')->filter()->unique()->count(),
-                'collaborations' => Collaboration::query()->where('is_active', true)->count(),
-                'partners' => Collaboration::query()->where('is_active', true)->distinct()->count('partner_name'),
+                'events' => Event::query()->visible()->count(),
+                'cities' => $cities->count(),
+                'categories' => $categories->count(),
+                'organizers' => Organizer::query()
+                    ->whereHas('events', fn ($query) => $query->visible())
+                    ->count(),
             ],
-            'settings' => SiteContent::settings(),
+            'seo' => [
+                'title' => $siteName.' — Beli Tiket Konser, Seminar & Festival',
+                'description' => 'Temukan konser, seminar, workshop, dan festival pilihan. Beli tiket online, bayar aman, dan terima e-tiket QR langsung di email.',
+                'jsonLd' => [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'WebSite',
+                    'name' => $siteName,
+                    'url' => route('home'),
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => route('events.index').'?q={search_term_string}',
+                        'query-input' => 'required name=search_term_string',
+                    ],
+                ],
+            ],
         ]);
     }
 }

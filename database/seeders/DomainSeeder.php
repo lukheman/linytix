@@ -19,9 +19,9 @@ class DomainSeeder extends Seeder
             $user = User::factory()->create();
         }
 
-        $organizer = Organizer::query()->firstOrCreate(['slug' => 'nusa-event'], [
+        $organizer = Organizer::query()->firstOrCreate(['slug' => 'LinyTix'], [
             'owner_user_id' => $user->id,
-            'name' => 'Nusa Event',
+            'name' => 'LinyTix',
             'description' => 'Penyelenggara event profesional.',
             'is_verified' => true,
         ]);

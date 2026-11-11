@@ -28,12 +28,14 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'idempotency_key',
         'user_id',
         'event_id',
         'voucher_id',
         'buyer_name',
         'buyer_email',
         'buyer_phone',
+        'holder_names',
         'subtotal',
         'discount_amount',
         'admin_fee',
@@ -48,6 +50,7 @@ class Order extends Model
     protected function casts(): array
     {
         return [
+            'holder_names' => 'array',
             'subtotal' => 'integer',
             'discount_amount' => 'integer',
             'admin_fee' => 'integer',
@@ -94,8 +97,36 @@ class Order extends Model
         return $this->hasMany(Refund::class);
     }
 
+    public function notificationLogs(): HasMany
+    {
+        return $this->hasMany(NotificationLog::class);
+    }
+
     public function scopePaid($query)
     {
         return $query->where('status', self::STATUS_PAID);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    /**
+     * Order masih bisa dibayar selama pending dan belum melewati batas waktu.
+     */
+    public function canBePaid(): bool
+    {
+        return $this->isPending() && ! $this->isExpired();
     }
 }

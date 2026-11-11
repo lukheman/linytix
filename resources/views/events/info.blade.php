@@ -99,7 +99,7 @@
                         <h2 class="h5">Masih butuh bantuan?</h2>
                         <p class="text-secondary mb-3">Hubungi tim kami melalui halaman kontak atau WhatsApp resmi.</p>
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="{{ route('contact') }}" class="btn btn-main">Hubungi kami</a>
+                            <a href="{{ route('faq') }}" class="btn btn-main">Buka FAQ</a>
                             <a href="{{ route('faq') }}" class="btn btn-ghost">Lihat FAQ</a>
                         </div>
                     </div>

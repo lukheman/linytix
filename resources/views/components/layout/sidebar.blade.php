@@ -1,5 +1,5 @@
 @props([
-    'brandName' => 'AdminPro',
+    'brandName' => 'LinyTix',
     'brandIcon' => 'fas fa-layer-group'
 ])
 

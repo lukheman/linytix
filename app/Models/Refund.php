@@ -30,6 +30,7 @@ class Refund extends Model
         'reason',
         'status',
         'gateway_ref',
+        'error',
         'requested_by',
         'processed_by',
         'processed_at',

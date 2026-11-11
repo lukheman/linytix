@@ -56,8 +56,24 @@ class Organizer extends Model
         return $this->hasMany(Event::class);
     }
 
+    public function slugRedirects(): HasMany
+    {
+        return $this->hasMany(OrganizerSlugRedirect::class);
+    }
+
     public function logoUrl(): ?string
     {
         return $this->logo_url ?: null;
+    }
+
+    public function maskedBankAccountNo(): ?string
+    {
+        if (! $this->bank_account_no) {
+            return null;
+        }
+
+        $number = (string) $this->bank_account_no;
+
+        return mb_strlen($number) <= 4 ? '****' : '****'.mb_substr($number, -4);
     }
 }

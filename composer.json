@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "adminpro/admin-dashboard",
+    "name": "LinyTix/ticketing",
     "type": "project",
-    "description": "A modern Laravel admin dashboard template built with Blade and Bootstrap.",
+    "description": "LinyTix — platform penjualan tiket event dengan e-tiket QR.",
     "keywords": [
         "laravel",
         "framework"
@@ -10,7 +10,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.1",
+        "barryvdh/laravel-dompdf": "^3.1",
         "laravel/framework": "^12.0",
+        "laravel/socialite": "^5.31",
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {

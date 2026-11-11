@@ -1,4 +1,4 @@
-<x-layouts.guest title="Register - AdminPro" type="auth">
+<x-layouts.guest title="Register - LinyTix" type="auth">
     <div class="login-container">
         <div class="login-card">
             <!-- Brand Logo -->
@@ -7,7 +7,7 @@
                     <i class="fas fa-layer-group"></i>
                 </div>
                 <h1>Create Account</h1>
-                <p>Sign up to get started with AdminPro</p>
+                <p>Sign up to get started with LinyTix</p>
             </div>
 
             <!-- Register Form -->
@@ -71,7 +71,7 @@
                     <input class="form-check-input @error('agree_terms') is-invalid @enderror" type="checkbox"
                         name="agree_terms" value="1" id="agree_terms" @checked(old('agree_terms')) required>
                     <label class="form-check-label" for="agree_terms">
-                        I agree to the <a href="#" class="forgot-password">Terms of Service</a> and <a href="#"
+                        I agree to the <a href="{{ route('info.terms') }}" class="forgot-password">Terms of Service</a> and <a href="{{ route('info.privacy') }}"
                             class="forgot-password">Privacy Policy</a>
                     </label>
                     @error('agree_terms')
@@ -95,7 +95,7 @@
 
             <!-- Social Login -->
             <div class="social-login">
-                <a href="#" class="btn-social google">
+                <a href="{{ route('auth.google.redirect') }}" class="btn-social google">
                     <i class="fab fa-google"></i>
                     <span>Google</span>
                 </a>

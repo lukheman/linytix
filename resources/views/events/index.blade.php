@@ -15,7 +15,7 @@
             .event-card:hover .event-poster img { transform: scale(1.04); }
             .event-badge { position: absolute; top: .85rem; right: .85rem; background: var(--teal); color: #fff; border-radius: 999px; padding: .3rem .75rem; font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
             .event-badge.badge-sold { background: #6c757d; }
-            .filter-card { border: 1px solid var(--line); border-radius: 1rem; background: #fff; box-shadow: 0 14px 35px rgba(22, 76, 75, .06); }
+            .filter-card { border: 1px solid var(--line); border-radius: 1rem; background: #fff;  }
             .category-chip { border: 1px solid var(--line); border-radius: 999px; padding: .45rem 1rem; color: var(--ink); text-decoration: none; font-weight: 600; font-size: .9rem; background: #fff; }
             .category-chip:hover, .category-chip.active { background: var(--teal); border-color: var(--teal); color: #fff; }
             .banner-slide { border-radius: 1.25rem; overflow: hidden; aspect-ratio: 21 / 8; background: var(--mint); }

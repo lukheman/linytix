@@ -5,7 +5,8 @@
     'notificationCount' => 0,
     'searchPlaceholder' => 'Search anything...',
     'showLogout' => true,
-    'showThemeToggle' => true
+    'showThemeToggle' => true,
+    'profileUrl' => null
 ])
 
 @php
@@ -45,7 +46,7 @@
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">{{ $notificationCount }}</span>
             @endif
         </button>
-        <a href="{{ route('admin.profile') }}" class="d-flex align-items-center gap-2 text-decoration-none" title="Go to Profile">
+        <a href="{{ $profileUrl ?? route('admin.profile') }}" class="d-flex align-items-center gap-2 text-decoration-none" title="Go to Profile">
             @if(Auth::user()?->hasAvatar())
                 <img src="{{ Auth::user()->avatarUrl() }}" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
             @else
@@ -57,7 +58,7 @@
             </div>
         </a>
         @if($showLogout)
-            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+            <form method="POST" action="{{ route('admin.logout') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-link" title="Logout" style="color: var(--text-secondary);">
                     <i class="fas fa-sign-out-alt" style="font-size: 1.25rem;"></i>

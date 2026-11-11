@@ -7,7 +7,6 @@ use App\Models\Ticket;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class IssueTickets implements ShouldQueue
 {
@@ -17,13 +16,21 @@ class IssueTickets implements ShouldQueue
 
     public function handle(): void
     {
-        $order = Order::query()->with(['items.ticketType', 'event'])->find($this->orderId);
+        $created = DB::transaction(function (): int {
+            $order = Order::query()
+                ->whereKey($this->orderId)
+                ->lockForUpdate()
+                ->with(['items.ticketType', 'event'])
+                ->first();
 
-        if (! $order || $order->status !== Order::STATUS_PAID) {
-            return;
-        }
+            if (! $order || $order->status !== Order::STATUS_PAID) {
+                return 0;
+            }
 
-        DB::transaction(function () use ($order): void {
+            $holderNames = collect($order->holder_names ?? [])->values();
+            $nameOffset = 0;
+            $created = 0;
+
             foreach ($order->items as $item) {
                 $existing = Ticket::query()->where('order_item_id', $item->getKey())->count();
                 $missing = max(0, $item->quantity - $existing);
@@ -35,16 +42,22 @@ class IssueTickets implements ShouldQueue
                         'order_id' => $order->getKey(),
                         'event_id' => $order->event_id,
                         'ticket_type_id' => $item->ticket_type_id,
-                        'holder_name' => $order->buyer_name,
+                        'holder_name' => $holderNames->get($nameOffset + $existing + $i) ?: $order->buyer_name,
                         'status' => Ticket::STATUS_ACTIVE,
                         'issued_at' => now(),
                     ]);
+
+                    $created++;
                 }
+
+                $nameOffset += (int) $item->quantity;
             }
+
+            return $created;
         });
 
-        if (Str::length((string) $order->order_number) > 0) {
-            SendTicketEmail::dispatch($order->getKey());
+        if ($created > 0) {
+            SendTicketEmail::dispatch($this->orderId);
         }
     }
 }

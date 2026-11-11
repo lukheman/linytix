@@ -1,4 +1,4 @@
-<x-layouts.guest title="Login - AdminPro" type="auth">
+<x-layouts.guest title="Login - LinyTix" type="auth">
     <div class="login-container">
         <div class="login-card">
             <!-- Brand Logo -->
@@ -7,12 +7,16 @@
                     <i class="fas fa-layer-group"></i>
                 </div>
                 <h1>Welcome Back</h1>
-                <p>Sign in to continue to AdminPro</p>
+                <p>Sign in to continue to LinyTix</p>
             </div>
 
             <!-- Login Form -->
             <form method="POST" action="{{ route('login.store') }}" id="login-form">
                 @csrf
+
+                @if (session('status'))
+                    <div class="alert alert-success" role="status">{{ session('status') }}</div>
+                @endif
 
                 <!-- Email Field -->
                 <div class="form-floating position-relative">
@@ -48,7 +52,7 @@
                             id="remember" @checked(old('remember'))>
                         <label class="form-check-label" for="remember">Remember me</label>
                     </div>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <a href="{{ route('password.request') }}" class="forgot-password">Forgot Password?</a>
                 </div>
 
                 <!-- Login Button -->
@@ -63,6 +67,14 @@
             <!-- Divider -->
             <div class="divider">
                 <span>or continue with</span>
+            </div>
+
+            <!-- Social Login -->
+            <div class="social-login">
+                <a href="{{ route('auth.google.redirect') }}" class="btn-social google">
+                    <i class="fab fa-google"></i>
+                    <span>Google</span>
+                </a>
             </div>
 
             <!-- Sign Up Link -->
