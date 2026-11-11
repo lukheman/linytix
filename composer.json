@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "LinyTix/ticketing",
+    "name": "linytix/ticketing",
     "type": "project",
     "description": "LinyTix — platform penjualan tiket event dengan e-tiket QR.",
     "keywords": [
