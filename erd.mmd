@@ -1,0 +1,388 @@
+erDiagram
+    users ||--o{ organizers : "memiliki"
+    users ||--o{ role_user : "punya peran"
+    roles ||--o{ role_user : "diberikan ke"
+    users ||--o{ events : "menyetujui"
+    users ||--o{ refunds : "mengajukan"
+    users ||--o{ refunds : "memproses"
+    users ||--o{ event_staff : "bertugas"
+    users ||--o{ orders : "membuat"
+    users ||--o{ tickets : "memiliki"
+    users ||--o{ wishlists : "menyimpan"
+    users ||--o{ check_ins : "memindai"
+    organizers ||--o{ events : "menyelenggarakan"
+    categories ||--o{ events : "mengelompokkan"
+    venues |o--o{ events : "lokasi"
+    events ||--o{ event_images : "galeri"
+    events ||--o{ event_lineups : "lineup"
+    events ||--o{ ticket_types : "jenis tiket"
+    events ||--o{ orders : "dipesan di"
+    events ||--o{ tickets : "untuk"
+    events ||--o{ check_ins : "dicatat di"
+    events ||--o{ event_staff : "petugas"
+    events ||--o{ wishlists : "difavoritkan"
+    events |o--o{ vouchers : "promo"
+    events |o--o{ banners : "banner"
+    vouchers |o--o{ orders : "dipakai"
+    vouchers ||--o{ voucher_usages : "riwayat"
+    orders ||--o{ voucher_usages : "memakai"
+    orders ||--o{ order_items : "berisi"
+    orders ||--o{ payments : "dibayar"
+    orders ||--o{ tickets : "menerbitkan"
+    orders ||--o{ refunds : "direfund"
+    order_items ||--o{ tickets : "menghasilkan"
+    ticket_types ||--o{ order_items : "dibeli"
+    ticket_types ||--o{ tickets : "bertipe"
+    payments ||--o{ refunds : "sumber dana"
+    tickets ||--o{ check_ins : "discan"
+
+    users {
+        bigint id PK
+        string name
+        string email UK
+        string phone
+        string google_id UK
+        string avatar
+        timestamp email_verified_at
+        string password
+        string remember_token
+        boolean is_active
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    roles {
+        bigint id PK
+        string name UK
+        string label
+        text description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    role_user {
+        bigint role_id PK
+        bigint user_id PK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    organizers {
+        uuid id PK
+        bigint owner_user_id FK
+        string name
+        string slug UK
+        text description
+        string logo_url
+        string contact_email
+        string contact_phone
+        string bank_name
+        string bank_account_no
+        string bank_account_name
+        boolean is_verified
+        timestamp verified_at
+        bigint verified_by FK
+        text verification_note
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    categories {
+        smallint id PK
+        string name UK
+        string slug UK
+        string icon_url
+        smallint sort_order
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    venues {
+        uuid id PK
+        string name
+        text address
+        string city
+        string province
+        int capacity
+        decimal latitude
+        decimal longitude
+        string maps_url
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    events {
+        uuid id PK
+        uuid organizer_id FK
+        smallint category_id FK
+        uuid venue_id FK
+        string title
+        string short_desc
+        string slug UK
+        text description
+        text terms
+        string poster_url
+        string banner_url
+        boolean is_online
+        string online_url
+        string timezone
+        timestamp start_at
+        timestamp doors_open_at
+        timestamp end_at
+        bigint min_price
+        string status
+        boolean is_featured
+        boolean require_identity
+        bigint view_count
+        timestamp published_at
+        bigint approved_by FK
+        timestamp approved_at
+        text rejection_reason
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    event_images {
+        uuid id PK
+        uuid event_id FK
+        string image_url
+        string caption
+        smallint sort_order
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    event_lineups {
+        uuid id PK
+        uuid event_id FK
+        string name
+        string photo_url
+        timestamp perform_at
+        smallint sort_order
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ticket_types {
+        uuid id PK
+        uuid event_id FK
+        string name
+        text description
+        bigint price
+        int quota
+        int sold_count
+        int min_per_order
+        int max_per_order
+        timestamp sale_start_at
+        timestamp sale_end_at
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    vouchers {
+        uuid id PK
+        string code UK
+        uuid event_id FK
+        string discount_type
+        bigint discount_value
+        bigint max_discount
+        bigint min_purchase
+        int usage_limit
+        int per_user_limit
+        int used_count
+        timestamp valid_from
+        timestamp valid_until
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    orders {
+        uuid id PK
+        string order_number UK
+        bigint user_id FK
+        uuid event_id FK
+        uuid voucher_id FK
+        string buyer_name
+        string buyer_email
+        string buyer_phone
+        bigint subtotal
+        bigint discount_amount
+        bigint admin_fee
+        bigint payment_fee
+        bigint tax_amount
+        bigint total_amount
+        string status
+        timestamp expires_at
+        timestamp paid_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    order_items {
+        uuid id PK
+        uuid order_id FK
+        uuid ticket_type_id FK
+        int quantity
+        bigint unit_price
+        bigint subtotal
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    payments {
+        uuid id PK
+        uuid order_id FK
+        string gateway
+        string method
+        string gateway_ref UK
+        bigint amount
+        string status
+        string payment_url
+        json raw_response
+        timestamp paid_at
+        timestamp expires_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    refunds {
+        uuid id PK
+        uuid order_id FK
+        uuid payment_id FK
+        bigint amount
+        text reason
+        string status
+        string gateway_ref
+        bigint requested_by FK
+        bigint processed_by FK
+        timestamp processed_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    tickets {
+        uuid id PK
+        string ticket_code UK
+        uuid order_item_id FK
+        uuid order_id FK
+        uuid event_id FK
+        uuid ticket_type_id FK
+        string holder_name
+        string holder_id_number
+        string status
+        timestamp issued_at
+        timestamp used_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    check_ins {
+        uuid id PK
+        uuid ticket_id FK
+        uuid event_id FK
+        bigint scanned_by FK
+        string gate
+        string result
+        timestamp scanned_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    event_staff {
+        uuid event_id PK
+        bigint user_id PK
+    }
+
+    wishlists {
+        bigint user_id PK
+        uuid event_id PK
+        timestamp created_at
+    }
+
+    banners {
+        bigint id PK
+        uuid event_id FK
+        string image_url
+        string link_url
+        smallint sort_order
+        timestamp start_at
+        timestamp end_at
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    faqs {
+        bigint id PK
+        text question
+        text answer
+        smallint sort_order
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    contact_messages {
+        uuid id PK
+        string name
+        string email
+        string phone
+        string subject
+        text message
+        string status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    audit_logs {
+        bigint id PK
+        bigint user_id FK
+        string action
+        string entity
+        string entity_id
+        json meta
+        string ip_address
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    voucher_usages {
+        uuid id PK
+        uuid voucher_id FK
+        uuid order_id FK
+        bigint user_id FK
+        timestamp used_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    webhook_events {
+        bigint id PK
+        string gateway
+        string external_id
+        string event_type
+        json payload
+        boolean signature_valid
+        string status
+        timestamp processed_at
+        text error
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    notification_logs {
+        uuid id PK
+        string channel
+        string recipient
+        string template
+        string status
+        string provider_ref
+        text error
+        timestamp sent_at
+        timestamp created_at
+        timestamp updated_at
+    }

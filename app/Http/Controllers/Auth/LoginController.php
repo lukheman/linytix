@@ -28,7 +28,7 @@ class LoginController extends Controller
 
         $remember = $request->boolean('remember');
 
-        if (! Auth::attempt($credentials, $remember)) {
+        if (! Auth::attempt($credentials + ['is_active' => true], $remember)) {
             return back()
                 ->withInput($request->only('email'))
                 ->withErrors(['email' => __('auth.failed')]);
@@ -36,6 +36,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $user = $request->user();
+        $user->forceFill(['last_login_at' => now()])->save();
+
+        return redirect()->intended(route($user->homeRouteName()));
     }
 }

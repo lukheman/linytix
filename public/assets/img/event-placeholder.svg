@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Poster event belum tersedia">
+    <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#0d6865"/>
+            <stop offset="0.6" stop-color="#084d4b"/>
+            <stop offset="1" stop-color="#102a2b"/>
+        </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#g)"/>
+    <circle cx="980" cy="120" r="220" fill="#d99b4b" opacity="0.18"/>
+    <circle cx="180" cy="700" r="260" fill="#e6f3ef" opacity="0.10"/>
+    <g fill="#e6f3ef" font-family="Archivo, sans-serif" text-anchor="middle">
+        <text x="600" y="370" font-size="96" font-weight="800" letter-spacing="-3">NUSA EVENT</text>
+        <text x="600" y="450" font-size="34" font-weight="600" opacity="0.75">Poster event segera hadir</text>
+    </g>
+</svg>

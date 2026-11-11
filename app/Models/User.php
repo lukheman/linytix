@@ -3,8 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\HasRoles;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
@@ -13,7 +16,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,8 +26,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone',
+        'google_id',
         'password',
         'avatar',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -46,8 +53,36 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'is_active' => 'boolean',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Organizer yang dimiliki pengguna.
+     */
+    public function organizers(): HasMany
+    {
+        return $this->hasMany(Organizer::class, 'owner_user_id');
+    }
+
+    /**
+     * Event tempat pengguna ditugaskan sebagai staff.
+     */
+    public function eventAssignments(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_staff')->withPivot('user_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 
     /**

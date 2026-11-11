@@ -8,8 +8,11 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Guest\EventController;
+use App\Http\Controllers\Guest\InfoPageController;
 use App\Http\Controllers\Guest\LandingPageController;
 use App\Http\Controllers\Guest\PublicPageController;
+use App\Http\Controllers\Guest\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 // Guest Routes
@@ -24,13 +27,25 @@ Route::get('/kerja-sama/{collaboration:slug}', [PublicPageController::class, 'co
 Route::get('/testimoni', [PublicPageController::class, 'testimonials'])->name('testimonials');
 Route::get('/kontak', [PublicPageController::class, 'contact'])->name('contact');
 
+// Ticketing public routes
+Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::get('/events/{event:slug}', [EventController::class, 'show'])->name('events.show');
+
+Route::get('/faq', [InfoPageController::class, 'faq'])->name('faq');
+Route::get('/tentang-kami', [InfoPageController::class, 'about'])->name('info.about');
+Route::get('/privacy-policy', [InfoPageController::class, 'privacy'])->name('info.privacy');
+Route::get('/terms', [InfoPageController::class, 'terms'])->name('info.terms');
+Route::get('/refund-policy', [InfoPageController::class, 'refund'])->name('info.refund');
+
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+
 // Auth Routes
 Route::get('/login', [LoginController::class, 'show'])->name('login');
 Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
-Route::prefix('admin')->middleware('auth')->group(function () {
+Route::prefix('admin')->middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     Route::get('/users', [UserController::class, 'index'])->name('admin.users');

@@ -3,6 +3,10 @@
     'description' => 'Partner event organizer untuk kegiatan yang berkesan.',
     'settings' => [],
     'socialLinks' => [],
+    'ogImage' => null,
+    'ogType' => 'website',
+    'canonical' => null,
+    'jsonLd' => null,
 ])
 
 @php
@@ -16,11 +20,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{{ $description }}">
     <meta name="theme-color" content="#0d6865">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $ogType }}">
     <meta property="og:title" content="{{ $title }}">
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:site_name" content="{{ $siteName }}">
+    @if ($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
+    @if ($canonical)
+        <link rel="canonical" href="{{ $canonical }}">
+    @endif
+    <meta name="twitter:title" content="{{ $title }}">
+    <meta name="twitter:description" content="{{ $description }}">
     <title>{{ $title }}</title>
+    @if ($jsonLd)
+        <script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -303,6 +320,7 @@
         </button>
         <div id="siteNav" class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item"><a class="nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}" href="{{ route('events.index') }}">Event</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('home') }}#katalog">Katalog Sewa</a></li>
                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">Tentang</a></li>
                 <li class="nav-item"><a class="nav-link {{ request()->routeIs('services*') ? 'active' : '' }}" href="{{ route('services') }}">Layanan</a></li>
@@ -338,11 +356,11 @@
             <div class="col-6 col-lg-3">
                 <div class="text-white fw-semibold mb-3">Jelajahi</div>
                 <div class="d-flex flex-column gap-2">
+                    <a href="{{ route('events.index') }}">Jelajahi Event</a>
                     <a href="{{ route('home') }}#katalog">Katalog Sewa</a>
                     <a href="{{ route('about') }}">Tentang Kami</a>
-                    <a href="{{ route('services') }}">Layanan</a>
-                    <a href="{{ route('collaborations') }}">Kerja Sama</a>
-                    <a href="{{ route('testimonials') }}">Testimoni</a>
+                    <a href="{{ route('faq') }}">FAQ</a>
+                    <a href="{{ route('info.terms') }}">Syarat & Ketentuan</a>
                 </div>
             </div>
             <div class="col-6 col-lg-4">

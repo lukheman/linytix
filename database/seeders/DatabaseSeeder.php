@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
             'password' => 'password123',
         ]);
+        $this->call(RoleSeeder::class);
+        $this->call(DomainSeeder::class);
+        $this->call(TicketingSeeder::class);
 
         $services = [
             ['category' => 'pelatihan', 'name' => 'Pelatihan', 'slug' => 'pelatihan', 'description' => 'Program pelatihan interaktif untuk meningkatkan kapasitas tim dan organisasi.', 'features' => ['Modul terstruktur', 'Fasilitator berpengalaman', 'Dokumentasi kegiatan'], 'sort_order' => 1],
