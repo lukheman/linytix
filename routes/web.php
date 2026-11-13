@@ -52,22 +52,23 @@ Route::get('/organizers/{slug}', [GuestOrganizerController::class, 'show'])->nam
 // Checkout & payment
 Route::get('/events/{event:slug}/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/events/{event:slug}/checkout', [CheckoutController::class, 'store'])
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:checkout-store')
     ->name('checkout.store');
 Route::get('/checkout/{order}', [CheckoutController::class, 'show'])
     ->whereUuid('order')
     ->name('checkout.show');
 Route::get('/checkout/{order}/status', [CheckoutController::class, 'status'])
     ->whereUuid('order')
-    ->middleware('throttle:120,1')
+    ->middleware('throttle:checkout-status')
     ->name('checkout.status');
 Route::post('/checkout/{order}/pay', [CheckoutController::class, 'pay'])
     ->whereUuid('order')
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:checkout-pay')
     ->name('checkout.pay');
 
 // Webhook gateway pembayaran
 Route::post('/webhooks/payment/{gateway}', PaymentWebhookController::class)
+    ->middleware('throttle:payment-webhook')
     ->name('webhooks.payment');
 
 // Scan tiket staff
@@ -78,7 +79,7 @@ Route::middleware(['auth', 'active', 'role:admin,staff'])->group(function () {
         ->name('scan.show');
     Route::post('/scan/{event}', [ScanController::class, 'store'])
         ->whereUuid('event')
-        ->middleware('throttle:60,1')
+        ->middleware('throttle:ticket-scan')
         ->name('scan.store');
 });
 
@@ -189,7 +190,9 @@ Route::prefix('organizer')->middleware(['auth', 'active', 'role:organizer'])->na
 });
 
 Route::prefix('admin')->middleware(['auth', 'active'])->group(function () {
-    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)
+        ->middleware('role:admin')
+        ->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('admin.profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
@@ -199,8 +202,12 @@ Route::prefix('admin')->middleware(['auth', 'active'])->group(function () {
 
     Route::get('/components', ComponentDocsController::class)->name('admin.components');
     Route::post('/logout', [LogoutController::class, '__invoke'])->name('admin.logout');
-    Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('admin.settings');
-    Route::put('/pengaturan', [SettingsController::class, 'update'])->name('admin.settings.update');
+    Route::get('/pengaturan', [SettingsController::class, 'edit'])
+        ->middleware('role:admin')
+        ->name('admin.settings');
+    Route::put('/pengaturan', [SettingsController::class, 'update'])
+        ->middleware('role:admin')
+        ->name('admin.settings.update');
 
     Route::middleware('role:admin')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('admin.users');

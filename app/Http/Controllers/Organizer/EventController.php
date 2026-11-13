@@ -93,7 +93,7 @@ class EventController extends Controller
 
     public function edit(Event $event): View
     {
-        Gate::authorize('view', $event);
+        Gate::authorize('update', $event);
 
         $event->load(['category', 'venue', 'images', 'lineups', 'ticketTypes']);
 

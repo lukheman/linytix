@@ -17,7 +17,7 @@ it('assigns the customer role on registration', function () {
         'password' => 'password123',
         'password_confirmation' => 'password123',
         'agree_terms' => '1',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $user = User::where('email', 'pembeli@example.com')->firstOrFail();
 

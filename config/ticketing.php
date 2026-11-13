@@ -65,4 +65,21 @@ return [
             'lineup' => ['min_width' => 200, 'min_height' => 200],
         ],
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rate limit per menit
+    |--------------------------------------------------------------------------
+    |
+    | Nilai dapat dinaikkan sementara di lingkungan load test melalui env.
+    | Jangan menaikkan batas produksi tanpa analisis kapasitas.
+    |
+    */
+    'rate_limits' => [
+        'checkout_store' => (int) env('TICKETING_RATE_LIMIT_CHECKOUT_STORE', 10),
+        'checkout_pay' => (int) env('TICKETING_RATE_LIMIT_CHECKOUT_PAY', 10),
+        'checkout_status' => (int) env('TICKETING_RATE_LIMIT_CHECKOUT_STATUS', 120),
+        'ticket_scan' => (int) env('TICKETING_RATE_LIMIT_SCAN', 60),
+        'payment_webhook' => (int) env('TICKETING_RATE_LIMIT_PAYMENT_WEBHOOK', 120),
+    ],
 ];

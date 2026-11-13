@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versi** | 1.20 |
+| **Versi** | 1.22 |
 | **Tanggal** | 13 November 2026 |
 | **Status** | Draft untuk review |
 | **Dokumen terkait** | `schema.sql`, `erd.mmd`, `BACKLOG.md` |
@@ -33,6 +33,8 @@
 | 1.18 | Moderasi event admin: antrean `pending_review` terbaru dulu, halaman detail event dengan poster/tiket/organizer, approve/reject dengan alasan wajib, pembatalan khusus event `published`/`sold_out` dengan refund batch untuk seluruh order lunas, email organizer untuk setiap keputusan, serta audit log untuk approve/reject/cancel |
 | 1.19 | Master data admin: CRUD kategori, venue, FAQ, dan banner dengan validasi; slug kategori/venue unik (kolom `venues.slug` dan `venues.is_active` ditambahkan); data nonaktif disembunyikan dari halaman publik dan form organizer; cache master data publik (kategori, kota, FAQ, banner) diinvalidasi otomatis; setiap perubahan diaudit |
 | 1.20 | Monitoring transaksi admin: daftar order dengan filter status/event/rentang tanggal dan pencarian nomor order/email, halaman detail berisi item/pembayaran/tiket/riwayat refund, refund penuh dari halaman detail, rekonsiliasi manual pembayaran pending/failed/expired, masking nomor identitas dan telepon, serta audit log untuk refund, rekonsiliasi, dan kirim ulang e-tiket |
+| 1.21 | QA & launch: artefak load test k6 (public browse, checkout rush, scan) dan verifikasi stok; security review otomatis dengan perbaikan akses admin dashboard/settings, XSS JSON-LD, rate limit webhook, dan policy edit event; rate limit checkout/scan/webhook dapat dikonfigurasi; command `ticketing:launch-check`; skenario UAT end-to-end; script backup/restore drill; runbook backup, launch checklist, dan runbook insiden |
+| 1.22 | Sinkronisasi dokumentasi QA/launch: audit dan penandaan AC Epik 0–3 berdasarkan bukti test/kode, koreksi status implementasi (E0-02, E0-04, E0-05, E0-07, E0-08), penyesuaian AC email guest (e-tiket setelah pembayaran), standarisasi label traceability, penambahan bukti drill backup lokal, serta indeks dokumen QA/ops. Tidak ada perubahan fitur |
 
 ---
 
@@ -40,7 +42,7 @@
 
 Platform web untuk menjual tiket event dan konser musik secara online. Pengunjung dapat menjelajahi event, memilih jenis tiket, membayar, dan menerima e-tiket ber-QR. Organizer dapat membuat event, mengatur penjualan tiket, serta memantau penjualan dan kehadiran. Admin mengelola pengguna, moderasi event, master data, transaksi, dan refund.
 
-Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema), Tahap 1 (halaman publik event), serta Tahap 2 (auth, akun, dan akses guest) sudah diimplementasikan. Tahap 3 selesai: checkout, pembayaran, webhook, expiry, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email admin, panel refund admin, dan polling status pembayaran sudah tersedia. Epik 4 selesai: dashboard, profil organizer, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia; Epik 7 berikutnya.
+Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema), Tahap 1 (halaman publik event), serta Tahap 2 (auth, akun, dan akses guest) sudah diimplementasikan. Tahap 3 selesai: checkout, pembayaran, webhook, expiry, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email admin, panel refund admin, dan polling status pembayaran sudah tersedia. Epik 4 selesai: dashboard, profil organizer, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia. Epik 7 selesai di sisi implementasi: artefak load test, security review beserta perbaikannya, skenario UAT otomatis, script backup/restore, launch-check, serta runbook operasional tersedia; eksekusi load test/UAT di staging, sign-off Product Owner, backup produksi, dan verifikasi domain/gateway/monitoring masih menunggu tim ops.
 
 ---
 
@@ -318,7 +320,7 @@ Aturan:
 - Model dan migration ticketing sudah ada: `Event`, `Organizer`, `Venue`, `TicketType`, `Voucher`, `Order`, `OrderItem`, `Payment`, `Ticket`, `CheckIn`, `VoucherUsage`, `Banner`, `Faq`, `ContactMessage`, `AuditLog`.
 - Halaman publik event sudah tersedia: `/events`, `/events/{slug}`, filter, dan halaman informasi.
 - Auth, akun, dan akses guest sudah tersedia: `/login`, `/register`, `/forgot-password`, `/reset-password`, `/auth/google/*`, `/email/verify*`, `/akun`, `/akun/pesanan`, `/akun/tiket`, `/pesanan/cari`, dan signed URL `/pesanan/{order}`.
-- Checkout dan pembayaran sudah tersedia: form pilih tiket, order pending dengan reservasi stok, guest checkout, inisiasi pembayaran, halaman status dengan polling otomatis, webhook idempoten, expiry otomatis, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email, serta panel refund admin (refund penuh, retry, dan pembatalan event dengan refund batch). Epik 4 selesai: dashboard, profil, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia; Epik 7 berikutnya.
+- Checkout dan pembayaran sudah tersedia: form pilih tiket, order pending dengan reservasi stok, guest checkout, inisiasi pembayaran, halaman status dengan polling otomatis, webhook idempoten, expiry otomatis, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email, serta panel refund admin (refund penuh, retry, dan pembatalan event dengan refund batch). Epik 4 selesai: dashboard, profil, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia. Epik 7 selesai di sisi implementasi: artefak load test, security review beserta perbaikannya, skenario UAT otomatis, script backup/restore, launch-check, serta runbook operasional tersedia; eksekusi load test/UAT di staging, sign-off Product Owner, backup produksi, dan verifikasi domain/gateway/monitoring masih menunggu tim ops.
 - Skema aktual ada di `schema.sql`; ERD domain ada di `erd.mmd`.
 - Perluasan skema P0 sudah diterapkan dan didokumentasikan di §10.3 serta `BACKLOG.md` Epik 0.
 

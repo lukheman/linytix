@@ -36,7 +36,7 @@ test('authenticated users can view the admin pages', function () {
     $admin = User::factory()->admin()->create();
     $otherUser = User::factory()->create();
 
-    $this->actingAs($user)->get('/admin/dashboard')->assertOk()->assertSee('Dashboard Ticketing');
+    $this->actingAs($admin)->get('/admin/dashboard')->assertOk()->assertSee('Dashboard Ticketing');
     $this->actingAs($user)->get('/admin/profile')
         ->assertOk()
         ->assertSee('Informasi Profile')
@@ -65,7 +65,7 @@ test('users can log in', function () {
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'secret123',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $this->assertAuthenticatedAs($user);
 });
@@ -77,7 +77,7 @@ test('users can register', function () {
         'password' => 'password123',
         'password_confirmation' => 'password123',
         'agree_terms' => '1',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $this->assertAuthenticated();
     expect(User::where('email', 'new@example.com')->exists())->toBeTrue();

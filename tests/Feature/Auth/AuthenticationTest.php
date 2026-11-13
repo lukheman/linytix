@@ -15,7 +15,7 @@ it('registers a new customer, normalizes the email, and queues verification', fu
         'password' => 'password123',
         'password_confirmation' => 'password123',
         'agree_terms' => '1',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $user = User::where('email', 'budi@example.com')->firstOrFail();
 
@@ -67,7 +67,7 @@ it('logs in with a case-insensitive email and allows unverified users', function
     $this->post('/login', [
         'email' => 'LOGIN@example.com',
         'password' => 'secret123',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $this->assertAuthenticatedAs($user);
 });
@@ -123,7 +123,7 @@ it('logs out authenticated users', function () {
 });
 
 it('keeps the admin logout redirecting to the login page', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
 
     $this->actingAs($user)
         ->get('/admin/dashboard')
@@ -148,7 +148,7 @@ it('verifies an email through a signed link and claims matching guest orders', f
         'hash' => sha1($user->getEmailForVerification()),
     ]);
 
-    $this->actingAs($user)->get($url)->assertRedirect('/admin/dashboard');
+    $this->actingAs($user)->get($url)->assertRedirect('/akun');
 
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue()
         ->and($order->fresh()->user_id)->toBe($user->id);

@@ -98,7 +98,7 @@ it('deactivates and reactivates a user and blocks inactive users from logging in
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'password',
-    ])->assertRedirect('/admin/dashboard');
+    ])->assertRedirect('/akun');
 
     $this->assertAuthenticatedAs($user->fresh());
 

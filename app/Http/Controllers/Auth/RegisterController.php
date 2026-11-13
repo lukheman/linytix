@@ -54,7 +54,7 @@ class RegisterController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard')
+        return redirect()->route($user->homeRouteName())
             ->with('status', 'Akun berhasil dibuat. Silakan verifikasi email Anda.');
     }
 }

@@ -300,22 +300,27 @@ function openBrowser(string $url): void
 /**
  * Baca nilai dari config.json
  */
-function get_config(string $key = null, mixed $default = null)
+function get_config(?string $key = null, mixed $default = null)
 {
     static $config = null;
     if ($config === null) {
-        $file = __DIR__ . '/config.json';
+        $file = __DIR__.'/config.json';
         $config = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
     }
-    
-    if (is_null($key)) return $config;
-    
+
+    if (is_null($key)) {
+        return $config;
+    }
+
     $keys = explode('.', $key);
     $val = $config;
     foreach ($keys as $k) {
-        if (!is_array($val) || !array_key_exists($k, $val)) return $default;
+        if (! is_array($val) || ! array_key_exists($k, $val)) {
+            return $default;
+        }
         $val = $val[$k];
     }
+
     return $val;
 }
 

@@ -29,7 +29,7 @@ it('creates a verified customer account from a Google callback', function () {
         'avatar' => 'https://example.test/avatar.jpg',
     ]));
 
-    $this->get(route('auth.google.callback'))->assertRedirect('/admin/dashboard');
+    $this->get(route('auth.google.callback'))->assertRedirect('/akun');
 
     $user = User::where('email', 'new.google@example.com')->firstOrFail();
 
@@ -53,7 +53,7 @@ it('logs in an existing verified user and links the Google id', function () {
         'avatar' => 'https://example.test/linked.jpg',
     ]));
 
-    $this->get(route('auth.google.callback'))->assertRedirect('/admin/dashboard');
+    $this->get(route('auth.google.callback'))->assertRedirect('/akun');
 
     $this->assertAuthenticatedAs($user);
 

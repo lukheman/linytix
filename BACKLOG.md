@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Versi** | 1.19 |
+| **Versi** | 1.21 |
 | **Tanggal** | 13 November 2026 |
-| **Basis** | `PRD.md` v1.20 |
-| **Status** | Tahap 0–3 selesai; Epik 4 selesai; Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 berikutnya |
-| **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd` |
+| **Basis** | `PRD.md` v1.22 |
+| **Status** | Tahap 0–3 selesai; Epik 4 selesai; Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
+| **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd`, `docs/README.md` |
 
 Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, acceptance criteria (AC), task teknis, dan urutan sprint. P1/P2 tidak masuk backlog ini kecuali disebut sebagai dependency.
 
@@ -31,17 +31,17 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 
 | Story | Status | Catatan |
 |---|---|---|
-| E0-01 Perluasan skema | Selesai | 5 migration baru; `schema.sql` 41 tabel; `erd.mmd` diperbarui |
-| E0-02 Role & otorisasi | Sebagian | Role, middleware, policy, login aktif/nonaktif selesai. Route `/admin` lama masih memakai `auth` agar situs legacy tidak rusak; penerapan `role:admin` menunggu migrasi panel admin |
+| E0-01 Perluasan skema | Sebagian | Migration P0, `schema.sql` (34 tabel, impor MySQL bersih), dan `erd.mmd` tersedia; `migrate:fresh --seed` lulus di MySQL dan SQLite. `migrate:rollback` gagal pada migration rental legacy (`rental_items` sudah dihapus) |
+| E0-02 Role & otorisasi | Sebagian | Role, middleware, policy, login aktif/nonaktif, dan audit log selesai; `/admin/dashboard` dan `/admin/pengaturan` sudah `role:admin`. Admin 2FA belum; `/admin/profile` dan `/admin/components` sengaja tetap `auth` (accepted risk SEC-05) |
 | E0-03 Payment abstraction | Selesai | `PaymentGateway`, `FakeGateway`, `MidtransGateway`, `config/payment.php` |
-| E0-04 Layout & navigasi | Selesai | Layout publik diperluas untuk event dan SEO; layout organizer/staff penuh menyusul |
-| E0-05 Observability & job | Sebagian | Job expiry, rekonsiliasi, tiket, email, refund dan scheduler ada; Sentry/alert belum dipasang |
-| E0-06 Factory & seeder | Selesai | Factory ticketing terisi; `RoleSeeder`, `TicketingSeeder` |
-| E0-07 CI | Sebagian | Workflow Flux dibersihkan; Pint + Pest berjalan. Staging/deploy belum ada |
-| E0-08 Legal & konten | Sebagian | Halaman FAQ, tentang, privasi, S&K, refund tersedia; review legal belum |
-| E1-01 Beranda event | Selesai | `/` menjadi beranda discovery event (hero, pencarian, kategori, unggulan); `/events` menampilkan banner, event unggulan, kategori |
-| E1-02 Daftar event | Selesai | Hanya event published/sold_out dan akan datang; pagination 12 |
-| E1-03 Filter & pencarian | Selesai | Kategori, kota, tanggal, harga, kata kunci; input tidak valid diabaikan |
+| E0-04 Layout & navigasi | Sebagian | Layout publik, organizer, staff, dan admin responsif; menu mengikuti peran dan akses langsung tetap 403. Halaman error kustom dan verifikasi visual 360/768/1280 px belum |
+| E0-05 Observability & job | Sebagian | Job expiry, rekonsiliasi, tiket, email, refund, scheduler, dan `failed_jobs` ada; `/health` masih `/up` bawaan, Sentry dan alert belum dipasang |
+| E0-06 Factory & seeder | Selesai | Factory ticketing terisi; `RoleSeeder`, `TicketingSeeder` idempoten (`firstOrCreate`/`updateOrCreate`) |
+| E0-07 CI | Sebagian | Pint + Pest bersih; rollback terdokumentasi. Workflow CI, staging, deploy script, dan backup otomatis belum ada |
+| E0-08 Legal & konten | Sebagian | Halaman FAQ, tentang, privasi, S&K, dan refund tersedia. Versi/tanggal halaman, persetujuan S&K di checkout, PSE, dan review legal belum |
+| E1-01 Beranda event | Sebagian | `/` menjadi beranda discovery event (hero, pencarian, kategori, unggulan); banner aktif tampil di `/events`. Urutan event belum diassert di test |
+| E1-02 Daftar event | Sebagian | Hanya event published/sold_out dan akan datang; pagination 12. Benchmark 10.000 event belum dijalankan |
+| E1-03 Filter & pencarian | Sebagian | Kategori, kota, tanggal, harga, kata kunci; input tidak valid diabaikan. Test filter tanggal dan kombinasi belum ada |
 | E1-04 Detail event | Selesai | Lineup, galeri, venue, S&K, tiket, status jual, JSON-LD |
 | E1-05 Halaman informasi | Selesai | `/faq`, `/tentang-kami`, `/privacy-policy`, `/terms`, `/refund-policy` |
 | E2-01 Registrasi & login | Selesai | Registrasi, login case-insensitive, rate limit 5/menit, verifikasi email via queue, logout; penolakan checkout menunggu E3 |
@@ -49,12 +49,12 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E2-03 Lupa & reset password | Selesai | Respons generik, token 60 menit sekali pakai, session lain diinvalidasi |
 | E2-04 Riwayat pesanan | Selesai | Daftar/detail order milik user, isolasi akses, unduh PDF |
 | E2-05 Tiket saya | Selesai | Daftar per event, QR inline, detail tiket, unduh PDF |
-| E2-06 Akses guest | Selesai | Signed URL 30 hari, lookup generik + rate limit, klaim order, email setelah checkout, PDF tiket |
+| E2-06 Akses guest | Selesai | Signed URL 30 hari, lookup generik + rate limit, klaim order, e-tiket via email setelah pembayaran, PDF tiket |
 | E3-01 Pilih tiket & validasi | Selesai | Form checkout; validasi event/tiket, kuota, jadwal jual, min/max, identitas, dan perubahan harga |
-| E3-02 Order & stok atomik | Selesai | Transaksi order + item, increment stok bersyarat, expiry 15 menit, batas pending, idempotency key |
+| E3-02 Order & stok atomik | Sebagian | Transaksi order + item, increment stok bersyarat, expiry 15 menit, batas pending, idempotency key. Uji dua proses paralel belum ada (disimulasikan berurutan) |
 | E3-03 Guest checkout | Selesai | Nama/email/phone, email lowercase, `user_id` null, akses via signed URL |
-| E3-04 Inisiasi pembayaran | Selesai | Payment record + FakeGateway; Midtrans charge tersedia; retry dan error gateway ditangani |
-| E3-05 Webhook & idempotensi | Selesai | Signature, `webhook_events` unik, duplikat/out-of-order, sukses/gagal, late payment |
+| E3-04 Inisiasi pembayaran | Sebagian | Payment record + FakeGateway; Midtrans charge tersedia; retry dan error gateway ditangani. Test timeout gateway belum ada |
+| E3-05 Webhook & idempotensi | Sebagian | Signature, `webhook_events` unik, duplikat/out-of-order, sukses/gagal, late payment. Test webhook `failed` sebelum order paid belum ada |
 | E3-06 Expiry & rekonsiliasi | Selesai | Expiry idempoten, pengembalian stok, email expired, rekonsiliasi, late payment + refund otomatis |
 | E3-07 Penerbitan tiket & email | Selesai | Tiket idempoten, QR unik, email via queue + log, PDF per order, resend admin |
 | E3-08 Status pembayaran | Selesai | Status, countdown, polling 5 detik (maks 15 menit), tombol cek status, akses owner/signed |
@@ -63,6 +63,17 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E4-02 Kelola event | Selesai | Draft dengan field wajib, upload tervalidasi, submit review, penguncian field setelah submit, edit non-kritis event tayang, moderasi admin, audit log |
 | E4-03 Kelola jenis tiket | Selesai | CRUD tipe tiket, validasi harga/kuota, batas kapasitas venue, jadwal jual, larangan hapus tiket terjual, snapshot harga, audit log |
 | E4-04 Laporan penjualan | Selesai | Ringkasan paid-only, refund terpisah, grafik & rincian harian per timezone event, filter tanggal/jenis tiket, index performa |
+| E5-01 Penugasan staff | Selesai | Admin/organizer owner mengelola staff + gate; role staff otomatis; audit log; akses scan per event |
+| E5-02 Scan QR | Selesai | Kamera + input manual, validasi server, update atomik, check-in success/duplicate/invalid, rate limit 60/menit |
+| E6-01 Manajemen pengguna & organizer | Selesai | CRUD user admin-only, proteksi self/admin terakhir, verifikasi organizer, audit log |
+| E6-02 Moderasi event | Selesai | Antrean pending review, approve/reject beralasan, pembatalan event + refund batch, notifikasi organizer |
+| E6-03 Master data | Selesai | CRUD kategori/venue/FAQ/banner, slug unik, data nonaktif tersembunyi, invalidasi cache publik |
+| E6-04 Monitoring transaksi & refund | Selesai | Filter order, detail order, refund penuh, rekonsiliasi manual, resend tiket, masking PII, audit log |
+| E7-01 Load & performance test | Sebagian | Script k6, verifikasi stok, dan rencana eksekusi tersedia; hasil aktual menunggu staging |
+| E7-02 Security review | Selesai | Test otorisasi/CSRF/XSS/SQLi/mass assignment/upload/webhook/signed URL; 4 temuan high/medium diperbaiki |
+| E7-03 UAT | Sebagian | Skenario otomatis dan rencana UAT tersedia; UAT manual + sign-off Product Owner menunggu |
+| E7-04 Backup & restore drill | Sebagian | Script backup/restore dan runbook tersedia; drill lokal lulus; cron produksi menunggu ops |
+| E7-05 Launch checklist | Sebagian | Checklist, launch-check command, dan runbook insiden tersedia; verifikasi domain/DNS/gateway/monitoring menunggu ops |
 
 ---
 
@@ -129,12 +140,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `php artisan migrate:fresh --seed` berhasil di MySQL/MariaDB.
+- [x] `php artisan migrate:fresh --seed` berhasil di MySQL/MariaDB.
 - [ ] `php artisan migrate:rollback` berhasil tanpa error FK.
-- [ ] Semua kolom baru nullable atau memiliki default sehingga data lama tidak rusak.
-- [ ] `schema.sql` dapat diimpor ke database kosong tanpa error.
-- [ ] `erd.mmd` memuat seluruh tabel/kolom baru dan tetap valid Mermaid.
-- [ ] Test `SchemaTest` memastikan tabel/kolom/index kunci ada.
+- [x] Semua kolom baru nullable atau memiliki default sehingga data lama tidak rusak.
+- [x] `schema.sql` dapat diimpor ke database kosong tanpa error.
+- [x] `erd.mmd` memuat seluruh tabel/kolom baru dan tetap valid Mermaid.
+- [x] Test `SchemaTest` memastikan tabel/kolom/index kunci ada.
+
+> Catatan: `migrate:fresh --seed` dan impor `schema.sql` ke MySQL kosong diverifikasi 2026-11-13. `migrate:rollback` gagal karena migration rental legacy mencoba mengubah tabel `rental_items` yang sudah dihapus; perlu perbaikan migration sebelum rollback dianggap lulus.
 
 ### E0-02 — Role & otorisasi
 
@@ -151,13 +164,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Customer tidak bisa membuka `/organizer/*` atau `/admin/*` (403).
-- [ ] Organizer hanya bisa mengubah event miliknya; event organizer lain menghasilkan 403.
-- [ ] Staff hanya bisa scan event yang ada di `event_staff`.
-- [ ] Admin bisa mengakses seluruh panel admin.
-- [ ] User nonaktif (`is_active = false`) tidak bisa login dan session aktifnya dihentikan.
-- [ ] Perubahan role dan status aktif tercatat di `audit_logs`.
-- [ ] Feature test untuk setiap peran dan setiap route sensitif.
+- [x] Customer tidak bisa membuka `/organizer/*` atau `/admin/*` (403).
+- [x] Organizer hanya bisa mengubah event miliknya; event organizer lain menghasilkan 403.
+- [x] Staff hanya bisa scan event yang ada di `event_staff`.
+- [x] Admin bisa mengakses seluruh panel admin.
+- [x] User nonaktif (`is_active = false`) tidak bisa login dan session aktifnya dihentikan.
+- [x] Perubahan role dan status aktif tercatat di `audit_logs`.
+- [x] Feature test untuk setiap peran dan setiap route sensitif.
 
 ### E0-03 — Abstraksi payment gateway
 
@@ -174,11 +187,11 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Test membuat charge memakai `FakeGateway` tanpa memanggil network.
-- [ ] Signature webhook invalid ditolak dengan 401/403 dan tidak mengubah order.
-- [ ] Webhook valid memanggil handler domain yang sama untuk semua gateway.
-- [ ] Refund test memakai `FakeGateway` dan menghasilkan status yang benar.
-- [ ] Tidak ada kredensial gateway di kode/log.
+- [x] Test membuat charge memakai `FakeGateway` tanpa memanggil network.
+- [x] Signature webhook invalid ditolak dengan 401/403 dan tidak mengubah order.
+- [x] Webhook valid memanggil handler domain yang sama untuk semua gateway.
+- [x] Refund test memakai `FakeGateway` dan menghasilkan status yang benar.
+- [x] Tidak ada kredensial gateway di kode/log.
 
 ### E0-04 — Layout & navigasi
 
@@ -195,10 +208,12 @@ Berlaku untuk semua story:
 **AC:**
 
 - [ ] Layout tampil benar di 360 px, 768 px, dan 1280 px.
-- [ ] Menu yang tidak berhak tidak muncul; akses langsung tetap 403.
-- [ ] Flash message bertahan setelah redirect dan hilang setelah dibaca.
+- [x] Menu yang tidak berhak tidak muncul; akses langsung tetap 403.
+- [x] Flash message bertahan setelah redirect dan hilang setelah dibaca.
 - [ ] Halaman error menampilkan pesan Bahasa Indonesia dan tidak membocorkan stack trace.
 - [ ] Tidak ada broken link di navigasi utama.
+
+> Catatan: halaman error kustom belum ada (Laravel memakai halaman bawaan); verifikasi responsif 360/768/1280 px dan audit tautan navigasi perlu dilakukan manual di browser/staging.
 
 ### E0-05 — Observability, queue, dan scheduler
 
@@ -216,11 +231,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Job gagal masuk `failed_jobs` dan bisa di-retry.
-- [ ] Log tidak memuat email lengkap, nomor HP, nomor identitas, atau token.
+- [x] Job gagal masuk `failed_jobs` dan bisa di-retry.
+- [x] Log tidak memuat email lengkap, nomor HP, nomor identitas, atau token.
 - [ ] `/health` mengembalikan 200 hanya jika DB dan queue dapat diakses.
 - [ ] Alert test terkirim ke channel yang ditentukan.
-- [ ] `ExpireOrders` idempoten: dijalankan dua kali tidak menggandakan pengembalian stok.
+- [x] `ExpireOrders` idempoten: dijalankan dua kali tidak menggandakan pengembalian stok.
+
+> Catatan: `/health` masih memakai endpoint `/up` bawaan (tidak mengecek DB/queue) dan belum ada integrasi Sentry/alert. Job gagal tersedia lewat tabel `failed_jobs` dan `queue:retry`.
 
 ### E0-06 — Seeder, factory, dan data uji
 
@@ -235,10 +252,10 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `migrate:fresh --seed` menghasilkan data yang bisa dipakai untuk semua halaman.
-- [ ] Factory dapat membuat event dengan kuota dan tiket konsisten.
-- [ ] Seeder tidak membuat data duplikat saat dijalankan ulang (idempoten atau truncate jelas).
-- [ ] Tidak ada kredensial produksi di seeder.
+- [x] `migrate:fresh --seed` menghasilkan data yang bisa dipakai untuk semua halaman.
+- [x] Factory dapat membuat event dengan kuota dan tiket konsisten.
+- [x] Seeder tidak membuat data duplikat saat dijalankan ulang (idempoten atau truncate jelas).
+- [x] Tidak ada kredensial produksi di seeder.
 
 ### E0-07 — CI, staging, dan deployment
 
@@ -258,7 +275,9 @@ Berlaku untuk semua story:
 - [ ] Staging dapat di-deploy dari branch utama.
 - [ ] Deploy tidak menghapus data; migration berjalan sebelum traffic dialihkan.
 - [ ] Backup staging berhasil di-restore ke database uji.
-- [ ] Rollback aplikasi terdokumentasi.
+- [x] Rollback aplikasi terdokumentasi.
+
+> Catatan: rollback terdokumentasi di `docs/ops/launch-checklist.md` dan `docs/ops/incident-runbook.md`, tetapi belum diuji. CI, staging, deploy script, dan backup otomatis belum tersedia.
 
 ### E0-08 — Legal & konten wajib
 
@@ -279,6 +298,8 @@ Berlaku untuk semua story:
 - [ ] Kebijakan Refund sesuai keputusan D7 di PRD.
 - [ ] Tidak ada klaim hukum yang belum disetujui legal.
 
+> Catatan: halaman legal tersedia tanpa nomor versi/tanggal, checkout belum menampilkan persetujuan S&K/Privasi eksplisit, dan review legal/PSE belum dilakukan.
+
 ---
 
 ## 5. Epik 1 — Halaman Publik (P0)
@@ -291,14 +312,16 @@ Berlaku untuk semua story:
 **AC:**
 
 - [ ] Menampilkan banner aktif yang berada dalam rentang `start_at`–`end_at`, maksimal 5, urut `sort_order`.
-- [ ] Menampilkan maksimal 8 event `published` yang `is_featured = true`, urut `start_at` terdekat.
-- [ ] Menampilkan kategori aktif yang memiliki event published.
-- [ ] Setiap kartu event menampilkan poster, judul, tanggal, kota, dan harga mulai.
-- [ ] Jika tidak ada banner/event/kategori, tampil empty state, bukan error.
-- [ ] Klik kartu membuka `/events/{slug}`.
+- [x] Menampilkan maksimal 8 event `published` yang `is_featured = true`, urut `start_at` terdekat.
+- [x] Menampilkan kategori aktif yang memiliki event published.
+- [x] Setiap kartu event menampilkan poster, judul, tanggal, kota, dan harga mulai.
+- [x] Jika tidak ada banner/event/kategori, tampil empty state, bukan error.
+- [x] Klik kartu membuka `/events/{slug}`.
 - [ ] LCP < 2 detik p75 pada mobile 4G (diuji di staging).
-- [ ] Meta title, description, dan OG image tersedia.
-- [ ] Feature test: hanya konten aktif/published yang tampil; urutan benar.
+- [x] Meta title, description, dan OG image tersedia.
+- [ ] Feature test: hanya konten aktif/published yang tampil; urutan benar. _(konten aktif/published teruji; urutan belum diassert)_
+
+> Catatan: banner aktif dirender di `/events`, bukan di beranda; urutan event belum diassert di test; LCP p75 menunggu pengukuran staging.
 
 ### E1-02 — F-02 Daftar event
 
@@ -307,14 +330,16 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Hanya event `published`/`sold_out` dengan `start_at >= now()` yang tampil.
-- [ ] Event `draft`, `pending_review`, `rejected`, `cancelled`, `ended` tidak tampil dan detailnya 404.
-- [ ] Pagination 12 event per halaman; nomor halaman dan filter dipertahankan.
-- [ ] Kartu menampilkan poster, judul, tanggal, kota/online, harga mulai, dan badge sold out.
-- [ ] Sorting default `start_at` terdekat; opsi urutan harga/terbaru jika disepakati.
+- [x] Hanya event `published`/`sold_out` dengan `start_at >= now()` yang tampil.
+- [x] Event `draft`, `pending_review`, `rejected`, `cancelled`, `ended` tidak tampil dan detailnya 404.
+- [x] Pagination 12 event per halaman; nomor halaman dan filter dipertahankan.
+- [x] Kartu menampilkan poster, judul, tanggal, kota/online, harga mulai, dan badge sold out.
+- [x] Sorting default `start_at` terdekat; opsi urutan harga/terbaru jika disepakati.
 - [ ] Query p95 < 300 ms dengan 10.000 event (diuji dengan seeder/benchmark).
-- [ ] Halaman dapat diakses tanpa login.
-- [ ] Feature test untuk filter status, pagination, dan empty state.
+- [x] Halaman dapat diakses tanpa login.
+- [x] Feature test untuk filter status, pagination, dan empty state.
+
+> Catatan: benchmark 10.000 event (p95 < 300 ms) belum dijalankan.
 
 ### E1-03 — F-03 Filter & pencarian
 
@@ -323,14 +348,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Filter: kategori, kota, tanggal dari–sampai, harga min–max, kata kunci judul.
-- [ ] Filter dapat dikombinasikan (AND); nilai tidak valid diabaikan tanpa error 500.
-- [ ] Kata kunci minimal 2 karakter; pencarian case-insensitive.
-- [ ] Filter tercermin di query string dan dapat dibagikan/di-bookmark.
-- [ ] Tombol "Reset" menghapus semua filter.
-- [ ] Hasil kosong menampilkan saran reset filter.
-- [ ] Tidak ada N+1 query; gunakan eager loading.
-- [ ] Feature test untuk setiap filter, kombinasi, dan input invalid.
+- [x] Filter: kategori, kota, tanggal dari–sampai, harga min–max, kata kunci judul.
+- [x] Filter dapat dikombinasikan (AND); nilai tidak valid diabaikan tanpa error 500.
+- [x] Kata kunci minimal 2 karakter; pencarian case-insensitive.
+- [x] Filter tercermin di query string dan dapat dibagikan/di-bookmark.
+- [x] Tombol "Reset" menghapus semua filter.
+- [x] Hasil kosong menampilkan saran reset filter.
+- [x] Tidak ada N+1 query; gunakan eager loading.
+- [ ] Feature test untuk setiap filter, kombinasi, dan input invalid. _(kategori/kota/kata kunci/harga dan input invalid teruji; filter tanggal dan kombinasi belum)_
 
 ### E1-04 — F-04 Detail event
 
@@ -339,16 +364,16 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Hanya event `published`/`sold_out` yang dapat diakses; lainnya 404.
-- [ ] Menampilkan poster, judul, deskripsi, lineup, galeri, tanggal/waktu, timezone, venue + peta, S&K, dan daftar tiket.
-- [ ] Untuk event online, tampilkan label online dan `online_url` hanya setelah pembayaran (jangan bocorkan di halaman publik).
-- [ ] Setiap tiket menampilkan harga, sisa kuota (atau "Habis"), jadwal jual, dan status aktif.
-- [ ] Tiket dengan jadwal jual belum mulai ditandai "Belum dijual"; yang lewat "Ditutup".
-- [ ] Sisa kuota = `quota - sold_count`, tidak pernah negatif.
-- [ ] Jika seluruh tiket habis, event berstatus `sold_out` dan tombol beli disabled.
-- [ ] Structured data `Event` dan OG tags valid.
-- [ ] Galeri memakai lazy loading; gambar punya alt text.
-- [ ] Feature test: event draft 404; ketersediaan tiket benar; event online tidak membocorkan URL.
+- [x] Hanya event `published`/`sold_out` yang dapat diakses; lainnya 404.
+- [x] Menampilkan poster, judul, deskripsi, lineup, galeri, tanggal/waktu, timezone, venue + peta, S&K, dan daftar tiket.
+- [x] Untuk event online, tampilkan label online dan `online_url` hanya setelah pembayaran (jangan bocorkan di halaman publik).
+- [x] Setiap tiket menampilkan harga, sisa kuota (atau "Habis"), jadwal jual, dan status aktif.
+- [x] Tiket dengan jadwal jual belum mulai ditandai "Belum dijual"; yang lewat "Ditutup".
+- [x] Sisa kuota = `quota - sold_count`, tidak pernah negatif.
+- [x] Jika seluruh tiket habis, event berstatus `sold_out` dan tombol beli disabled.
+- [x] Structured data `Event` dan OG tags valid.
+- [x] Galeri memakai lazy loading; gambar punya alt text.
+- [x] Feature test: event draft 404; ketersediaan tiket benar; event online tidak membocorkan URL.
 
 ### E1-05 — F-13 Halaman informasi
 
@@ -357,11 +382,11 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] `/faq` menampilkan FAQ aktif urut `sort_order`.
-- [ ] `/tentang-kami`, `/privacy-policy`, `/terms`, `/refund-policy` dapat diakses dan mobile-friendly.
-- [ ] FAQ memakai accordion yang dapat dioperasikan keyboard.
-- [ ] Meta title/description unik per halaman.
-- [ ] Tidak ada link mati ke halaman kontak/legal.
+- [x] `/faq` menampilkan FAQ aktif urut `sort_order`.
+- [x] `/tentang-kami`, `/privacy-policy`, `/terms`, `/refund-policy` dapat diakses dan mobile-friendly.
+- [x] FAQ memakai accordion yang dapat dioperasikan keyboard.
+- [x] Meta title/description unik per halaman.
+- [x] Tidak ada link mati ke halaman kontak/legal.
 
 ---
 
@@ -447,7 +472,7 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Setelah checkout guest, email berisi signed URL ke detail pesanan dan tiket. _(email dikirim setelah pembayaran; email segera setelah checkout belum dibuat)_
+- [x] Setelah pembayaran guest berhasil, email berisi e-tiket dan tautan signed URL ke detail pesanan. _(email konfirmasi segera setelah checkout tidak termasuk scope; lihat catatan E2-06)_
 - [x] Signed URL berlaku sampai 30 hari setelah event berakhir; URL kedaluwarsa menampilkan halaman instruksi.
 - [x] `/pesanan/cari` menerima nomor order + email; jika cocok, kirim link baru ke email (bukan menampilkan data langsung).
 - [x] Respons lookup selalu generik untuk mencegah enumerasi order.
@@ -455,6 +480,8 @@ Berlaku untuk semua story:
 - [x] Jika guest mendaftar dengan email yang sama dan terverifikasi, order lama terhubung otomatis.
 - [x] Rate limit lookup 10/menit per IP.
 - [x] Feature test: signed URL valid/expired/tampered, lookup cocok/tidak, klaim order.
+
+> Catatan: email yang dikirim setelah checkout adalah e-tiket setelah pembayaran; email konfirmasi order terpisah tidak termasuk scope (lihat juga E3-03).
 
 ---
 
@@ -467,13 +494,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Pembeli memilih satu jenis tiket dan jumlah; minimal 1, maksimal `max_per_order`.
-- [ ] Validasi server: event published, tiket aktif, dalam jadwal jual, sisa kuota cukup, batas per identitas belum terlampaui.
-- [ ] Jika event `require_identity`, form meminta nama pemegang untuk setiap tiket; jumlahnya harus sama dengan quantity.
-- [ ] Harga yang ditampilkan berasal dari database, bukan input client.
-- [ ] Perubahan harga setelah halaman dimuat tidak memengaruhi order; server memakai harga saat order dibuat dan menolak jika harga berubah (minta konfirmasi ulang).
-- [ ] Error ditampilkan per field dan ringkasan di atas form.
-- [ ] Feature test: kuota habis, jadwal belum mulai, jadwal lewat, max per order, identitas kurang, harga berubah.
+- [x] Pembeli memilih satu jenis tiket dan jumlah; minimal 1, maksimal `max_per_order`.
+- [x] Validasi server: event published, tiket aktif, dalam jadwal jual, sisa kuota cukup, batas per identitas belum terlampaui.
+- [x] Jika event `require_identity`, form meminta nama pemegang untuk setiap tiket; jumlahnya harus sama dengan quantity.
+- [x] Harga yang ditampilkan berasal dari database, bukan input client.
+- [x] Perubahan harga setelah halaman dimuat tidak memengaruhi order; server memakai harga saat order dibuat dan menolak jika harga berubah (minta konfirmasi ulang).
+- [x] Error ditampilkan per field dan ringkasan di atas form.
+- [x] Feature test: kuota habis, jadwal belum mulai, jadwal lewat, max per order, identitas kurang, harga berubah.
 
 ### E3-02 — F-07 Pembuatan order & stok atomik
 
@@ -482,15 +509,17 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Order dibuat dalam satu transaksi database bersama `order_items`.
-- [ ] Stok dikurangi dengan query atomik; `sold_count` tidak pernah melebihi `quota`.
-- [ ] Dua request bersamaan untuk tiket terakhir: satu sukses, satu gagal dengan pesan "Tiket sudah habis".
-- [ ] `expires_at` = now + 15 menit (config).
-- [ ] Order `pending` ganda dari identitas yang sama dibatasi (config, default 2).
-- [ ] Total dihitung server-side: subtotal − diskon + admin_fee + payment_fee + tax; tidak negatif.
-- [ ] Idempotency key mencegah double submit membuat dua order.
-- [ ] Tidak ada tiket yang dibuat pada tahap order `pending`; tiket baru dibuat setelah webhook `paid`.
-- [ ] Feature test: concurrency (dua proses), total, idempotency, batas pending.
+- [x] Order dibuat dalam satu transaksi database bersama `order_items`.
+- [x] Stok dikurangi dengan query atomik; `sold_count` tidak pernah melebihi `quota`.
+- [x] Dua request bersamaan untuk tiket terakhir: satu sukses, satu gagal dengan pesan "Tiket sudah habis".
+- [x] `expires_at` = now + 15 menit (config).
+- [x] Order `pending` ganda dari identitas yang sama dibatasi (config, default 2).
+- [x] Total dihitung server-side: subtotal − diskon + admin_fee + payment_fee + tax; tidak negatif.
+- [x] Idempotency key mencegah double submit membuat dua order.
+- [x] Tidak ada tiket yang dibuat pada tahap order `pending`; tiket baru dibuat setelah webhook `paid`.
+- [ ] Feature test: concurrency (dua proses), total, idempotency, batas pending. _(total, idempotency, batas pending teruji; dua proses paralel disimulasikan berurutan)_
+
+> Catatan: invariant `sold_count <= quota` dijaga query atomik dan diuji dengan dua request berurutan; uji paralel nyata (dua proses) belum dilakukan.
 
 ### E3-03 — F-06 Guest checkout
 
@@ -499,13 +528,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Guest dapat checkout tanpa login dengan nama, email, phone.
-- [ ] Email dan phone divalidasi format; email dinormalisasi lowercase.
-- [ ] `orders.user_id` null untuk guest.
-- [ ] Guest tidak dapat mengakses halaman akun; hanya signed URL.
-- [ ] Guest menerima email order dan tiket.
-- [ ] Jika email sudah terdaftar, tetap boleh guest checkout; order tidak otomatis terhubung sampai email terverifikasi.
-- [ ] Feature test: guest checkout sukses, email invalid, akses akun ditolak.
+- [x] Guest dapat checkout tanpa login dengan nama, email, phone.
+- [x] Email dan phone divalidasi format; email dinormalisasi lowercase.
+- [x] `orders.user_id` null untuk guest.
+- [x] Guest tidak dapat mengakses halaman akun; hanya signed URL.
+- [x] Guest menerima email e-tiket setelah pembayaran (lihat E2-06).
+- [x] Jika email sudah terdaftar, tetap boleh guest checkout; order tidak otomatis terhubung sampai email terverifikasi.
+- [x] Feature test: guest checkout sukses, email invalid, akses akun ditolak.
 
 ### E3-04 — F-09 Inisiasi pembayaran
 
@@ -514,13 +543,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Halaman checkout menampilkan ringkasan order, countdown, dan metode bayar yang tersedia.
-- [ ] Memilih metode membuat `payments` + charge gateway; `payment_url`/QR ditampilkan.
-- [ ] `payments.expires_at` disinkronkan dengan expiry gateway dan tidak melebihi `orders.expires_at`.
-- [ ] Jika gateway gagal, order tetap `pending`, error ditampilkan, dan pembeli dapat mencoba lagi.
-- [ ] Tidak ada data kartu yang disimpan.
+- [x] Halaman checkout menampilkan ringkasan order, countdown, dan metode bayar yang tersedia.
+- [x] Memilih metode membuat `payments` + charge gateway; `payment_url`/QR ditampilkan.
+- [x] `payments.expires_at` disinkronkan dengan expiry gateway dan tidak melebihi `orders.expires_at`.
+- [x] Jika gateway gagal, order tetap `pending`, error ditampilkan, dan pembeli dapat mencoba lagi.
+- [x] Tidak ada data kartu yang disimpan.
 - [ ] Feature test dengan `FakeGateway`: charge sukses, gagal, timeout, retry.
 
+> Catatan: test sukses, gagal, dan retry tersedia; skenario timeout gateway belum diuji eksplisit.
 ### E3-05 — F-09 Webhook & idempotensi
 
 **Estimasi:** L  
@@ -528,13 +558,15 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Endpoint webhook menerima payload gateway, memvalidasi signature, dan menolak yang invalid.
-- [ ] Setiap event disimpan di `webhook_events` dengan unique `(gateway, external_id)`.
-- [ ] Webhook duplikat tidak menggandakan tiket atau email.
-- [ ] Webhook sukses mengubah order `pending`/`expired` → `paid` (sesuai kebijakan late payment) dan memicu penerbitan tiket.
-- [ ] Webhook out-of-order (mis. `expired` setelah `success`) tidak menurunkan status `paid`.
-- [ ] Respons webhook cepat (< 2 detik); pekerjaan berat masuk queue.
-- [ ] Feature test: signature invalid, duplikat, out-of-order, sukses, gagal, late payment.
+- [x] Endpoint webhook menerima payload gateway, memvalidasi signature, dan menolak yang invalid.
+- [x] Setiap event disimpan di `webhook_events` dengan unique `(gateway, external_id)`.
+- [x] Webhook duplikat tidak menggandakan tiket atau email.
+- [x] Webhook sukses mengubah order `pending`/`expired` → `paid` (sesuai kebijakan late payment) dan memicu penerbitan tiket.
+- [x] Webhook out-of-order (mis. `expired` setelah `success`) tidak menurunkan status `paid`.
+- [x] Respons webhook cepat (< 2 detik); pekerjaan berat masuk queue.
+- [ ] Feature test: signature invalid, duplikat, out-of-order, sukses, gagal, late payment. _(semua teruji kecuali webhook `failed` sebelum order paid)_
+
+> Catatan: webhook `failed` setelah order paid diuji tidak menurunkan status; skenario `failed` sebelum paid belum diuji eksplisit.
 
 ### E3-06 — F-09 Expiry, rekonsiliasi, late payment
 
@@ -543,12 +575,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Job terjadwal menandai order `pending` yang `expires_at < now()` menjadi `expired`.
-- [ ] Stok dikembalikan tepat sekali; job idempoten.
-- [ ] Job rekonsiliasi memeriksa payment `pending` ke gateway dan memperbarui status.
-- [ ] Late payment: jika stok tersedia, order diaktifkan kembali dan tiket terbit; jika tidak, refund otomatis dibuat.
-- [ ] Pembeli menerima email untuk expired dan late payment.
-- [ ] Feature test: expiry, double run, late payment with/without stock.
+- [x] Job terjadwal menandai order `pending` yang `expires_at < now()` menjadi `expired`.
+- [x] Stok dikembalikan tepat sekali; job idempoten.
+- [x] Job rekonsiliasi memeriksa payment `pending` ke gateway dan memperbarui status.
+- [x] Late payment: jika stok tersedia, order diaktifkan kembali dan tiket terbit; jika tidak, refund otomatis dibuat.
+- [x] Pembeli menerima email untuk expired dan late payment.
+- [x] Feature test: expiry, double run, late payment with/without stock.
 
 ### E3-07 — F-10 Penerbitan tiket, QR, PDF, email
 
@@ -766,38 +798,48 @@ Berlaku untuk semua story:
 
 ## 11. Epik 7 — QA & Launch (P0)
 
+**Artefak:** `docs/README.md` (indeks), `docs/qa/load-test-plan.md`, `docs/qa/security-review.md`, `docs/qa/uat-plan.md`, `docs/ops/backup-restore.md`, `docs/ops/launch-checklist.md`, `docs/ops/incident-runbook.md`, `tests/load/*`, `scripts/backup-database.sh`, `scripts/restore-drill.sh`.
+
 ### E7-01 — Load & performance test
 
-- [ ] Skenario: 500 concurrent users, 50 order/menit, 20 scan/detik.
+- [x] Skenario: 500 concurrent users, 50 order/menit, 20 scan/detik.
 - [ ] Tidak ada overselling pada skenario rebutan tiket.
 - [ ] p95 halaman publik < 2 detik; checkout < 2 detik.
 - [ ] Queue tidak backlog > 5 menit.
 - [ ] Hasil dan bottleneck didokumentasikan.
 
+> Script k6 dan query verifikasi stok siap. Eksekusi memerlukan staging dengan rate limit dinaikkan sementara; hasil aktual diisi di `docs/qa/load-test-plan.md`.
+
 ### E7-02 — Security review
 
-- [ ] Uji otorisasi horizontal/vertikal untuk semua route sensitif.
-- [ ] Uji CSRF, XSS, SQL injection, mass assignment, upload berbahaya.
-- [ ] Uji signature webhook, replay, dan rate limit.
-- [ ] Uji signed URL tampering/expiry.
-- [ ] Tidak ada secret/PII di log atau repo.
-- [ ] Temuan critical/high ditutup sebelum launch.
+- [x] Uji otorisasi horizontal/vertikal untuk semua route sensitif.
+- [x] Uji CSRF, XSS, SQL injection, mass assignment, upload berbahaya.
+- [x] Uji signature webhook, replay, dan rate limit.
+- [x] Uji signed URL tampering/expiry.
+- [x] Tidak ada secret/PII di log atau repo.
+- [x] Temuan critical/high ditutup sebelum launch.
+
+> Temuan high/medium yang diperbaiki: akses admin dashboard/settings, XSS JSON-LD, rate limit webhook, dan policy halaman edit event organizer. Detail di `docs/qa/security-review.md`.
 
 ### E7-03 — UAT
 
-- [ ] Skenario pembelian guest dan customer.
-- [ ] Skenario pembayaran sukses, gagal, expired, late payment.
-- [ ] Skenario refund dan pembatalan event.
-- [ ] Skenario organizer membuat event sampai tayang.
-- [ ] Skenario scan valid/duplikat/invalid.
-- [ ] Skenario admin moderasi, master data, refund.
+- [x] Skenario pembelian guest dan customer.
+- [x] Skenario pembayaran sukses, gagal, expired, late payment.
+- [x] Skenario refund dan pembatalan event.
+- [x] Skenario organizer membuat event sampai tayang.
+- [x] Skenario scan valid/duplikat/invalid.
+- [x] Skenario admin moderasi, master data, refund.
 - [ ] Product owner menyetujui hasil UAT.
+
+> Skenario otomatis tersedia di `tests/Feature/UatJourneyTest.php` dan suite terkait. Sign-off manual menunggu Product Owner.
 
 ### E7-04 — Backup & restore drill
 
 - [ ] Backup harian berjalan dan terverifikasi.
-- [ ] Restore ke database uji berhasil dalam RTO 4 jam.
-- [ ] Dokumen runbook restore tersedia.
+- [x] Restore ke database uji berhasil dalam RTO 4 jam.
+- [x] Dokumen runbook restore tersedia.
+
+> Drill lokal MySQL berhasil (1 detik, data inti terbaca). Cron harian dan drill produksi menunggu ops; lihat `docs/ops/backup-restore.md`.
 
 ### E7-05 — Launch checklist
 
@@ -806,8 +848,10 @@ Berlaku untuk semua story:
 - [ ] Gateway produksi aktif dan webhook URL terdaftar.
 - [ ] Monitoring dan alert aktif.
 - [ ] Legal pages, PSE, dan kontak support siap.
-- [ ] On-call dan runbook insiden tersedia.
+- [x] On-call dan runbook insiden tersedia.
 - [ ] Rollback plan diuji.
+
+> Checklist dan command `php artisan ticketing:launch-check --strict` tersedia. Verifikasi eksternal dan rollback drill menunggu ops; lihat `docs/ops/launch-checklist.md` dan `docs/ops/incident-runbook.md`.
 
 ---
 
@@ -815,17 +859,17 @@ Berlaku untuk semua story:
 
 | Fitur | Story | Status |
 |---|---|---|
-| F-01 Beranda | E1-01 | Done |
-| F-02 Daftar event | E1-02 | Done |
-| F-03 Filter & pencarian | E1-03 | Done |
-| F-04 Detail event | E1-04 | Done |
-| F-05 Registrasi & login | E2-01, E2-02, E2-03 | Done |
+| F-01 Beranda | E1-01 | Selesai |
+| F-02 Daftar event | E1-02 | Selesai |
+| F-03 Filter & pencarian | E1-03 | Selesai |
+| F-04 Detail event | E1-04 | Selesai |
+| F-05 Registrasi & login | E2-01, E2-02, E2-03 | Selesai |
 | F-06 Guest checkout | E3-03, E2-06 | Selesai |
 | F-07 Pilih tiket & checkout | E3-01, E3-02 | Selesai |
 | F-09 Pembayaran | E3-04, E3-05, E3-06 | Selesai |
 | F-10 E-tiket | E3-07, E2-05 | Selesai |
 | F-11 Riwayat pesanan | E2-04, E3-08 | Selesai |
-| F-13 Halaman informasi | E1-05 | Done |
+| F-13 Halaman informasi | E1-05 | Selesai |
 | O-01 Profil organizer | E4-01 | Selesai |
 | O-02 Kelola event | E4-02 | Selesai |
 | O-03 Kelola jenis tiket | E4-03 | Selesai |

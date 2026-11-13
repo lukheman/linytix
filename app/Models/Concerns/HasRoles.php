@@ -108,6 +108,10 @@ trait HasRoles
             return 'scan.index';
         }
 
+        if (! $this->isAdmin()) {
+            return 'akun.dashboard';
+        }
+
         return 'dashboard';
     }
 
@@ -121,8 +125,9 @@ trait HasRoles
     {
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
 
-        // Organizer selalu diarahkan ke area organizer, bukan area admin.
-        if ($this->isOrganizer() && ! $this->isAdmin() && str_starts_with($path, '/admin')) {
+        // Area /admin hanya untuk admin. Organizer, staff, dan customer
+        // diarahkan ke dashboard sesuai perannya.
+        if (! $this->isAdmin() && str_starts_with($path, '/admin')) {
             return false;
         }
 
