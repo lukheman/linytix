@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versi** | 1.21 |
+| **Versi** | 1.26 |
 | **Tanggal** | 13 November 2026 |
-| **Basis** | `PRD.md` v1.22 |
-| **Status** | Tahap 0–3 selesai; Epik 4 selesai; Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
+| **Basis** | `PRD.md` v1.27 |
+| **Status** | Tahap 0–3 selesai; Epik 4 selesai (registrasi organizer self-service + panduan organizer); Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
 | **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd`, `docs/README.md` |
 
 Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, acceptance criteria (AC), task teknis, dan urutan sprint. P1/P2 tidak masuk backlog ini kecuali disebut sebagai dependency.
@@ -20,7 +20,7 @@ Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, accepta
 | **E1** | Halaman publik: beranda, daftar, filter, detail, informasi | M | E0 |
 | **E2** | Auth, akun, tiket saya, riwayat, akses guest | M | E0, E1 |
 | **E3** | Checkout, pembayaran, webhook, e-tiket, refund | XL | E0, E2 |
-| **E4** | Dashboard organizer: profil, event, tiket, laporan | L | E0, E1 |
+| **E4** | Dashboard organizer: registrasi, profil, event, tiket, laporan | L | E0, E1 |
 | **E5** | Scan QR staff | M | E0, E3 |
 | **E6** | Admin: pengguna, moderasi, master data, transaksi | L | E0, E1, E3 |
 | **E7** | Load test, security review, UAT, launch | M | E1–E6 |
@@ -31,7 +31,7 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 
 | Story | Status | Catatan |
 |---|---|---|
-| E0-01 Perluasan skema | Sebagian | Migration P0, `schema.sql` (34 tabel, impor MySQL bersih), dan `erd.mmd` tersedia; `migrate:fresh --seed` lulus di MySQL dan SQLite. `migrate:rollback` gagal pada migration rental legacy (`rental_items` sudah dihapus) |
+| E0-01 Perluasan skema | Selesai | Migration P0, `schema.sql` (34 tabel, impor MySQL bersih), dan `erd.mmd` tersedia; `migrate:fresh --seed` serta `migrate:rollback` lulus di MySQL dan SQLite |
 | E0-02 Role & otorisasi | Sebagian | Role, middleware, policy, login aktif/nonaktif, dan audit log selesai; `/admin/dashboard` dan `/admin/pengaturan` sudah `role:admin`. Admin 2FA belum; `/admin/profile` dan `/admin/components` sengaja tetap `auth` (accepted risk SEC-05) |
 | E0-03 Payment abstraction | Selesai | `PaymentGateway`, `FakeGateway`, `MidtransGateway`, `config/payment.php` |
 | E0-04 Layout & navigasi | Sebagian | Layout publik, organizer, staff, dan admin responsif; menu mengikuti peran dan akses langsung tetap 403. Halaman error kustom dan verifikasi visual 360/768/1280 px belum |
@@ -39,12 +39,12 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E0-06 Factory & seeder | Selesai | Factory ticketing terisi; `RoleSeeder`, `TicketingSeeder` idempoten (`firstOrCreate`/`updateOrCreate`) |
 | E0-07 CI | Sebagian | Pint + Pest bersih; rollback terdokumentasi. Workflow CI, staging, deploy script, dan backup otomatis belum ada |
 | E0-08 Legal & konten | Sebagian | Halaman FAQ, tentang, privasi, S&K, dan refund tersedia. Versi/tanggal halaman, persetujuan S&K di checkout, PSE, dan review legal belum |
-| E1-01 Beranda event | Sebagian | `/` menjadi beranda discovery event (hero, pencarian, kategori, unggulan); banner aktif tampil di `/events`. Urutan event belum diassert di test |
+| E1-01 Beranda event | Sebagian | `/` menjadi beranda discovery event (hero, pencarian, kategori, unggulan); urutan event unggulan diuji. Banner aktif tampil di `/events` |
 | E1-02 Daftar event | Sebagian | Hanya event published/sold_out dan akan datang; pagination 12. Benchmark 10.000 event belum dijalankan |
-| E1-03 Filter & pencarian | Sebagian | Kategori, kota, tanggal, harga, kata kunci; input tidak valid diabaikan. Test filter tanggal dan kombinasi belum ada |
+| E1-03 Filter & pencarian | Selesai | Kategori, kota, tanggal, harga, kata kunci, kombinasi AND; input tidak valid diabaikan dan diuji |
 | E1-04 Detail event | Selesai | Lineup, galeri, venue, S&K, tiket, status jual, JSON-LD |
 | E1-05 Halaman informasi | Selesai | `/faq`, `/tentang-kami`, `/privacy-policy`, `/terms`, `/refund-policy` |
-| E2-01 Registrasi & login | Selesai | Registrasi, login case-insensitive, rate limit 5/menit, verifikasi email via queue, logout; penolakan checkout menunggu E3 |
+| E2-01 Registrasi & login | Selesai | Registrasi, login case-insensitive, rate limit 5/menit, verifikasi email via queue, logout, dan UI auth konsisten dengan landing page; penolakan checkout menunggu E3 |
 | E2-02 Login Google | Selesai | Socialite; user baru verified + role customer; konflik `google_id` ditangani; state invalid aman |
 | E2-03 Lupa & reset password | Selesai | Respons generik, token 60 menit sekali pakai, session lain diinvalidasi |
 | E2-04 Riwayat pesanan | Selesai | Daftar/detail order milik user, isolasi akses, unduh PDF |
@@ -53,8 +53,8 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E3-01 Pilih tiket & validasi | Selesai | Form checkout; validasi event/tiket, kuota, jadwal jual, min/max, identitas, dan perubahan harga |
 | E3-02 Order & stok atomik | Sebagian | Transaksi order + item, increment stok bersyarat, expiry 15 menit, batas pending, idempotency key. Uji dua proses paralel belum ada (disimulasikan berurutan) |
 | E3-03 Guest checkout | Selesai | Nama/email/phone, email lowercase, `user_id` null, akses via signed URL |
-| E3-04 Inisiasi pembayaran | Sebagian | Payment record + FakeGateway; Midtrans charge tersedia; retry dan error gateway ditangani. Test timeout gateway belum ada |
-| E3-05 Webhook & idempotensi | Sebagian | Signature, `webhook_events` unik, duplikat/out-of-order, sukses/gagal, late payment. Test webhook `failed` sebelum order paid belum ada |
+| E3-04 Inisiasi pembayaran | Selesai | Payment record + FakeGateway; Midtrans charge tersedia; sukses, gagal, timeout, dan retry diuji |
+| E3-05 Webhook & idempotensi | Selesai | Signature, `webhook_events` unik, duplikat/out-of-order, sukses, `failed` sebelum dan sesudah paid, late payment |
 | E3-06 Expiry & rekonsiliasi | Selesai | Expiry idempoten, pengembalian stok, email expired, rekonsiliasi, late payment + refund otomatis |
 | E3-07 Penerbitan tiket & email | Selesai | Tiket idempoten, QR unik, email via queue + log, PDF per order, resend admin |
 | E3-08 Status pembayaran | Selesai | Status, countdown, polling 5 detik (maks 15 menit), tombol cek status, akses owner/signed |
@@ -63,6 +63,7 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E4-02 Kelola event | Selesai | Draft dengan field wajib, upload tervalidasi, submit review, penguncian field setelah submit, edit non-kritis event tayang, moderasi admin, audit log |
 | E4-03 Kelola jenis tiket | Selesai | CRUD tipe tiket, validasi harga/kuota, batas kapasitas venue, jadwal jual, larangan hapus tiket terjual, snapshot harga, audit log |
 | E4-04 Laporan penjualan | Selesai | Ringkasan paid-only, refund terpisah, grafik & rincian harian per timezone event, filter tanggal/jenis tiket, index performa |
+| E4-05 Registrasi organizer | Selesai | `/organizer/daftar` untuk customer terverifikasi, organizer unverified + role `organizer`, verifikasi/penolakan admin dengan catatan wajib, status pengajuan, audit log, rate limit, unique owner index, panduan publik `/panduan-organizer`, section beranda, dan checklist onboarding dashboard |
 | E5-01 Penugasan staff | Selesai | Admin/organizer owner mengelola staff + gate; role staff otomatis; audit log; akses scan per event |
 | E5-02 Scan QR | Selesai | Kamera + input manual, validasi server, update atomik, check-in success/duplicate/invalid, rate limit 60/menit |
 | E6-01 Manajemen pengguna & organizer | Selesai | CRUD user admin-only, proteksi self/admin terakhir, verifikasi organizer, audit log |
@@ -141,13 +142,13 @@ Berlaku untuk semua story:
 **AC:**
 
 - [x] `php artisan migrate:fresh --seed` berhasil di MySQL/MariaDB.
-- [ ] `php artisan migrate:rollback` berhasil tanpa error FK.
+- [x] `php artisan migrate:rollback` berhasil tanpa error FK.
 - [x] Semua kolom baru nullable atau memiliki default sehingga data lama tidak rusak.
 - [x] `schema.sql` dapat diimpor ke database kosong tanpa error.
 - [x] `erd.mmd` memuat seluruh tabel/kolom baru dan tetap valid Mermaid.
 - [x] Test `SchemaTest` memastikan tabel/kolom/index kunci ada.
 
-> Catatan: `migrate:fresh --seed` dan impor `schema.sql` ke MySQL kosong diverifikasi 2026-11-13. `migrate:rollback` gagal karena migration rental legacy mencoba mengubah tabel `rental_items` yang sudah dihapus; perlu perbaikan migration sebelum rollback dianggap lulus.
+> Catatan: `migrate:fresh --seed`, `migrate:rollback` (seluruh batch), dan impor `schema.sql` ke MySQL kosong diverifikasi 2026-11-13 di MySQL dan SQLite. Rollback aman ketika tabel legacy sudah dihapus dan ketika MySQL memakai composite index untuk FK.
 
 ### E0-02 — Role & otorisasi
 
@@ -319,9 +320,9 @@ Berlaku untuk semua story:
 - [x] Klik kartu membuka `/events/{slug}`.
 - [ ] LCP < 2 detik p75 pada mobile 4G (diuji di staging).
 - [x] Meta title, description, dan OG image tersedia.
-- [ ] Feature test: hanya konten aktif/published yang tampil; urutan benar. _(konten aktif/published teruji; urutan belum diassert)_
+- [x] Feature test: hanya konten aktif/published yang tampil; urutan benar.
 
-> Catatan: banner aktif dirender di `/events`, bukan di beranda; urutan event belum diassert di test; LCP p75 menunggu pengukuran staging.
+> Catatan: banner aktif dirender di `/events`, bukan di beranda; LCP p75 menunggu pengukuran staging.
 
 ### E1-02 — F-02 Daftar event
 
@@ -355,7 +356,7 @@ Berlaku untuk semua story:
 - [x] Tombol "Reset" menghapus semua filter.
 - [x] Hasil kosong menampilkan saran reset filter.
 - [x] Tidak ada N+1 query; gunakan eager loading.
-- [ ] Feature test untuk setiap filter, kombinasi, dan input invalid. _(kategori/kota/kata kunci/harga dan input invalid teruji; filter tanggal dan kombinasi belum)_
+- [x] Feature test untuk setiap filter, kombinasi, dan input invalid.
 
 ### E1-04 — F-04 Detail event
 
@@ -407,6 +408,8 @@ Berlaku untuk semua story:
 - [x] Login gagal menampilkan pesan generik, tidak membocorkan apakah email terdaftar.
 - [x] Rate limit login 5 percobaan/menit per email+IP.
 - [x] Logout menginvalidasi session dan regenerate CSRF token.
+- [x] Halaman login, registrasi, lupa/reset password, dan verifikasi email memakai layout publik yang konsisten dengan landing page, copy Bahasa Indonesia, dan toggle password yang aksesibel.
+- [x] CTA "Daftar sebagai Organizer" untuk guest langsung menuju halaman registrasi akun dengan konteks organizer, bukan halaman login.
 - [x] Feature test: registrasi, email duplikat, password lemah, login benar/salah, verifikasi, logout.
 
 ### E2-02 — F-05 Login Google
@@ -548,9 +551,7 @@ Berlaku untuk semua story:
 - [x] `payments.expires_at` disinkronkan dengan expiry gateway dan tidak melebihi `orders.expires_at`.
 - [x] Jika gateway gagal, order tetap `pending`, error ditampilkan, dan pembeli dapat mencoba lagi.
 - [x] Tidak ada data kartu yang disimpan.
-- [ ] Feature test dengan `FakeGateway`: charge sukses, gagal, timeout, retry.
-
-> Catatan: test sukses, gagal, dan retry tersedia; skenario timeout gateway belum diuji eksplisit.
+- [x] Feature test dengan `FakeGateway`: charge sukses, gagal, timeout, retry.
 ### E3-05 — F-09 Webhook & idempotensi
 
 **Estimasi:** L  
@@ -564,9 +565,7 @@ Berlaku untuk semua story:
 - [x] Webhook sukses mengubah order `pending`/`expired` → `paid` (sesuai kebijakan late payment) dan memicu penerbitan tiket.
 - [x] Webhook out-of-order (mis. `expired` setelah `success`) tidak menurunkan status `paid`.
 - [x] Respons webhook cepat (< 2 detik); pekerjaan berat masuk queue.
-- [ ] Feature test: signature invalid, duplikat, out-of-order, sukses, gagal, late payment. _(semua teruji kecuali webhook `failed` sebelum order paid)_
-
-> Catatan: webhook `failed` setelah order paid diuji tidak menurunkan status; skenario `failed` sebelum paid belum diuji eksplisit.
+- [x] Feature test: signature invalid, duplikat, out-of-order, sukses, gagal, late payment.
 
 ### E3-06 — F-09 Expiry, rekonsiliasi, late payment
 
@@ -695,6 +694,29 @@ Berlaku untuk semua story:
 - [x] Grafik dan angka konsisten; timezone mengikuti event.
 - [x] Query p95 < 500 ms untuk 10.000 order (diuji).
 - [x] Feature test: perhitungan, filter, isolasi organizer.
+
+### E4-05 — Registrasi organizer self-service
+
+**Estimasi:** M  
+**Dependency:** E2-01, E4-01
+
+**AC:**
+
+- [x] Customer dengan email terverifikasi dapat membuka `/organizer/daftar`; guest diarahkan ke login dan email belum terverifikasi diarahkan ke halaman verifikasi.
+- [x] Form pengajuan minimal: nama organizer, deskripsi, email kontak, telepon kontak, rekening opsional, dan persetujuan S&K.
+- [x] Submit membuat organizer `is_verified=false`, slug unik, dan role `organizer` tanpa menghapus role `customer`.
+- [x] Satu user hanya memiliki satu organizer; unique index `organizers.owner_user_id` mencegah duplikasi.
+- [x] Input role/verifikasi dari pengguna diabaikan; pengajuan dibatasi rate limit 5/menit.
+- [x] Audit log `organizer.registered` mencatat data pengajuan dengan nomor rekening dimasking.
+- [x] Admin melihat jumlah dan daftar pengajuan unverified, lalu dapat memverifikasi atau menolak dengan catatan wajib (`organizer.rejected`).
+- [x] User melihat status "Menunggu verifikasi" atau "Perlu perbaikan" beserta catatan admin di dashboard/profil.
+- [x] Tersedia halaman publik `/panduan-organizer` yang menjelaskan alur pendaftaran organizer dan pendaftaran event.
+- [x] Beranda menampilkan section "Daftarkan event Anda di sini" dengan CTA kondisional untuk guest/customer/organizer.
+- [x] Halaman `/organizer/daftar` memuat ringkasan cara mendaftar organizer dan cara mendaftarkan event beserta tautan panduan.
+- [x] Dashboard organizer menampilkan checklist onboarding untuk organizer belum terverifikasi dan panduan event pertama untuk organizer terverifikasi tanpa event.
+- [x] FAQ publik memuat pertanyaan tentang cara menjadi organizer, cara mendaftarkan event, dan syarat submit review.
+- [x] Organizer baru dapat submit event untuk review setelah diverifikasi admin.
+- [x] Feature test: akses guest/email/inaktif, pengajuan valid/ganda, slug unik, role escalation, rate limit, verifikasi/penolakan admin, alur end-to-end.
 
 ---
 
@@ -871,6 +893,7 @@ Berlaku untuk semua story:
 | F-11 Riwayat pesanan | E2-04, E3-08 | Selesai |
 | F-13 Halaman informasi | E1-05 | Selesai |
 | O-01 Profil organizer | E4-01 | Selesai |
+| Registrasi organizer self-service | E4-05 | Selesai |
 | O-02 Kelola event | E4-02 | Selesai |
 | O-03 Kelola jenis tiket | E4-03 | Selesai |
 | O-05 Laporan penjualan | E4-04 | Selesai |
@@ -891,7 +914,7 @@ Berlaku untuk semua story:
 | **Sprint 1** | E1-01 s/d E1-05, E2-01 s/d E2-03 | Publik + auth dasar |
 | **Sprint 2** | E3-01 s/d E3-06 | Checkout + pembayaran + webhook |
 | **Sprint 3** | E3-07 s/d E3-09, E2-04 s/d E2-06 | E-tiket, riwayat, guest access, refund |
-| **Sprint 4** | E4-01 s/d E4-04, E5-01 s/d E5-02 | Organizer + scan |
+| **Sprint 4** | E4-01 s/d E4-05, E5-01 s/d E5-02 | Organizer + scan |
 | **Sprint 5** | E6-01 s/d E6-04, E7-01 s/d E7-05 | Admin + hardening + UAT |
 
 Jika tim hanya 1–2 orang, gabungkan sprint dan perpanjang MVP menjadi 14–16 minggu. Jika payment gateway belum siap di Sprint 2, gunakan `FakeGateway` untuk development dan jangan menunda E3-01/E3-02.

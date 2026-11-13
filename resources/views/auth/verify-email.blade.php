@@ -1,34 +1,30 @@
-<x-layouts.guest title="Verifikasi Email — LinyTix" type="auth">
-    <div class="login-container">
-        <div class="login-card">
-            <div class="brand-logo">
-                <div class="icon-wrapper">
-                    <i class="fas fa-envelope-circle-check"></i>
-                </div>
-                <h1>Verifikasi Email</h1>
-                <p>Kami telah mengirim tautan verifikasi ke email Anda</p>
-            </div>
+<x-layouts.auth
+    title="Verifikasi Email — LinyTix"
+    description="Verifikasi email akun LinyTix Anda untuk mengaktifkan pembelian tiket dan pendaftaran organizer."
+    eyebrow="Verifikasi akun"
+    heading="Verifikasi email Anda."
+    subheading="Kami telah mengirim tautan verifikasi ke email terdaftar. Buka tautan tersebut untuk mengaktifkan akun."
+>
+    @if (session('status'))
+        <div class="alert alert-success small" role="status">{{ session('status') }}</div>
+    @endif
 
-            @if (session('status'))
-                <div class="alert alert-success" role="status">{{ session('status') }}</div>
-            @endif
+    <p class="text-secondary small mb-4">
+        Jika email tidak ditemukan, periksa folder spam atau kirim ulang email verifikasi.
+        Email terverifikasi diperlukan sebelum Anda dapat mengajukan profil organizer.
+    </p>
 
-            <p class="text-secondary mb-4">
-                Klik tautan pada email untuk mengaktifkan verifikasi. Jika tidak menemukannya,
-                periksa folder spam atau kirim ulang email verifikasi.
-            </p>
+    <form method="POST" action="{{ route('verification.send') }}">
+        @csrf
+        <button type="submit" class="btn btn-main w-100">
+            Kirim ulang email verifikasi <i class="fas fa-paper-plane ms-1"></i>
+        </button>
+    </form>
 
-            <form method="POST" action="{{ route('verification.send') }}">
-                @csrf
-                <button type="submit" class="btn btn-login">
-                    Kirim Ulang Email Verifikasi <i class="fas fa-paper-plane"></i>
-                </button>
-            </form>
+    <div class="auth-divider">atau</div>
 
-            <form method="POST" action="{{ route('logout') }}" class="mt-3">
-                @csrf
-                <button type="submit" class="btn btn-outline-secondary w-100 rounded-pill">Keluar</button>
-            </form>
-        </div>
-    </div>
-</x-layouts.guest>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="btn btn-ghost w-100">Keluar dari akun</button>
+    </form>
+</x-layouts.auth>

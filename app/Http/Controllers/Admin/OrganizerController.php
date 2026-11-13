@@ -49,6 +49,7 @@ class OrganizerController extends Controller
             'organizers' => $organizers,
             'search' => $search,
             'status' => $status,
+            'pendingCount' => Organizer::query()->where('is_verified', false)->count(),
         ]);
     }
 
@@ -60,12 +61,27 @@ class OrganizerController extends Controller
         Gate::authorize('verify', Organizer::class);
 
         $validated = $request->validate([
-            'action' => ['required', 'in:verify,unverify'],
-            'verification_note' => ['nullable', 'string', 'max:1000'],
+            'action' => ['required', 'in:verify,unverify,reject'],
+            'verification_note' => ['nullable', 'string', 'max:1000', 'required_if:action,reject'],
         ], [
             'action.required' => 'Aksi verifikasi tidak valid.',
             'action.in' => 'Aksi verifikasi tidak valid.',
+            'verification_note.required_if' => 'Catatan wajib diisi saat menolak pengajuan organizer.',
         ]);
+
+        if ($validated['action'] === 'reject') {
+            $service->reject(
+                $organizer,
+                $request->user(),
+                $validated['verification_note'],
+                $request->ip(),
+            );
+
+            return back()->with(
+                'success',
+                'Pengajuan organizer '.$organizer->name.' ditolak dengan catatan.',
+            );
+        }
 
         $verified = $validated['action'] === 'verify';
 

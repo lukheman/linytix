@@ -11,9 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('rental_items', function (Blueprint $table) {
-            $table->string('category')->nullable()->after('service_id');
-            $table->boolean('is_active')->default(true)->after('sort_order');
+        // Tabel legacy bisa saja sudah dihapus lebih dulu (mis. rollback parsial
+        // atau database yang dibangun dari schema.sql terbaru).
+        if (! Schema::hasTable('rental_items')) {
+            return;
+        }
+
+        $hasCategory = Schema::hasColumn('rental_items', 'category');
+        $hasActive = Schema::hasColumn('rental_items', 'is_active');
+
+        if ($hasCategory && $hasActive) {
+            return;
+        }
+
+        Schema::table('rental_items', function (Blueprint $table) use ($hasCategory, $hasActive) {
+            if (! $hasCategory) {
+                $table->string('category')->nullable()->after('service_id');
+            }
+
+            if (! $hasActive) {
+                $table->boolean('is_active')->default(true)->after('sort_order');
+            }
         });
     }
 
@@ -22,8 +40,24 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('rental_items', function (Blueprint $table) {
-            $table->dropColumn(['category', 'is_active']);
+        // Migration remove_legacy_content_tables menghapus rental_items dan
+        // sengaja tidak membuatnya kembali, sehingga rollback harus aman
+        // ketika tabel atau kolom sudah tidak ada.
+        if (! Schema::hasTable('rental_items')) {
+            return;
+        }
+
+        $columns = array_values(array_filter(
+            ['category', 'is_active'],
+            fn (string $column): bool => Schema::hasColumn('rental_items', $column),
+        ));
+
+        if ($columns === []) {
+            return;
+        }
+
+        Schema::table('rental_items', function (Blueprint $table) use ($columns) {
+            $table->dropColumn($columns);
         });
     }
 };

@@ -347,6 +347,9 @@
                             <li><a class="dropdown-item" href="{{ route('akun.dashboard') }}">Akun saya</a></li>
                             <li><a class="dropdown-item" href="{{ route('akun.orders.index') }}">Pesanan</a></li>
                             <li><a class="dropdown-item" href="{{ route('akun.tickets.index') }}">Tiket saya</a></li>
+                            @unless (auth()->user()->isOrganizer())
+                                <li><a class="dropdown-item" href="{{ route('organizer.register') }}">Daftar Organizer</a></li>
+                            @endunless
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">
@@ -394,6 +397,8 @@
                     <a href="{{ route('faq') }}">FAQ</a>
                     <a href="{{ route('guest.orders.lookup') }}">Cari Pesanan</a>
                     <a href="{{ route('info.about') }}">Tentang Platform</a>
+                    <a href="{{ \App\Support\OrganizerCta::url() }}">Daftar Organizer</a>
+                    <a href="{{ route('organizer.guide') }}">Panduan Organizer</a>
                     <a href="{{ route('info.terms') }}">Syarat & Ketentuan</a>
                 </div>
             </div>

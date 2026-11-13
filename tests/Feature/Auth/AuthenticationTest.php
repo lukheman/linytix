@@ -26,6 +26,27 @@ it('registers a new customer, normalizes the email, and queues verification', fu
     Notification::assertSentTo($user, VerifyEmailNotification::class);
 });
 
+it('carries organizer intent from the signup call to action', function () {
+    Notification::fake();
+
+    $this->get(route('register', ['intent' => 'organizer']))
+        ->assertOk()
+        ->assertSee('Anda mendaftar untuk menjadi organizer.')
+        ->assertSee('name="intent" value="organizer"', false);
+
+    $this->post('/register', [
+        'name' => 'Calon Organizer',
+        'email' => 'calon@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'agree_terms' => '1',
+        'intent' => 'organizer',
+    ])->assertRedirect('/akun')
+        ->assertSessionHas('status', fn ($status) => str_contains($status, 'lanjutkan pendaftaran organizer'));
+
+    expect(User::where('email', 'calon@example.com')->firstOrFail()->isCustomer())->toBeTrue();
+});
+
 it('rejects weak passwords, mismatched confirmation, and duplicate emails', function () {
     User::factory()->create(['email' => 'taken@example.com']);
 
@@ -177,6 +198,17 @@ it('resends the verification notification', function () {
         ->assertSessionHas('status');
 
     Notification::assertSentTo($user, VerifyEmailNotification::class);
+});
+
+it('shows the verification notice with the public auth layout', function () {
+    $user = User::factory()->unverified()->create();
+
+    $this->actingAs($user)
+        ->get(route('verification.notice'))
+        ->assertOk()
+        ->assertSee('Verifikasi email Anda.')
+        ->assertSee('Kirim ulang email verifikasi')
+        ->assertSee('Seluruh hak cipta');
 });
 
 it('sends an organizer to the organizer dashboard instead of an admin intended url', function () {

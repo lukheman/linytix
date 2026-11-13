@@ -15,8 +15,25 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropIndex('order_items_order_ticket_type_index');
-        });
+        if (! Schema::hasTable('order_items')) {
+            return;
+        }
+
+        $indexes = collect(Schema::getIndexes('order_items'))->pluck('name');
+
+        // MySQL/MariaDB dapat memakai composite index untuk FK order_id dan
+        // menghapus index tunggalnya. Pastikan index FK tersedia sebelum
+        // composite dihapus agar rollback tidak gagal.
+        if (! $indexes->contains('order_items_order_id_foreign')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->index('order_id', 'order_items_order_id_foreign');
+            });
+        }
+
+        if ($indexes->contains('order_items_order_ticket_type_index')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->dropIndex('order_items_order_ticket_type_index');
+            });
+        }
     }
 };

@@ -392,7 +392,7 @@ CREATE TABLE `organizers` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `organizers_slug_unique` (`slug`),
-  KEY `organizers_owner_user_id_foreign` (`owner_user_id`),
+  UNIQUE KEY `organizers_owner_user_id_unique` (`owner_user_id`),
   KEY `organizers_verified_by_foreign` (`verified_by`),
   CONSTRAINT `organizers_owner_user_id_foreign` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `organizers_verified_by_foreign` FOREIGN KEY (`verified_by`) REFERENCES `users` (`id`) ON DELETE SET NULL

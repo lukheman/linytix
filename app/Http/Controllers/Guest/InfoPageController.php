@@ -46,6 +46,19 @@ class InfoPageController extends Controller
         return $this->page('refund', 'Kebijakan Refund', 'Ketentuan pengembalian dana untuk pembelian tiket.');
     }
 
+    public function organizerGuide(): View
+    {
+        $settings = SiteContent::settings();
+
+        return view('guest.organizer-guide', [
+            'settings' => $settings,
+            'seo' => [
+                'title' => 'Panduan Organizer — '.($settings['site_name'] ?? 'LinyTix'),
+                'description' => 'Panduan menjadi organizer dan mendaftarkan event di LinyTix: verifikasi, pembuatan event, tiket, dan review admin.',
+            ],
+        ]);
+    }
+
     private function page(string $key, string $title, string $description): View
     {
         return view('events.info', [

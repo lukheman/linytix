@@ -54,7 +54,11 @@ class RegisterController extends Controller
 
         $request->session()->regenerate();
 
+        $organizerIntent = $request->input('intent') === 'organizer';
+
         return redirect()->route($user->homeRouteName())
-            ->with('status', 'Akun berhasil dibuat. Silakan verifikasi email Anda.');
+            ->with('status', $organizerIntent
+                ? 'Akun berhasil dibuat. Verifikasi email Anda, lalu lanjutkan pendaftaran organizer dari dashboard akun.'
+                : 'Akun berhasil dibuat. Silakan verifikasi email Anda.');
     }
 }

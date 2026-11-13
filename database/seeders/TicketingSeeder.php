@@ -203,6 +203,9 @@ class TicketingSeeder extends Seeder
             ['Bagaimana cara membeli tiket?', 'Pilih event, tentukan jenis dan jumlah tiket, lalu selesaikan pembayaran sebelum batas waktu.'],
             ['Apakah tiket bisa dikembalikan?', 'Tiket dapat dikembalikan jika event dibatalkan oleh penyelenggara. Permintaan refund lain diproses sesuai kebijakan.'],
             ['Bagaimana cara masuk ke event?', 'Tunjukkan QR e-tiket di pintu masuk. Petugas akan memindai kode tiket Anda.'],
+            ['Bagaimana cara menjadi organizer?', 'Buat akun, verifikasi email, lalu ajukan profil organizer melalui halaman Daftar Organizer. Admin akan meninjau pengajuan Anda.'],
+            ['Bagaimana cara mendaftarkan event?', 'Setelah profil organizer terverifikasi, buat event draft, tambahkan minimal satu jenis tiket aktif, lalu ajukan review admin.'],
+            ['Mengapa event saya belum bisa diajukan untuk review?', 'Pastikan profil organizer sudah terverifikasi, field wajib event lengkap, poster sudah diunggah, dan minimal ada satu jenis tiket aktif.'],
         ] as $index => [$question, $answer]) {
             Faq::query()->updateOrCreate(
                 ['question' => $question],

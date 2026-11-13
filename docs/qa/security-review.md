@@ -19,7 +19,8 @@ Tanggal review: 2026-11-13
 | CSRF | `SecurityReviewTest` — middleware menolak POST tanpa token, hanya `webhooks/*` dikecualikan |
 | XSS | `SecurityReviewTest` — title/description/JSON-LD |
 | SQL injection | `SecurityReviewTest` — pencarian publik dan admin |
-| Mass assignment | `SecurityReviewTest` — register, checkout, update user |
+| Mass assignment | `SecurityReviewTest` — register, checkout, update user; `OrganizerRegistrationTest` — input `role`/`is_verified` diabaikan |
+| Rate limit pengajuan organizer | `OrganizerRegistrationTest` — 5 pengajuan/menit per user, percobaan ke-6 ditolak 429 |
 | Upload berbahaya | `SecurityReviewTest` — poster PHP dan avatar SVG |
 | Webhook | `SecurityReviewTest` + `tests/Feature/PaymentWebhookTest.php` — signature, replay, rate limit |
 | Signed URL | `SecurityReviewTest` + `tests/Feature/CheckoutTest.php` — tamper/expiry |
@@ -31,7 +32,7 @@ Jalankan:
 php artisan test --compact tests/Feature/SecurityReviewTest.php tests/Feature/PaymentWebhookTest.php tests/Feature/CheckoutTest.php
 ```
 
-Hasil 2026-11-13: `SecurityReviewTest` 13 test lulus; suite penuh 235 test / 1.506 assertion; `vendor/bin/pint --test` bersih untuk seluruh repo.
+Hasil 2026-11-13: `SecurityReviewTest` 13 test lulus; suite penuh 260 test / 1.661 assertion; `vendor/bin/pint --test` bersih untuk seluruh repo.
 
 ## Temuan & Perbaikan
 

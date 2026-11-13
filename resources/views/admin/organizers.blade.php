@@ -17,6 +17,18 @@
         </div>
     @endif
 
+    @if ($pendingCount > 0)
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <i class="fas fa-hourglass-half me-1"></i>
+                <strong>{{ $pendingCount }} pengajuan organizer</strong> menunggu verifikasi.
+            </div>
+            <a href="{{ route('admin.organizers', ['status' => 'unverified']) }}" class="btn btn-sm btn-outline-dark">
+                Lihat pengajuan
+            </a>
+        </div>
+    @endif
+
     <x-layout.modern-card>
         <form method="GET" action="{{ route('admin.organizers') }}" class="row g-2 align-items-end mb-4">
             <div class="col-md-5">
@@ -63,6 +75,7 @@
                                     /organizers/{{ $organizer->slug }}
                                     <i class="fas fa-arrow-up-right-from-square ms-1" style="font-size: .65rem;"></i>
                                 </a>
+                                <div class="small text-muted mt-1">Diajukan {{ $organizer->created_at->translatedFormat('d M Y') }}</div>
                             </td>
                             <td>
                                 <div class="fw-semibold text-body">{{ $organizer->owner?->name ?? '—' }}</div>
@@ -81,8 +94,10 @@
                             <td>
                                 @if ($organizer->is_verified)
                                     <x-ui.badge variant="success">Terverifikasi</x-ui.badge>
+                                @elseif ($organizer->verification_note)
+                                    <x-ui.badge variant="danger">Perlu perbaikan</x-ui.badge>
                                 @else
-                                    <x-ui.badge variant="warning">Belum terverifikasi</x-ui.badge>
+                                    <x-ui.badge variant="warning">Menunggu verifikasi</x-ui.badge>
                                 @endif
                                 @if ($organizer->verified_at)
                                     <div class="small text-muted mt-1">{{ $organizer->verified_at->translatedFormat('d M Y, H.i') }}</div>
@@ -94,8 +109,8 @@
                             <td>
                                 <form method="POST" action="{{ route('admin.organizers.verify', $organizer) }}" class="d-flex flex-column gap-2">
                                     @csrf
-                                    <input type="text" name="verification_note" value="{{ $organizer->verification_note }}" class="form-control form-control-sm" maxlength="1000" placeholder="Catatan verifikasi (opsional)">
-                                    <div class="d-flex gap-1">
+                                    <input type="text" name="verification_note" value="{{ $organizer->verification_note }}" class="form-control form-control-sm" maxlength="1000" placeholder="Catatan (wajib saat menolak)">
+                                    <div class="d-flex gap-1 flex-wrap">
                                         @if ($organizer->is_verified)
                                             <button type="submit" name="action" value="unverify" class="btn btn-sm btn-outline-warning">
                                                 <i class="fas fa-xmark me-1"></i>Batalkan verifikasi
@@ -103,6 +118,9 @@
                                         @else
                                             <button type="submit" name="action" value="verify" class="btn btn-sm btn-outline-success">
                                                 <i class="fas fa-check me-1"></i>Verifikasi
+                                            </button>
+                                            <button type="submit" name="action" value="reject" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-ban me-1"></i>Tolak
                                             </button>
                                         @endif
                                     </div>

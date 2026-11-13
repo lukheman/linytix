@@ -142,6 +142,20 @@ it('does not downgrade a paid order when a late failure webhook arrives', functi
         ->and(Ticket::query()->where('order_id', $order->getKey())->count())->toBe(1);
 });
 
+it('marks the payment failed without issuing tickets when a failure webhook arrives before payment', function () {
+    [$order, $ticketType, $payment] = webhookOrder();
+
+    $payment->forceFill(['gateway_ref' => 'EVT-FAILED-EARLY'])->save();
+
+    postFakeWebhook($this, webhookPayload($order, 'EVT-FAILED-EARLY', 'failed'))->assertOk();
+
+    expect($order->fresh()->status)->toBe(Order::STATUS_PENDING)
+        ->and($payment->fresh()->status)->toBe(Payment::STATUS_FAILED)
+        ->and($ticketType->fresh()->sold_count)->toBe(1)
+        ->and(Ticket::query()->where('order_id', $order->getKey())->count())->toBe(0)
+        ->and(WebhookEvent::query()->firstOrFail()->status)->toBe(WebhookEvent::STATUS_PROCESSED);
+});
+
 it('rejects a webhook whose amount does not match the order', function () {
     [$order, , $payment] = webhookOrder();
 

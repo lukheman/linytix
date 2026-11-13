@@ -51,6 +51,51 @@ it('filters events by category city keyword and price', function () {
     $this->get('/events?price_max=150000')->assertOk()->assertSee('Bandung Leadership Talk')->assertDontSee('Jakarta Music Night');
 });
 
+it('filters events by date range and combined filters', function () {
+    $jakarta = Venue::factory()->create(['city' => 'Jakarta']);
+    $bandung = Venue::factory()->create(['city' => 'Bandung']);
+    $music = Category::factory()->create(['name' => 'Musik', 'slug' => 'musik']);
+
+    $early = Event::factory()->create([
+        'title' => 'Konser Awal',
+        'category_id' => $music->id,
+        'venue_id' => $jakarta->id,
+        'start_at' => now()->addDays(3),
+    ]);
+    TicketType::factory()->forEvent($early)->create(['price' => 100000]);
+
+    $late = Event::factory()->create([
+        'title' => 'Konser Akhir',
+        'category_id' => $music->id,
+        'venue_id' => $jakarta->id,
+        'start_at' => now()->addDays(30),
+    ]);
+    TicketType::factory()->forEvent($late)->create(['price' => 100000]);
+
+    $otherCity = Event::factory()->create([
+        'title' => 'Seminar Bandung',
+        'category_id' => $music->id,
+        'venue_id' => $bandung->id,
+        'start_at' => now()->addDays(3),
+    ]);
+    TicketType::factory()->forEvent($otherCity)->create(['price' => 100000]);
+
+    $dateFrom = now()->addDay()->toDateString();
+    $dateTo = now()->addDays(7)->toDateString();
+
+    $this->get('/events?date_from='.$dateFrom.'&date_to='.$dateTo)
+        ->assertOk()
+        ->assertSee('Konser Awal')
+        ->assertSee('Seminar Bandung')
+        ->assertDontSee('Konser Akhir');
+
+    $this->get('/events?category=musik&city=Jakarta&date_from='.$dateFrom.'&date_to='.$dateTo.'&price_max=150000')
+        ->assertOk()
+        ->assertSee('Konser Awal')
+        ->assertDontSee('Konser Akhir')
+        ->assertDontSee('Seminar Bandung');
+});
+
 it('ignores invalid filter values without failing', function () {
     Event::factory()->create(['title' => 'Event Aman']);
 

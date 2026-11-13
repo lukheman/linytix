@@ -13,11 +13,72 @@
     @if (! $organizer->is_verified)
         <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-                <strong>Organizer belum terverifikasi.</strong>
-                Anda dapat menyiapkan event draft, tetapi belum dapat submit review atau publish sampai admin memverifikasi profil.
+                @if ($organizer->verification_note)
+                    <strong>Profil organizer perlu diperbaiki.</strong>
+                    {{ $organizer->verification_note }}
+                @else
+                    <strong>Menunggu verifikasi admin.</strong>
+                    Anda dapat menyiapkan event draft, tetapi belum dapat submit review atau publish sampai admin memverifikasi profil.
+                @endif
             </div>
             <a href="{{ route('organizer.profile') }}" class="btn btn-sm btn-outline-dark">Lengkapi profil</a>
         </div>
+    @endif
+
+    @if (! $organizer->is_verified)
+        <x-layout.modern-card title="Langkah menjadi organizer" class="mb-4">
+            <p class="text-secondary small mb-3">
+                @if ($organizer->verification_note)
+                    Perbaiki profil sesuai catatan admin, lalu tunggu peninjauan ulang.
+                @else
+                    Pengajuan Anda sedang ditinjau admin. Sambil menunggu, Anda bisa menyiapkan draft event.
+                @endif
+            </p>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <ul class="list-unstyled small mb-0">
+                        <li class="d-flex gap-2 py-1"><i class="fas fa-circle-check text-success mt-1"></i><span>Pengajuan organizer terkirim</span></li>
+                        <li class="d-flex gap-2 py-1"><i class="fas fa-circle-check text-success mt-1"></i><span>Email terverifikasi</span></li>
+                        <li class="d-flex gap-2 py-1"><i class="fas fa-hourglass-half text-warning mt-1"></i><span>Menunggu verifikasi admin</span></li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-unstyled small text-secondary mb-0">
+                        <li class="d-flex gap-2 py-1"><i class="far fa-circle mt-1"></i><span>Lengkapi profil &amp; rekening</span></li>
+                        <li class="d-flex gap-2 py-1"><i class="far fa-circle mt-1"></i><span>Buat event pertama</span></li>
+                        <li class="d-flex gap-2 py-1"><i class="far fa-circle mt-1"></i><span>Tambah tiket &amp; ajukan review</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{{ route('organizer.profile') }}" class="btn btn-sm btn-main">Lengkapi profil</a>
+                <a href="{{ route('organizer.guide') }}" class="btn btn-sm btn-ghost">Baca panduan</a>
+            </div>
+        </x-layout.modern-card>
+    @elseif ($counts->sum() === 0)
+        <x-layout.modern-card title="Mulai daftarkan event pertama" class="mb-4">
+            <p class="text-secondary small mb-3">
+                Profil organizer Anda sudah terverifikasi. Ikuti langkah berikut untuk mendaftarkan event.
+            </p>
+            <div class="row g-3">
+                @foreach ([
+                    ['number' => '01', 'text' => 'Buat event draft: judul, kategori, jadwal, venue/online, deskripsi, dan poster.'],
+                    ['number' => '02', 'text' => 'Tambahkan minimal satu jenis tiket aktif beserta harga dan kuota.'],
+                    ['number' => '03', 'text' => 'Ajukan review admin. Setelah disetujui, event tayang di katalog.'],
+                ] as $step)
+                    <div class="col-md-4">
+                        <div class="small">
+                            <span class="step-number me-2">{{ $step['number'] }}</span>
+                            {{ $step['text'] }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{{ route('organizer.events.create') }}" class="btn btn-sm btn-main">Buat Event</a>
+                <a href="{{ route('organizer.guide') }}" class="btn btn-sm btn-ghost">Baca panduan</a>
+            </div>
+        </x-layout.modern-card>
     @endif
 
     <div class="row g-3 mb-4">
@@ -88,8 +149,10 @@
                     <span class="text-secondary">Status verifikasi</span>
                     @if ($organizer->is_verified)
                         <x-ui.badge variant="success">Terverifikasi</x-ui.badge>
+                    @elseif ($organizer->verification_note)
+                        <x-ui.badge variant="danger">Perlu perbaikan</x-ui.badge>
                     @else
-                        <x-ui.badge variant="warning">Belum terverifikasi</x-ui.badge>
+                        <x-ui.badge variant="warning">Menunggu verifikasi</x-ui.badge>
                     @endif
                 </div>
                 <div class="d-flex align-items-center justify-content-between border-bottom py-2">

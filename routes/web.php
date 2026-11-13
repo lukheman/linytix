@@ -36,6 +36,7 @@ use App\Http\Controllers\Guest\SitemapController;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboardController;
 use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
 use App\Http\Controllers\Organizer\ProfileController as OrganizerProfileController;
+use App\Http\Controllers\Organizer\RegistrationController as OrganizerRegistrationController;
 use App\Http\Controllers\Organizer\TicketTypeController as OrganizerTicketTypeController;
 use App\Http\Controllers\ScanController;
 use Illuminate\Support\Facades\Route;
@@ -88,6 +89,7 @@ Route::get('/tentang-kami', [InfoPageController::class, 'about'])->name('info.ab
 Route::get('/privacy-policy', [InfoPageController::class, 'privacy'])->name('info.privacy');
 Route::get('/terms', [InfoPageController::class, 'terms'])->name('info.terms');
 Route::get('/refund-policy', [InfoPageController::class, 'refund'])->name('info.refund');
+Route::get('/panduan-organizer', [InfoPageController::class, 'organizerGuide'])->name('organizer.guide');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
@@ -136,6 +138,17 @@ Route::get('/pesanan/{order}', [GuestOrderController::class, 'show'])
 Route::get('/pesanan/{order}/pdf', [GuestOrderController::class, 'pdf'])
     ->whereUuid('order')
     ->name('guest.orders.pdf');
+
+// Registrasi organizer self-service
+Route::middleware(['auth', 'active', 'verified'])
+    ->prefix('organizer')
+    ->name('organizer.')
+    ->group(function () {
+        Route::get('/daftar', [OrganizerRegistrationController::class, 'create'])->name('register');
+        Route::post('/daftar', [OrganizerRegistrationController::class, 'store'])
+            ->middleware('throttle:5,1')
+            ->name('register.store');
+    });
 
 // Organizer Routes
 Route::prefix('organizer')->middleware(['auth', 'active', 'role:organizer'])->name('organizer.')->group(function () {

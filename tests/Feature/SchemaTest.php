@@ -40,4 +40,5 @@ it('has composite indexes for ticketing queries', function () {
     expect(Schema::hasIndex('check_ins', 'check_ins_event_scanned_at_index'))->toBeTrue();
     expect(Schema::hasIndex('payments', 'payments_order_id_status_index'))->toBeTrue();
     expect(Schema::hasIndex('voucher_usages', 'voucher_usages_voucher_user_index'))->toBeTrue();
+    expect(Schema::hasIndex('organizers', ['owner_user_id'], 'unique'))->toBeTrue();
 });

@@ -3,7 +3,7 @@
 Tanggal: 2026-11-13
 Status: **skenario otomatis tersedia; UAT manual & sign-off Product Owner menunggu**.
 
-Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario otomatis lulus melalui `php artisan test --compact` (235 test); kolom Otomasi di bawah merujuk file test yang menjadi bukti.
+Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario otomatis lulus melalui `php artisan test --compact` (260 test); kolom Otomasi di bawah merujuk file test yang menjadi bukti.
 
 ## Peserta
 
@@ -28,7 +28,7 @@ Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario ot
 | UAT-01 | Pembelian guest | Pilih tiket → isi data → buat order → bayar → webhook sukses | Order paid, e-tiket terbit, tautan guest dapat dibuka | `UatJourneyTest` — guest purchase |
 | UAT-02 | Pembelian customer | Login → checkout → bayar → buka akun | Order dan tiket muncul di `/akun/pesanan` dan `/akun/tiket` | `UatJourneyTest` — customer account |
 | UAT-03 | Pembayaran sukses | Webhook `success` dengan nominal sesuai | Order paid, tiket aktif, email terkirim sekali | `PaymentWebhookTest` |
-| UAT-04 | Pembayaran gagal | Webhook `failed` sebelum paid | Order tetap pending/expired, tidak ada tiket | `PaymentWebhookTest` (failure setelah paid); failure sebelum paid belum diuji |
+| UAT-04 | Pembayaran gagal | Webhook `failed` sebelum paid | Order tetap pending/expired, tidak ada tiket | `PaymentWebhookTest` (failure sebelum dan sesudah paid) |
 | UAT-05 | Pembayaran expired | Order melewati `expires_at`, jalankan `ExpireOrders` | Order expired, stok kembali sekali, email expired | `PaymentWebhookTest` |
 | UAT-06 | Late payment | Webhook sukses setelah order expired | Jika stok ada: order paid + tiket; jika tidak: refund otomatis | `PaymentWebhookTest` |
 | UAT-07 | Refund penuh | Admin ajukan refund pada order paid | Refund sukses, tiket refunded, kuota tidak kembali | `RefundTest` |
@@ -41,6 +41,10 @@ Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario ot
 | UAT-14 | Master data | Admin CRUD kategori/venue/FAQ/banner | Perubahan tersimpan, cache publik invalid, data nonaktif tersembunyi | `AdminMasterDataTest` |
 | UAT-15 | Refund admin | Admin refund dari daftar/detail order | Refund idempoten, retry refund gagal berfungsi | `AdminOrderMonitoringTest` / `RefundTest` |
 | UAT-16 | Monitoring order | Admin filter status/event/tanggal/cari | Hasil sesuai filter, PII termasking | `AdminOrderMonitoringTest` |
+| UAT-17 | Registrasi organizer | Customer terverifikasi ajukan `/organizer/daftar` → admin tolak dengan catatan → perbaiki profil → admin verifikasi → submit event | Organizer unverified dibuat, catatan tampil ke user, role `organizer` aktif, submit review hanya setelah verifikasi | `OrganizerRegistrationTest` |
+| UAT-18 | Panduan organizer | Guest buka beranda dan `/panduan-organizer` → klik CTA daftar | Section "Daftarkan event Anda di sini" tampil, panduan memuat alur organizer & event, CTA mengarah ke login/daftar | `OrganizerGuideTest` / `PublicPagesTest` |
+| UAT-19 | Konsistensi UI auth | Guest buka `/login`, `/register`, `/forgot-password`, `/reset-password`, dan `/email/verify` | Navigasi, footer, tipografi, dan tombol sama dengan landing page; copy Bahasa Indonesia; toggle password berfungsi | `AdminTest` / `AuthenticationTest` |
+| UAT-20 | CTA organizer untuk guest | Guest klik "Daftar sebagai Organizer" di beranda, panduan, dan footer | Langsung masuk halaman registrasi akun dengan banner konteks organizer, bukan halaman login; setelah daftar, status mengarahkan verifikasi email dan pengajuan organizer | `OrganizerGuideTest` / `AuthenticationTest` |
 
 ## Perintah Regresi Otomatis
 

@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Event;
 use App\Models\Organizer;
 use App\Models\OrganizerSlugRedirect;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,20 +18,61 @@ class OrganizerService
      */
     public function forUser(User $user): Organizer
     {
-        $organizer = Organizer::query()
-            ->where('owner_user_id', $user->getKey())
-            ->first();
+        return Organizer::query()->firstOrCreate(
+            ['owner_user_id' => $user->getKey()],
+            [
+                'name' => $user->name,
+                'slug' => $this->uniqueSlug($user->name),
+                'contact_email' => $user->email,
+            ],
+        );
+    }
 
-        if ($organizer) {
+    /**
+     * Daftarkan user sebagai organizer self-service (belum terverifikasi).
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function register(User $user, array $data, ?string $ip = null): Organizer
+    {
+        $organizer = DB::transaction(function () use ($user, $data, $ip): Organizer {
+            $existing = Organizer::query()
+                ->where('owner_user_id', $user->getKey())
+                ->first();
+
+            if ($existing) {
+                $user->assignRole(Role::ORGANIZER);
+
+                return $existing;
+            }
+
+            $organizer = Organizer::query()->create([
+                'owner_user_id' => $user->getKey(),
+                'name' => $data['name'],
+                'slug' => $this->uniqueSlug($data['name']),
+                'description' => $data['description'] ?? null,
+                'contact_email' => $data['contact_email'] ?? $user->email,
+                'contact_phone' => $data['contact_phone'] ?? null,
+                'bank_name' => $data['bank_name'] ?? null,
+                'bank_account_no' => $data['bank_account_no'] ?? null,
+                'bank_account_name' => $data['bank_account_name'] ?? null,
+                'is_verified' => false,
+            ]);
+
+            $user->assignRole(Role::ORGANIZER);
+
+            $this->audit($user, 'organizer.registered', $organizer->getKey(), [
+                'name' => $organizer->name,
+                'slug' => $organizer->slug,
+                'contact_email' => $organizer->contact_email,
+                'contact_phone' => $organizer->contact_phone,
+                'bank_account_no' => $this->maskAccount($organizer->bank_account_no),
+            ], $ip);
+
             return $organizer;
-        }
+        });
 
-        return Organizer::query()->create([
-            'owner_user_id' => $user->getKey(),
-            'name' => $user->name,
-            'slug' => $this->uniqueSlug($user->name),
-            'contact_email' => $user->email,
-        ]);
+        return $organizer->refresh();
     }
 
     /**
@@ -152,6 +194,32 @@ class OrganizerService
                 ['note' => $note],
                 $ip,
             );
+        });
+
+        return $organizer->refresh();
+    }
+
+    /**
+     * Tolak pengajuan organizer atau minta perbaikan profil.
+     */
+    public function reject(Organizer $organizer, User $admin, string $note, ?string $ip = null): Organizer
+    {
+        DB::transaction(function () use ($organizer, $admin, $note, $ip): void {
+            $locked = Organizer::query()
+                ->whereKey($organizer->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $locked->forceFill([
+                'is_verified' => false,
+                'verified_at' => null,
+                'verified_by' => null,
+                'verification_note' => $note,
+            ])->save();
+
+            $this->audit($admin, 'organizer.rejected', $locked->getKey(), [
+                'note' => $note,
+            ], $ip);
         });
 
         return $organizer->refresh();

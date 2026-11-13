@@ -223,6 +223,58 @@ it('keeps the order pending when the payment gateway fails', function () {
         ->and($order->fresh()->status)->toBe(Order::STATUS_PENDING);
 });
 
+it('retries payment after a gateway timeout without duplicating the order', function () {
+    [$event, $ticketType] = checkoutEvent();
+
+    $this->post(route('checkout.store', $event->slug), checkoutPayload($ticketType))->assertRedirect();
+
+    $order = Order::query()->firstOrFail();
+    $payUrl = URL::temporarySignedRoute('checkout.pay', now()->addHour(), ['order' => $order->getKey()]);
+
+    $attempts = 0;
+
+    $this->partialMock(FakeGateway::class, function (MockInterface $mock) use (&$attempts): void {
+        $mock->shouldReceive('createCharge')
+            ->twice()
+            ->andReturnUsing(function (Order $order, string $method) use (&$attempts): array {
+                $attempts++;
+
+                if ($attempts === 1) {
+                    throw new RuntimeException('Gateway timeout');
+                }
+
+                $ref = 'FAKE-RETRY-'.strtoupper(Str::random(8));
+
+                return [
+                    'gateway_ref' => $ref,
+                    'payment_url' => 'https://fake.payment.test/'.$ref,
+                    'expires_at' => $order->expires_at,
+                    'raw' => [
+                        'order_number' => $order->order_number,
+                        'method' => $method,
+                        'amount' => $order->total_amount,
+                    ],
+                ];
+            });
+    });
+
+    $this->post($payUrl, ['method' => 'qris'])->assertSessionHasErrors('payment');
+
+    expect($attempts)->toBe(1)
+        ->and($order->payments()->count())->toBe(0)
+        ->and($order->fresh()->status)->toBe(Order::STATUS_PENDING);
+
+    $this->post($payUrl, ['method' => 'qris'])->assertRedirect();
+
+    $payment = $order->payments()->firstOrFail();
+
+    expect($attempts)->toBe(2)
+        ->and($order->payments()->count())->toBe(1)
+        ->and($payment->status)->toBe('pending')
+        ->and($payment->payment_url)->toContain('fake.payment.test')
+        ->and($order->fresh()->status)->toBe(Order::STATUS_PENDING);
+});
+
 it('protects the payment status page with signed urls or ownership', function () {
     [$event, $ticketType] = checkoutEvent();
 

@@ -305,6 +305,54 @@
         </div>
     </section>
 
+    <section class="section" id="untuk-organizer">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-5">
+                    <span class="eyebrow">Untuk organizer</span>
+                    <h2 class="display-6 mt-2 mb-3">Punya event? Daftarkan event Anda di sini.</h2>
+                    <p class="text-secondary mb-4">
+                        Daftar sebagai organizer, lengkapi profil, dan buat event pertama Anda. Setelah diverifikasi
+                        admin, event dapat diajukan untuk review dan tayang di katalog {{ $siteName }}.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (auth()->check() && auth()->user()->isOrganizer())
+                            <a href="{{ route('organizer.dashboard') }}" class="btn btn-main">
+                                <i class="fas fa-gauge-high me-1"></i> Buka Dashboard Organizer
+                            </a>
+                        @else
+                            <a href="{{ \App\Support\OrganizerCta::url() }}" class="btn btn-main">
+                                <i class="fas fa-building me-1"></i> Daftar sebagai Organizer
+                            </a>
+                        @endif
+                        <a href="{{ route('organizer.guide') }}" class="btn btn-ghost">Baca panduan lengkap</a>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        @foreach ([
+                            ['number' => '01', 'icon' => 'fa-user-check', 'title' => 'Daftar & verifikasi', 'text' => 'Buat akun, verifikasi email, lalu ajukan profil organizer.'],
+                            ['number' => '02', 'icon' => 'fa-shield-halved', 'title' => 'Verifikasi admin', 'text' => 'Admin meninjau profil dan mengirim catatan jika ada perbaikan.'],
+                            ['number' => '03', 'icon' => 'fa-calendar-plus', 'title' => 'Buat event & tiket', 'text' => 'Lengkapi detail event, unggah poster, dan tambahkan jenis tiket.'],
+                            ['number' => '04', 'icon' => 'fa-rocket', 'title' => 'Review & tayang', 'text' => 'Ajukan review. Setelah disetujui, event tayang dan tiket bisa dijual.'],
+                        ] as $step)
+                            <div class="col-sm-6">
+                                <div class="card-clean p-4 h-100">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="icon-box"><i class="fa-solid {{ $step['icon'] }}"></i></div>
+                                        <div class="step-number">{{ $step['number'] }}</div>
+                                    </div>
+                                    <h3 class="h6">{{ $step['title'] }}</h3>
+                                    <p class="text-secondary small mb-0">{{ $step['text'] }}</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="section">
         <div class="container">
             <div class="cta-band p-4 p-md-5">

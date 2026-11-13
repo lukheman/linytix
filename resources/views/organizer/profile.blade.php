@@ -3,8 +3,10 @@
         <x-slot:actions>
             @if ($organizer->is_verified)
                 <x-ui.badge variant="success">Terverifikasi</x-ui.badge>
+            @elseif ($organizer->verification_note)
+                <x-ui.badge variant="danger">Perlu perbaikan</x-ui.badge>
             @else
-                <x-ui.badge variant="warning">Belum terverifikasi</x-ui.badge>
+                <x-ui.badge variant="warning">Menunggu verifikasi</x-ui.badge>
             @endif
         </x-slot:actions>
     </x-layout.page-header>
@@ -21,9 +23,13 @@
 
     @if (! $organizer->is_verified)
         <div class="alert alert-warning">
-            Profil belum diverifikasi admin. Anda tetap dapat menyiapkan event draft, tetapi belum dapat submit review atau publish.
             @if ($organizer->verification_note)
+                <strong>Profil organizer perlu diperbaiki.</strong>
+                Perbarui data sesuai catatan admin, lalu tunggu peninjauan ulang.
                 <div class="mt-2"><strong>Catatan admin:</strong> {{ $organizer->verification_note }}</div>
+            @else
+                <strong>Menunggu verifikasi admin.</strong>
+                Anda tetap dapat menyiapkan event draft, tetapi belum dapat submit review atau publish sampai admin memverifikasi profil.
             @endif
         </div>
     @elseif ($organizer->verification_note)

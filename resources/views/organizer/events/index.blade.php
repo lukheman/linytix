@@ -18,9 +18,17 @@
     @endif
 
     @if (! $organizer->is_verified)
-        <div class="alert alert-warning">
-            <strong>Organizer belum terverifikasi.</strong>
-            Anda dapat membuat dan menyimpan draft, tetapi submit review menunggu verifikasi admin.
+        <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                @if ($organizer->verification_note)
+                    <strong>Profil organizer perlu diperbaiki.</strong>
+                    {{ $organizer->verification_note }}
+                @else
+                    <strong>Menunggu verifikasi admin.</strong>
+                    Anda dapat membuat dan menyimpan draft, tetapi submit review menunggu verifikasi admin.
+                @endif
+            </div>
+            <a href="{{ route('organizer.profile') }}" class="btn btn-sm btn-outline-dark">Lengkapi profil</a>
         </div>
     @endif
 

@@ -70,6 +70,21 @@
                 </div>
             </div>
 
+            @unless ($user->isOrganizer())
+                <div class="card-clean p-4 p-md-5 mb-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <div class="eyebrow">Untuk penyelenggara</div>
+                        <h2 class="h4 mt-2 mb-2">Punya event? Jual tiketnya di LinyTix.</h2>
+                        <p class="text-secondary mb-0">
+                            Daftar sebagai organizer, lengkapi profil, dan tunggu verifikasi admin sebelum event diajukan untuk tayang.
+                        </p>
+                    </div>
+                    <a href="{{ route('organizer.register') }}" class="btn btn-main text-nowrap">
+                        <i class="fas fa-building me-1"></i> Daftar sebagai organizer
+                    </a>
+                </div>
+            @endunless
+
             <div class="d-flex justify-content-between align-items-end mb-3">
                 <div>
                     <div class="eyebrow">Mendatang</div>
