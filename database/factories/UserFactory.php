@@ -55,6 +55,11 @@ class UserFactory extends Factory
         return $this->afterCreating(fn (User $user) => $user->assignRole(Role::CUSTOMER));
     }
 
+    public function staff(): static
+    {
+        return $this->afterCreating(fn (User $user) => $user->assignRole(Role::STAFF));
+    }
+
     /**
      * Indicate that the model's email address should be unverified.
      */

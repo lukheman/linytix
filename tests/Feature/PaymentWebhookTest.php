@@ -14,9 +14,8 @@ use App\Models\WebhookEvent;
 use App\Notifications\OrderExpired;
 use App\Notifications\OrderRefundRequested;
 use App\Notifications\TicketIssued;
-use App\Services\Checkout\PaymentConfirmationService;
 use App\Services\Payment\FakeGateway;
-use App\Services\Payment\PaymentManager;
+use App\Services\Payment\PaymentReconciliationService;
 use Illuminate\Support\Facades\Notification;
 use Mockery\MockInterface;
 use Tests\TestCase;
@@ -239,8 +238,7 @@ it('reconciles a pending payment and issues tickets', function () {
     });
 
     (new ReconcilePayments)->handle(
-        app(PaymentManager::class),
-        app(PaymentConfirmationService::class),
+        app(PaymentReconciliationService::class),
     );
 
     expect($order->fresh()->status)->toBe(Order::STATUS_PAID)

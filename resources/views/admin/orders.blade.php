@@ -19,11 +19,11 @@
 
     <x-layout.modern-card>
         <form method="GET" action="{{ route('admin.orders') }}" class="row g-2 align-items-end mb-4">
-            <div class="col-md-5">
+            <div class="col-sm-6 col-lg-3">
                 <label for="q" class="form-label small fw-semibold">Cari pesanan</label>
-                <input type="search" id="q" name="q" value="{{ $search }}" class="form-control" placeholder="Nomor pesanan, nama, atau email">
+                <input type="search" id="q" name="q" value="{{ $search }}" class="form-control" placeholder="Nomor pesanan atau email">
             </div>
-            <div class="col-md-3">
+            <div class="col-sm-6 col-lg-2">
                 <label for="status" class="form-label small fw-semibold">Status</label>
                 <select id="status" name="status" class="form-select">
                     <option value="">Semua status</option>
@@ -32,11 +32,28 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4 d-flex gap-2">
+            <div class="col-sm-6 col-lg-3">
+                <label for="event_id" class="form-label small fw-semibold">Event</label>
+                <select id="event_id" name="event_id" class="form-select">
+                    <option value="">Semua event</option>
+                    @foreach ($events as $event)
+                        <option value="{{ $event->getKey() }}" @selected($eventId === $event->getKey())>{{ $event->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="date_from" class="form-label small fw-semibold">Dari tanggal</label>
+                <input type="date" id="date_from" name="date_from" value="{{ $dateFrom }}" class="form-control">
+            </div>
+            <div class="col-sm-6 col-lg-2">
+                <label for="date_to" class="form-label small fw-semibold">Sampai tanggal</label>
+                <input type="date" id="date_to" name="date_to" value="{{ $dateTo }}" class="form-control">
+            </div>
+            <div class="col-12 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-search me-1"></i>Filter
                 </button>
-                @if ($search !== '' || $status !== '')
+                @if ($search !== '' || $status !== '' || $eventId !== '' || $dateFrom !== '' || $dateTo !== '')
                     <a href="{{ route('admin.orders') }}" class="btn btn-outline-secondary">Reset</a>
                 @endif
             </div>
@@ -61,8 +78,10 @@
                         @php $log = $notificationLogs->get($order->getKey()); @endphp
                         <tr>
                             <td>
-                                <div class="fw-semibold">{{ $order->order_number }}</div>
-                                <small class="text-muted">{{ $order->created_at?->translatedFormat('d M Y, H.i') }}</small>
+                                <a href="{{ route('admin.orders.show', $order) }}" class="fw-semibold text-decoration-none">
+                                    {{ $order->order_number }}
+                                </a>
+                                <small class="text-muted d-block">{{ $order->created_at?->translatedFormat('d M Y, H.i') }}</small>
                             </td>
                             <td class="text-secondary">{{ $order->event?->title ?? 'Event tidak tersedia' }}</td>
                             <td>
@@ -129,6 +148,9 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-wrap gap-1">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-outline-secondary" title="Lihat detail pesanan">
+                                        <i class="fas fa-eye me-1"></i>Detail
+                                    </a>
                                     @if ($order->tickets_count > 0)
                                         <a href="{{ route('admin.orders.pdf', $order) }}" class="btn btn-sm btn-outline-primary" title="Unduh PDF">
                                             <i class="fas fa-file-pdf"></i>

@@ -82,6 +82,11 @@ class Event extends Model
         return $this->belongsTo(Organizer::class);
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -129,7 +134,7 @@ class Event extends Model
 
     public function staff(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'event_staff')->withPivot('user_id');
+        return $this->belongsToMany(User::class, 'event_staff')->withPivot(['user_id', 'gate']);
     }
 
     public function wishlists(): HasMany
@@ -181,6 +186,60 @@ class Event extends Model
         return in_array($this->status, [self::STATUS_PUBLISHED, self::STATUS_SOLD_OUT], true);
     }
 
+    /**
+     * Event masih dapat diubah penuh oleh organizer (termasuk field penjualan).
+     */
+    public function isFullyEditable(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_REJECTED], true)
+            && $this->published_at === null;
+    }
+
+    /**
+     * Event yang sudah tayang hanya boleh diubah pada konten non-penjualan.
+     */
+    public function allowsNonCriticalEdits(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_PUBLISHED,
+            self::STATUS_SOLD_OUT,
+            self::STATUS_ENDED,
+        ], true);
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return $this->isFullyEditable() && $this->published_at === null;
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_DRAFT => 'Draft',
+            self::STATUS_PENDING_REVIEW => 'Menunggu Review',
+            self::STATUS_REJECTED => 'Ditolak',
+            self::STATUS_PUBLISHED => 'Published',
+            self::STATUS_SOLD_OUT => 'Sold Out',
+            self::STATUS_ENDED => 'Selesai',
+            self::STATUS_CANCELLED => 'Dibatalkan',
+            default => str($this->status)->headline()->toString(),
+        };
+    }
+
+    public function statusVariant(): string
+    {
+        return match ($this->status) {
+            self::STATUS_DRAFT => 'secondary',
+            self::STATUS_PENDING_REVIEW => 'warning',
+            self::STATUS_REJECTED => 'danger',
+            self::STATUS_PUBLISHED => 'success',
+            self::STATUS_SOLD_OUT => 'info',
+            self::STATUS_ENDED => 'secondary',
+            self::STATUS_CANCELLED => 'dark',
+            default => 'secondary',
+        };
+    }
+
     public function isSoldOut(): bool
     {
         $types = $this->relationLoaded('ticketTypes')
@@ -201,6 +260,60 @@ class Event extends Model
             : $this->activeTicketTypes()->get();
 
         return (int) $types->sum(fn (TicketType $type) => $type->remainingQuota());
+    }
+
+    /**
+     * Total kuota seluruh jenis tiket, termasuk yang nonaktif.
+     * Nilai ini dibandingkan dengan kapasitas venue saat submit review.
+     */
+    public function ticketQuotaTotal(?string $excludeTicketTypeId = null): int
+    {
+        return (int) $this->ticketTypes()
+            ->when($excludeTicketTypeId, fn ($query) => $query->whereKeyNot($excludeTicketTypeId))
+            ->sum('quota');
+    }
+
+    /**
+     * Kapasitas venue untuk event offline; event online tidak dibatasi venue.
+     */
+    public function venueCapacity(): ?int
+    {
+        if ($this->is_online) {
+            return null;
+        }
+
+        return $this->venue?->capacity;
+    }
+
+    /**
+     * @return array{total: int, capacity: int, excess: int}|null
+     */
+    public function capacityOverflowFor(int $projectedQuotaTotal): ?array
+    {
+        $capacity = $this->venueCapacity();
+
+        if ($capacity === null || $projectedQuotaTotal <= $capacity) {
+            return null;
+        }
+
+        return [
+            'total' => $projectedQuotaTotal,
+            'capacity' => $capacity,
+            'excess' => $projectedQuotaTotal - $capacity,
+        ];
+    }
+
+    public function exceedsVenueCapacity(): bool
+    {
+        $capacity = $this->venueCapacity();
+
+        if ($capacity === null) {
+            return false;
+        }
+
+        $total = $this->ticket_quota_total ?? $this->ticketQuotaTotal();
+
+        return (int) $total > $capacity;
     }
 
     public function lowestActivePrice(): int

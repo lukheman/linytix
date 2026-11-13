@@ -53,15 +53,15 @@ class TicketingSeeder extends Seeder
         $venues = [
             'jakarta' => Venue::query()->updateOrCreate(
                 ['name' => 'Istora Senayan'],
-                ['address' => 'Jl. Pintu Satu Senayan', 'city' => 'Jakarta', 'province' => 'DKI Jakarta', 'capacity' => 7000],
+                ['slug' => 'istora-senayan', 'address' => 'Jl. Pintu Satu Senayan', 'city' => 'Jakarta', 'province' => 'DKI Jakarta', 'capacity' => 7000, 'is_active' => true],
             ),
             'bandung' => Venue::query()->updateOrCreate(
                 ['name' => 'Sabuga ITB'],
-                ['address' => 'Jl. Tamansari No. 73', 'city' => 'Bandung', 'province' => 'Jawa Barat', 'capacity' => 3500],
+                ['slug' => 'sabuga-itb', 'address' => 'Jl. Tamansari No. 73', 'city' => 'Bandung', 'province' => 'Jawa Barat', 'capacity' => 3500, 'is_active' => true],
             ),
             'makassar' => Venue::query()->updateOrCreate(
                 ['name' => 'Celebes Convention Center'],
-                ['address' => 'Jl. Metro Tanjung Bunga', 'city' => 'Makassar', 'province' => 'Sulawesi Selatan', 'capacity' => 2000],
+                ['slug' => 'celebes-convention-center', 'address' => 'Jl. Metro Tanjung Bunga', 'city' => 'Makassar', 'province' => 'Sulawesi Selatan', 'capacity' => 2000, 'is_active' => true],
             ),
         ];
 

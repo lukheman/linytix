@@ -37,13 +37,14 @@ class EventPolicy
 
     public function delete(User $user, Event $event): bool
     {
-        return $user->isAdmin() || ($this->owns($user, $event) && $event->status === Event::STATUS_DRAFT);
+        return $user->isAdmin() || ($this->owns($user, $event) && $event->canBeDeleted());
     }
 
     public function submitForReview(User $user, Event $event): bool
     {
         return $this->owns($user, $event)
-            && $event->status === Event::STATUS_DRAFT
+            && in_array($event->status, [Event::STATUS_DRAFT, Event::STATUS_REJECTED], true)
+            && $event->published_at === null
             && (bool) $event->organizer?->is_verified;
     }
 
@@ -57,9 +58,19 @@ class EventPolicy
         return $user->isAdmin() || $this->owns($user, $event);
     }
 
+    public function viewReport(User $user, Event $event): bool
+    {
+        return $user->isAdmin() || $this->owns($user, $event);
+    }
+
     public function scan(User $user, Event $event): bool
     {
         return $user->isAdmin() || $this->isStaff($user, $event);
+    }
+
+    public function manageStaff(User $user, Event $event): bool
+    {
+        return $user->isAdmin() || $this->owns($user, $event);
     }
 
     private function owns(User $user, Event $event): bool

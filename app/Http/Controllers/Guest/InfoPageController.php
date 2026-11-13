@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
+use App\Support\PublicCache;
 use App\Support\SiteContent;
 use Illuminate\View\View;
 
@@ -13,7 +14,10 @@ class InfoPageController extends Controller
     {
         return view('events.info', [
             'pageKey' => 'faq',
-            'faqs' => Faq::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'faqs' => PublicCache::remember(PublicCache::FAQS, fn () => Faq::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get()),
             'settings' => SiteContent::settings(),
             'seo' => [
                 'title' => 'FAQ — '.$this->siteName(),

@@ -14,6 +14,7 @@ class VenueFactory extends Factory
     {
         return [
             'name' => fake()->company().' Hall',
+            'slug' => fake()->unique()->slug(2),
             'address' => fake()->streetAddress(),
             'city' => fake()->randomElement(['Jakarta', 'Bandung', 'Surabaya', 'Makassar', 'Yogyakarta']),
             'province' => fake()->state(),
@@ -21,6 +22,7 @@ class VenueFactory extends Factory
             'latitude' => fake()->latitude(-8, 5),
             'longitude' => fake()->longitude(95, 140),
             'maps_url' => null,
+            'is_active' => true,
         ];
     }
 }

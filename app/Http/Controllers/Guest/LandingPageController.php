@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Event;
 use App\Models\Organizer;
 use App\Models\Venue;
+use App\Support\PublicCache;
 use App\Support\SiteContent;
 use Illuminate\View\View;
 
@@ -41,21 +42,22 @@ class LandingPageController extends Controller
             ->limit(8)
             ->get();
 
-        $categories = Category::query()
+        $categories = PublicCache::remember(PublicCache::HOME_CATEGORIES, fn () => Category::query()
             ->where('is_active', true)
             ->whereHas('events', fn ($query) => $query->visible())
             ->withCount(['events' => fn ($query) => $query->visible()])
             ->orderBy('sort_order')
             ->limit(8)
-            ->get();
+            ->get());
 
-        $cities = Venue::query()
+        $cities = PublicCache::remember(PublicCache::CITIES, fn () => Venue::query()
+            ->where('is_active', true)
             ->whereHas('events', fn ($query) => $query->visible())
             ->orderBy('city')
             ->pluck('city')
             ->filter()
             ->unique()
-            ->values();
+            ->values());
 
         $siteName = $settings['site_name'] ?? 'LinyTix';
 

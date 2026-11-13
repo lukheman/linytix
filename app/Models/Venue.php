@@ -17,6 +17,7 @@ class Venue extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'address',
         'city',
         'province',
@@ -24,6 +25,7 @@ class Venue extends Model
         'latitude',
         'longitude',
         'maps_url',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -32,6 +34,7 @@ class Venue extends Model
             'capacity' => 'integer',
             'latitude' => 'float',
             'longitude' => 'float',
+            'is_active' => 'boolean',
         ];
     }
 

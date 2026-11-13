@@ -39,4 +39,30 @@ return [
         'gopay' => 'GoPay',
         'shopeepay' => 'ShopeePay',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Upload media event
+    |--------------------------------------------------------------------------
+    |
+    | Semua media event disimpan pada disk yang sama. Batas ukuran dalam KB dan
+    | dimensi minimum mengikuti kebutuhan poster, banner, galeri, dan lineup.
+    |
+    */
+    'event_uploads' => [
+        'disk' => env('TICKETING_EVENT_UPLOAD_DISK', 'public'),
+        'gallery_max' => 8,
+        'max_kb' => [
+            'poster' => 4096,
+            'banner' => 4096,
+            'gallery' => 2048,
+            'lineup' => 2048,
+        ],
+        'dimensions' => [
+            'poster' => ['min_width' => 600, 'min_height' => 400],
+            'banner' => ['min_width' => 1200, 'min_height' => 400],
+            'gallery' => ['min_width' => 400, 'min_height' => 300],
+            'lineup' => ['min_width' => 200, 'min_height' => 200],
+        ],
+    ],
 ];

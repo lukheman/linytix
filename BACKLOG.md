@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versi** | 1.10 |
-| **Tanggal** | 11 November 2026 |
-| **Basis** | `PRD.md` v1.11 |
-| **Status** | Tahap 0–3 selesai; Epik 4 berjalan (profil organizer selesai, kelola event berikutnya) |
+| **Versi** | 1.19 |
+| **Tanggal** | 13 November 2026 |
+| **Basis** | `PRD.md` v1.20 |
+| **Status** | Tahap 0–3 selesai; Epik 4 selesai; Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 berikutnya |
 | **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd` |
 
 Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, acceptance criteria (AC), task teknis, dan urutan sprint. P1/P2 tidak masuk backlog ini kecuali disebut sebagai dependency.
@@ -59,7 +59,10 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E3-07 Penerbitan tiket & email | Selesai | Tiket idempoten, QR unik, email via queue + log, PDF per order, resend admin |
 | E3-08 Status pembayaran | Selesai | Status, countdown, polling 5 detik (maks 15 menit), tombol cek status, akses owner/signed |
 | E3-09 Refund admin | Selesai | Refund penuh beralasan, lifecycle status, retry gagal, pembatalan event batch, email, audit log |
-| E4-01 Profil organizer | Selesai | Dashboard/profil organizer, slug unik + redirect 301, rekening termasking di log, verifikasi admin, audit log |
+| E4-01 Profil organizer | Selesai | Dashboard/profil organizer, slug unik + redirect 301, rekening dimasking di log, verifikasi admin, audit log |
+| E4-02 Kelola event | Selesai | Draft dengan field wajib, upload tervalidasi, submit review, penguncian field setelah submit, edit non-kritis event tayang, moderasi admin, audit log |
+| E4-03 Kelola jenis tiket | Selesai | CRUD tipe tiket, validasi harga/kuota, batas kapasitas venue, jadwal jual, larangan hapus tiket terjual, snapshot harga, audit log |
+| E4-04 Laporan penjualan | Selesai | Ringkasan paid-only, refund terpisah, grafik & rincian harian per timezone event, filter tanggal/jenis tiket, index performa |
 
 ---
 
@@ -621,14 +624,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Organizer dapat membuat event draft dengan field wajib: judul, kategori, venue/online, start/end, timezone, deskripsi, poster.
-- [ ] Upload poster/banner/galeri/lineup divalidasi (mime, ukuran, dimensi) dan disimpan di storage yang dikonfigurasi.
-- [ ] Event draft dapat diedit dan dihapus selama belum pernah `published`.
-- [ ] Organizer dapat submit `draft → pending_review` hanya jika minimal 1 tiket aktif dan semua field wajib valid.
-- [ ] Setelah submit, organizer tidak dapat mengubah field yang memengaruhi penjualan sampai admin menolak atau event dikembalikan ke draft.
-- [ ] Organizer melihat status `pending_review`, `rejected` + alasan, `published`, `sold_out`, `ended`, `cancelled`.
-- [ ] Event `published` hanya dapat diubah pada field non-kritis (deskripsi, galeri) sesuai kebijakan.
-- [ ] Feature test: create, upload invalid, submit incomplete, submit valid, edit after submit, authorization.
+- [x] Organizer dapat membuat event draft dengan field wajib: judul, kategori, venue/online, start/end, timezone, deskripsi, poster.
+- [x] Upload poster/banner/galeri/lineup divalidasi (mime, ukuran, dimensi) dan disimpan di storage yang dikonfigurasi.
+- [x] Event draft dapat diedit dan dihapus selama belum pernah `published`.
+- [x] Organizer dapat submit `draft → pending_review` hanya jika minimal 1 tiket aktif dan semua field wajib valid.
+- [x] Setelah submit, organizer tidak dapat mengubah field yang memengaruhi penjualan sampai admin menolak atau event dikembalikan ke draft.
+- [x] Organizer melihat status `pending_review`, `rejected` + alasan, `published`, `sold_out`, `ended`, `cancelled`.
+- [x] Event `published` hanya dapat diubah pada field non-kritis (deskripsi, galeri) sesuai kebijakan.
+- [x] Feature test: create, upload invalid, submit incomplete, submit valid, edit after submit, authorization.
 
 ### E4-03 — O-03 Kelola jenis tiket
 
@@ -637,13 +640,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] CRUD tipe tiket: nama, deskripsi, harga, kuota, min/max per order, jadwal jual, aktif/nonaktif.
-- [ ] Harga dan kuota tidak boleh negatif; kuota ≥ sold_count.
-- [ ] Total kuota semua tipe tiket ≤ kapasitas venue (jika venue memiliki kapasitas); jika melebihi, tampilkan peringatan dan blokir submit.
-- [ ] Tipe tiket dengan penjualan tidak dapat dihapus; hanya dinonaktifkan.
-- [ ] Perubahan harga tidak mengubah `order_items` lama.
-- [ ] Jadwal jual harus berada dalam rentang event dan `sale_start_at < sale_end_at`.
-- [ ] Feature test: validasi, kuota, delete with sales, price snapshot.
+- [x] CRUD tipe tiket: nama, deskripsi, harga, kuota, min/max per order, jadwal jual, aktif/nonaktif.
+- [x] Harga dan kuota tidak boleh negatif; kuota ≥ sold_count.
+- [x] Total kuota semua tipe tiket ≤ kapasitas venue (jika venue memiliki kapasitas); jika melebihi, tampilkan peringatan dan blokir submit.
+- [x] Tipe tiket dengan penjualan tidak dapat dihapus; hanya dinonaktifkan.
+- [x] Perubahan harga tidak mengubah `order_items` lama.
+- [x] Jadwal jual harus berada dalam rentang event dan `sale_start_at < sale_end_at`.
+- [x] Feature test: validasi, kuota, delete with sales, price snapshot.
 
 ### E4-04 — O-05 Laporan penjualan
 
@@ -652,14 +655,14 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Dashboard menampilkan total tiket terjual, pendapatan, dan grafik harian.
-- [ ] Filter tanggal dan jenis tiket; default 30 hari terakhir.
-- [ ] Hanya order `paid` yang dihitung; `pending`, `expired`, `cancelled`, `refunded` dikecualikan.
-- [ ] Pendapatan = sum `order_items.subtotal` untuk order paid, dikurangi refund (ditampilkan terpisah).
-- [ ] Data hanya untuk event milik organizer; akses event lain 403.
-- [ ] Grafik dan angka konsisten; timezone mengikuti event.
-- [ ] Query p95 < 500 ms untuk 10.000 order (diuji).
-- [ ] Feature test: perhitungan, filter, isolasi organizer.
+- [x] Dashboard menampilkan total tiket terjual, pendapatan, dan grafik harian.
+- [x] Filter tanggal dan jenis tiket; default 30 hari terakhir.
+- [x] Hanya order `paid` yang dihitung; `pending`, `expired`, `cancelled`, `refunded` dikecualikan.
+- [x] Pendapatan = sum `order_items.subtotal` untuk order paid, dikurangi refund (ditampilkan terpisah).
+- [x] Data hanya untuk event milik organizer; akses event lain 403.
+- [x] Grafik dan angka konsisten; timezone mengikuti event.
+- [x] Query p95 < 500 ms untuk 10.000 order (diuji).
+- [x] Feature test: perhitungan, filter, isolasi organizer.
 
 ---
 
@@ -672,12 +675,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] P0: admin dapat menambahkan/menghapus user sebagai staff event dari halaman detail event (form sederhana).
-- [ ] P1: organizer dapat mengelola staff sendiri dari dashboard organizer (O-07).
-- [ ] Staff hanya dapat membuka `/scan/{event}` untuk event yang ditugaskan.
-- [ ] Staff melihat nama event dan gate yang ditugaskan.
-- [ ] Staff tidak dapat mengubah data event/tiket.
-- [ ] Feature test: assigned/unassigned staff, akses event lain.
+- [x] P0: admin dapat menambahkan/menghapus user sebagai staff event dari halaman detail event (form sederhana).
+- [x] P1: organizer dapat mengelola staff sendiri dari dashboard organizer (O-07).
+- [x] Staff hanya dapat membuka `/scan/{event}` untuk event yang ditugaskan.
+- [x] Staff melihat nama event dan gate yang ditugaskan.
+- [x] Staff tidak dapat mengubah data event/tiket.
+- [x] Feature test: assigned/unassigned staff, akses event lain.
 
 ### E5-02 — C-01 Scan QR
 
@@ -686,16 +689,16 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Halaman scan meminta izin kamera; jika ditolak, tampil instruksi dan opsi input manual (P1).
-- [ ] Scan mengirim `ticket_code` ke server; client tidak menentukan validitas.
-- [ ] Server memvalidasi: tiket ada, event cocok, order `paid`, tiket `active`.
-- [ ] Tiket valid: update atomik ke `used`, catat `check_ins` `success`, tampil nama pemegang, jenis tiket, dan waktu.
-- [ ] Tiket sudah digunakan: tampil `duplicate` + waktu/gate pertama; tidak mengubah status.
-- [ ] Tiket tidak valid/event salah/refunded/cancelled: tampil `invalid` dengan alasan yang aman.
-- [ ] Dua scan bersamaan: satu `success`, satu `duplicate`.
-- [ ] Hasil tampil < 3 detik p95 pada koneksi 4G.
-- [ ] Scan dapat diulang tanpa menutup halaman; ada riwayat scan sesi.
-- [ ] Feature test: valid, duplicate, invalid, wrong event, concurrent, rate limit.
+- [x] Halaman scan meminta izin kamera; jika ditolak, tampil instruksi dan opsi input manual (P1).
+- [x] Scan mengirim `ticket_code` ke server; client tidak menentukan validitas.
+- [x] Server memvalidasi: tiket ada, event cocok, order `paid`, tiket `active`.
+- [x] Tiket valid: update atomik ke `used`, catat `check_ins` `success`, tampil nama pemegang, jenis tiket, dan waktu.
+- [x] Tiket sudah digunakan: tampil `duplicate` + waktu/gate pertama; tidak mengubah status.
+- [x] Tiket tidak valid/event salah/refunded/cancelled: tampil `invalid` dengan alasan yang aman.
+- [x] Dua scan bersamaan: satu `success`, satu `duplicate`.
+- [x] Hasil tampil < 3 detik p95 pada koneksi 4G.
+- [x] Scan dapat diulang tanpa menutup halaman; ada riwayat scan sesi.
+- [x] Feature test: valid, duplicate, invalid, wrong event, concurrent, rate limit.
 
 ---
 
@@ -708,12 +711,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Admin dapat mencari user berdasarkan nama/email dan memfilter role/status.
-- [ ] Admin dapat menonaktifkan/mengaktifkan user; user nonaktif tidak bisa login.
-- [ ] Admin tidak dapat menonaktifkan dirinya sendiri atau admin terakhir.
-- [ ] Admin dapat memverifikasi organizer dan melihat status verifikasi.
-- [ ] Aksi sensitif tercatat di `audit_logs`.
-- [ ] Feature test: search, deactivate, self-deactivate, last admin, verify organizer.
+- [x] Admin dapat mencari user berdasarkan nama/email dan memfilter role/status.
+- [x] Admin dapat menonaktifkan/mengaktifkan user; user nonaktif tidak bisa login.
+- [x] Admin tidak dapat menonaktifkan dirinya sendiri atau admin terakhir.
+- [x] Admin dapat memverifikasi organizer dan melihat status verifikasi.
+- [x] Aksi sensitif tercatat di `audit_logs`.
+- [x] Feature test: search, deactivate, self-deactivate, last admin, verify organizer.
 
 ### E6-02 — A-02 Moderasi event
 
@@ -722,13 +725,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Admin melihat antrean event `pending_review`, terbaru dulu.
-- [ ] Admin dapat melihat detail event, tiket, poster, dan data organizer.
-- [ ] Approve mengubah status ke `published`, mengisi `published_at`, `approved_by`, `approved_at`.
-- [ ] Reject wajib alasan; status `rejected`, organizer dapat melihat alasan.
-- [ ] Admin dapat membatalkan event `published`/`sold_out`; semua order `paid` masuk refund batch.
-- [ ] Semua aksi tercatat di `audit_logs` dan organizer mendapat email.
-- [ ] Feature test: approve, reject, cancel, authorization, refund trigger.
+- [x] Admin melihat antrean event `pending_review`, terbaru dulu.
+- [x] Admin dapat melihat detail event, tiket, poster, dan data organizer.
+- [x] Approve mengubah status ke `published`, mengisi `published_at`, `approved_by`, `approved_at`.
+- [x] Reject wajib alasan; status `rejected`, organizer dapat melihat alasan.
+- [x] Admin dapat membatalkan event `published`/`sold_out`; semua order `paid` masuk refund batch.
+- [x] Semua aksi tercatat di `audit_logs` dan organizer mendapat email.
+- [x] Feature test: approve, reject, cancel, authorization, refund trigger.
 
 ### E6-03 — A-03 Master data
 
@@ -737,12 +740,12 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] CRUD kategori, venue, FAQ, banner dengan validasi.
-- [ ] Slug kategori/venue unik; banner memiliki rentang tanggal valid.
-- [ ] Data nonaktif tidak tampil di publik.
-- [ ] Perubahan master data menghapus cache halaman publik terkait.
-- [ ] Aksi tercatat di `audit_logs`.
-- [ ] Feature test: CRUD, validasi, cache invalidation, public visibility.
+- [x] CRUD kategori, venue, FAQ, banner dengan validasi.
+- [x] Slug kategori/venue unik; banner memiliki rentang tanggal valid.
+- [x] Data nonaktif tidak tampil di publik.
+- [x] Perubahan master data menghapus cache halaman publik terkait.
+- [x] Aksi tercatat di `audit_logs`.
+- [x] Feature test: CRUD, validasi, cache invalidation, public visibility.
 
 ### E6-04 — A-04 Monitoring transaksi & refund
 
@@ -751,13 +754,13 @@ Berlaku untuk semua story:
 
 **AC:**
 
-- [ ] Admin melihat daftar order dengan filter status, event, tanggal, dan pencarian nomor order/email.
-- [ ] Detail order menampilkan item, pembayaran, tiket, dan riwayat refund.
-- [ ] Admin dapat membuat refund full sesuai E3-09.
-- [ ] Admin dapat melihat payment gagal/expired dan memicu rekonsiliasi manual.
-- [ ] Tidak ada data PII berlebih; nomor identitas dimasking.
-- [ ] Semua aksi tercatat di `audit_logs`.
-- [ ] Feature test: filter, detail, refund, manual reconcile, authorization.
+- [x] Admin melihat daftar order dengan filter status, event, tanggal, dan pencarian nomor order/email.
+- [x] Detail order menampilkan item, pembayaran, tiket, dan riwayat refund.
+- [x] Admin dapat membuat refund full sesuai E3-09.
+- [x] Admin dapat melihat payment gagal/expired dan memicu rekonsiliasi manual.
+- [x] Tidak ada data PII berlebih; nomor identitas dimasking.
+- [x] Semua aksi tercatat di `audit_logs`.
+- [x] Feature test: filter, detail, refund, manual reconcile, authorization.
 
 ---
 
@@ -824,14 +827,15 @@ Berlaku untuk semua story:
 | F-11 Riwayat pesanan | E2-04, E3-08 | Selesai |
 | F-13 Halaman informasi | E1-05 | Done |
 | O-01 Profil organizer | E4-01 | Selesai |
-| O-02 Kelola event | E4-02 | Todo |
-| O-03 Kelola jenis tiket | E4-03 | Todo |
-| O-05 Laporan penjualan | E4-04 | Todo |
-| C-01 Scan QR | E5-01, E5-02 | Todo |
-| A-01 Manajemen pengguna & organizer | E6-01 | Todo |
-| A-02 Moderasi event | E6-02 | Todo |
-| A-03 Master data | E6-03 | Todo |
-| A-04 Monitoring transaksi & refund | E6-04, E3-09 | Sebagian |
+| O-02 Kelola event | E4-02 | Selesai |
+| O-03 Kelola jenis tiket | E4-03 | Selesai |
+| O-05 Laporan penjualan | E4-04 | Selesai |
+| O-07 Kelola staff | E5-01 | Selesai |
+| C-01 Scan QR | E5-01, E5-02 | Selesai |
+| A-01 Manajemen pengguna & organizer | E6-01 | Selesai |
+| A-02 Moderasi event | E6-02 | Selesai |
+| A-03 Master data | E6-03 | Selesai |
+| A-04 Monitoring transaksi & refund | E6-04, E3-09 | Selesai |
 
 ---
 

@@ -1,6 +1,9 @@
 <x-layouts.app title="Dashboard Organizer - LinyTix" brand-name="LinyTix" brand-icon="fas fa-ticket">
     <x-layout.page-header title="Dashboard Organizer" subtitle="Ringkasan profil dan event milik organizer Anda.">
         <x-slot:actions>
+            <a class="btn btn-primary" href="{{ route('organizer.events.create') }}">
+                <i class="fas fa-plus me-2"></i>Buat Event
+            </a>
             <a class="btn btn-outline-primary" href="{{ route('organizer.profile') }}">
                 <i class="fas fa-building me-2"></i>Profil Organizer
             </a>
@@ -45,7 +48,7 @@
         <div class="col-lg-7">
             <x-layout.modern-card title="Event Terbaru">
                 @if ($events->isEmpty())
-                    <p class="text-muted mb-0">Belum ada event. Pengelolaan event akan tersedia pada tahap berikutnya.</p>
+                    <p class="text-muted mb-0">Belum ada event. <a href="{{ route('organizer.events.create') }}">Buat event pertama Anda</a>.</p>
                 @else
                     <div class="table-responsive">
                         <table class="table table-modern align-middle mb-0">
@@ -60,7 +63,9 @@
                                 @foreach ($events as $event)
                                     <tr>
                                         <td>
-                                            <div class="fw-semibold">{{ $event->title }}</div>
+                                            <div class="fw-semibold">
+                                                <a href="{{ route('organizer.events.edit', $event) }}" class="text-decoration-none">{{ $event->title }}</a>
+                                            </div>
                                             <small class="text-muted">{{ $event->venue?->city ?? ($event->is_online ? 'Online' : 'Lokasi menyusul') }}</small>
                                         </td>
                                         <td class="small text-secondary">{{ $event->start_at?->translatedFormat('d M Y, H.i') ?? '—' }}</td>

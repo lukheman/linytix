@@ -73,7 +73,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function eventAssignments(): BelongsToMany
     {
-        return $this->belongsToMany(Event::class, 'event_staff')->withPivot('user_id');
+        return $this->belongsToMany(Event::class, 'event_staff')->withPivot(['user_id', 'gate']);
     }
 
     public function orders(): HasMany

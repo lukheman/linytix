@@ -562,6 +562,7 @@
         $authUser = auth()->user();
         $isAdmin = (bool) $authUser?->isAdmin();
         $isOrganizer = (bool) $authUser?->isOrganizer() && ! $isAdmin;
+        $isStaff = (bool) $authUser?->isStaff() && ! $isAdmin && ! $isOrganizer;
     @endphp
 
     <!-- Sidebar -->
@@ -571,12 +572,20 @@
                 <x-layout.sidebar-link href="{{ route('dashboard') }}" icon="fas fa-home" :active="request()->routeIs('dashboard')">Dashboard</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('admin.users') }}" icon="fas fa-users" :active="request()->routeIs('admin.users')">Users</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('admin.organizers') }}" icon="fas fa-building" :active="request()->routeIs('admin.organizers*')">Organizer</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.events') }}" icon="fas fa-calendar-check" :active="request()->routeIs('admin.events*')">Moderasi Event</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('admin.orders') }}" icon="fas fa-receipt" :active="request()->routeIs('admin.orders*')">Pesanan & E-Tiket</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('admin.refunds') }}" icon="fas fa-rotate-left" :active="request()->routeIs('admin.refunds*')">Refund</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.categories') }}" icon="fas fa-tags" :active="request()->routeIs('admin.categories*')">Kategori</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.venues') }}" icon="fas fa-location-dot" :active="request()->routeIs('admin.venues*')">Venue</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.faqs') }}" icon="fas fa-circle-question" :active="request()->routeIs('admin.faqs*')">FAQ</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('admin.banners') }}" icon="fas fa-images" :active="request()->routeIs('admin.banners*')">Banner</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('admin.settings') }}" icon="fas fa-sliders" :active="request()->routeIs('admin.settings*')">Pengaturan Ticketing</x-layout.sidebar-link>
             @elseif ($isOrganizer)
                 <x-layout.sidebar-link href="{{ route('organizer.dashboard') }}" icon="fas fa-home" :active="request()->routeIs('organizer.dashboard')">Dashboard</x-layout.sidebar-link>
+                <x-layout.sidebar-link href="{{ route('organizer.events.index') }}" icon="fas fa-calendar-days" :active="request()->routeIs('organizer.events*')">Event Saya</x-layout.sidebar-link>
                 <x-layout.sidebar-link href="{{ route('organizer.profile') }}" icon="fas fa-building" :active="request()->routeIs('organizer.profile*')">Profil Organizer</x-layout.sidebar-link>
+            @elseif ($isStaff)
+                <x-layout.sidebar-link href="{{ route('scan.index') }}" icon="fas fa-qrcode" :active="request()->routeIs('scan.*')">Scan Tiket</x-layout.sidebar-link>
             @endif
         </x-layout.sidebar-section>
 
@@ -604,7 +613,7 @@
             :user-role="$isAdmin ? 'Administrator' : ($isOrganizer ? 'Organizer' : 'Staff')"
             :notification-count="0"
             :show-logout="true"
-            :profile-url="$isOrganizer ? route('organizer.profile') : route('admin.profile')"
+            :profile-url="$isOrganizer ? route('organizer.profile') : ($isAdmin ? route('admin.profile') : route('akun.dashboard'))"
         />
 
         <!-- Content Area -->

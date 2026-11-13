@@ -4,45 +4,26 @@ namespace App\Jobs;
 
 use App\Models\Order;
 use App\Models\Payment;
-use App\Services\Checkout\PaymentConfirmationService;
-use App\Services\Payment\PaymentManager;
+use App\Services\Payment\PaymentReconciliationService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Throwable;
 
 class ReconcilePayments implements ShouldQueue
 {
     use Queueable;
 
-    public function handle(PaymentManager $manager, PaymentConfirmationService $confirmation): void
+    public function handle(PaymentReconciliationService $reconciliation): void
     {
         Payment::query()
             ->where('status', Payment::STATUS_PENDING)
             ->whereHas('order', fn ($query) => $query->whereIn('status', [Order::STATUS_PENDING, Order::STATUS_EXPIRED]))
             ->with('order')
-            ->chunkById(100, function ($payments) use ($manager, $confirmation): void {
+            ->chunkById(100, function ($payments) use ($reconciliation): void {
                 foreach ($payments as $payment) {
-                    $order = $payment->order;
-
-                    if (! $order) {
-                        continue;
-                    }
-
                     try {
-                        $status = $manager->gateway($payment->gateway)->getStatus($payment);
-
-                        if ($status === Payment::STATUS_SUCCESS) {
-                            $confirmation->confirm($order, $payment);
-
-                            continue;
-                        }
-
-                        if ($status !== Payment::STATUS_PENDING && $status !== $payment->status) {
-                            $payment->forceFill([
-                                'status' => $status,
-                                'paid_at' => null,
-                            ])->save();
-                        }
-                    } catch (\Throwable $exception) {
+                        $reconciliation->reconcile($payment);
+                    } catch (Throwable $exception) {
                         report($exception);
                     }
                 }

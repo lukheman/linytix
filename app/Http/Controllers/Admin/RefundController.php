@@ -58,7 +58,6 @@ class RefundController extends Controller
             ->whereIn('status', [
                 Event::STATUS_PUBLISHED,
                 Event::STATUS_SOLD_OUT,
-                Event::STATUS_ENDED,
             ])
             ->orderBy('title')
             ->get(['id', 'title', 'status', 'start_at']);

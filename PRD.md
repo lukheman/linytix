@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versi** | 1.11 |
-| **Tanggal** | 11 November 2026 |
+| **Versi** | 1.20 |
+| **Tanggal** | 13 November 2026 |
 | **Status** | Draft untuk review |
 | **Dokumen terkait** | `schema.sql`, `erd.mmd`, `BACKLOG.md` |
 | **Referensi UX** | mortix.id (inspirasi alur dan tampilan, bukan acuan teknis) |
@@ -24,6 +24,15 @@
 | 1.9 | Panel refund admin: refund penuh order `paid` dengan alasan wajib, lifecycle `requested`/`processing`/`succeeded`/`failed`, retry refund gagal, pembatalan event dengan refund batch, notifikasi email, dan audit log; `refunds.error` ditambahkan |
 | 1.10 | Polling status pembayaran setiap 5 detik (maksimal 15 menit) dengan endpoint JSON bertanda tangan, tombol cek status manual, dan tampilan status paid/expired |
 | 1.11 | Dashboard organizer dan profil organizer: edit identitas, kontak, logo, rekening, slug unik dengan redirect 301 dari slug lama, verifikasi admin dengan catatan, audit log dengan masking rekening, serta halaman publik organizer; tabel `organizer_slug_redirects` ditambahkan |
+| 1.12 | Kelola event organizer: draft dengan field wajib, upload poster/banner/galeri/lineup tervalidasi, edit/hapus draft, submit review dengan minimal satu tiket aktif, penguncian field penjualan setelah submit, edit non-kritis untuk event tayang, status event lengkap, serta moderasi approve/reject admin |
+| 1.13 | Kelola jenis tiket: CRUD tipe tiket, validasi harga/kuota, batas total kuota terhadap kapasitas venue (peringatan + blokir submit), validasi jadwal jual dalam rentang event, larangan hapus tipe tiket yang sudah terjual, snapshot harga pada `order_items`, dan audit log perubahan harga/kuota |
+| 1.14 | Laporan penjualan organizer: ringkasan tiket terjual, pendapatan order paid, refund terpisah, pendapatan bersih, grafik dan rincian harian per timezone event, filter tanggal/jenis tiket dengan default 30 hari terakhir, serta index `order_items(order_id, ticket_type_id)` untuk performa laporan 10.000 order |
+| 1.15 | Penugasan staff event: admin dan organizer owner dapat menambah/menghapus staff beserta gate dari halaman kelola staff, role staff diberikan otomatis, audit log penugasan, halaman `/scan` dan `/scan/{event}` hanya untuk staff yang ditugaskan (atau admin), serta staff tidak dapat mengubah event/tiket; kolom `event_staff.gate` ditambahkan |
+| 1.16 | Scan QR staff: kamera browser dengan fallback input manual, validasi server berdasarkan kode tiket/event/order paid/status tiket, update atomik `active` → `used`, `check_ins` untuk success/duplicate/invalid, tampilan hasil dan riwayat sesi, duplikat menampilkan waktu/gate scan pertama, serta rate limit 60 scan/menit |
+| 1.17 | Manajemen pengguna & organizer admin: pencarian nama/email dengan filter role dan status, aktivasi/nonaktivasi akun dengan proteksi akun sendiri dan admin terakhir, pembatasan area user management hanya untuk admin, verifikasi organizer beserta statusnya, serta audit log untuk create/update/delete/aktivasi user dan verifikasi organizer |
+| 1.18 | Moderasi event admin: antrean `pending_review` terbaru dulu, halaman detail event dengan poster/tiket/organizer, approve/reject dengan alasan wajib, pembatalan khusus event `published`/`sold_out` dengan refund batch untuk seluruh order lunas, email organizer untuk setiap keputusan, serta audit log untuk approve/reject/cancel |
+| 1.19 | Master data admin: CRUD kategori, venue, FAQ, dan banner dengan validasi; slug kategori/venue unik (kolom `venues.slug` dan `venues.is_active` ditambahkan); data nonaktif disembunyikan dari halaman publik dan form organizer; cache master data publik (kategori, kota, FAQ, banner) diinvalidasi otomatis; setiap perubahan diaudit |
+| 1.20 | Monitoring transaksi admin: daftar order dengan filter status/event/rentang tanggal dan pencarian nomor order/email, halaman detail berisi item/pembayaran/tiket/riwayat refund, refund penuh dari halaman detail, rekonsiliasi manual pembayaran pending/failed/expired, masking nomor identitas dan telepon, serta audit log untuk refund, rekonsiliasi, dan kirim ulang e-tiket |
 
 ---
 
@@ -31,7 +40,7 @@
 
 Platform web untuk menjual tiket event dan konser musik secara online. Pengunjung dapat menjelajahi event, memilih jenis tiket, membayar, dan menerima e-tiket ber-QR. Organizer dapat membuat event, mengatur penjualan tiket, serta memantau penjualan dan kehadiran. Admin mengelola pengguna, moderasi event, master data, transaksi, dan refund.
 
-Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema), Tahap 1 (halaman publik event), serta Tahap 2 (auth, akun, dan akses guest) sudah diimplementasikan. Tahap 3 selesai: checkout, pembayaran, webhook, expiry, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email admin, panel refund admin, dan polling status pembayaran sudah tersedia. Epik 4 berjalan: dashboard dan profil organizer sudah tersedia; pengelolaan event dan tiket menyusul.
+Versi 1 dibangun sebagai **monolit Laravel 12** dengan **Blade + Bootstrap 5 + Tailwind 4** dan **MySQL/MariaDB**. Tahap 0 (fondasi dan skema), Tahap 1 (halaman publik event), serta Tahap 2 (auth, akun, dan akses guest) sudah diimplementasikan. Tahap 3 selesai: checkout, pembayaran, webhook, expiry, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email admin, panel refund admin, dan polling status pembayaran sudah tersedia. Epik 4 selesai: dashboard, profil organizer, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia; Epik 7 berikutnya.
 
 ---
 
@@ -81,7 +90,7 @@ Satu pengguna dapat memiliki lebih dari satu peran. Peran **tidak** disimpan seb
 | Guest | Tanpa login | Lihat event, checkout guest, akses tiket via signed link |
 | Customer | User terdaftar | Semua hak guest + riwayat pesanan + tiket saya |
 | Organizer Owner | `organizers.owner_user_id` | Kelola event miliknya, tiket, laporan |
-| Field Staff | `event_staff` + role `staff` | Scan tiket untuk event yang ditugaskan |
+| Field Staff | `event_staff` + role `staff` | Scan tiket untuk event yang ditugaskan, dengan gate per penugasan |
 | Admin | role `admin` | Moderasi, pengguna, master data, transaksi, refund |
 
 Role disimpan di tabel `roles` dan pivot `role_user` (lihat §10 dan `BACKLOG.md` Epik 0). Otorisasi memakai Laravel Policies/Gates, bukan pengecekan role di view.
@@ -140,7 +149,7 @@ Prioritas: **P0** = wajib MVP, **P1** = setelah MVP, **P2** = opsional.
 | A-01 | Manajemen pengguna & organizer | Verifikasi organizer, nonaktifkan akun, penugasan staff event minimal | P0 |
 | A-02 | Moderasi event | Setujui/tolak event sebelum tayang, batalkan event | P0 |
 | A-03 | Master data | Kategori, venue, FAQ, banner | P0 |
-| A-04 | Monitoring transaksi | Lihat order/pembayaran, proses refund | P0 |
+| A-04 | Monitoring transaksi | Lihat order/pembayaran dengan filter, detail order, refund penuh, dan rekonsiliasi manual | P0 |
 | A-05 | Pesan kontak | Lihat dan tanggapi pesan | P1 |
 | A-06 | Audit log | Riwayat aksi sensitif | P1 |
 
@@ -193,7 +202,7 @@ Tanpa Epik 0, fitur P0 tidak dapat diterima.
 | `published` | `sold_out` | Sistem | Turunan saat seluruh tiket aktif habis |
 | `sold_out` | `published` | Sistem | Jika kuota ditambah |
 | `published` / `sold_out` | `ended` | Sistem | Setelah `end_at` |
-| `draft` / `pending_review` / `published` / `sold_out` | `cancelled` | Admin | Organizer mengajukan, admin mengeksekusi |
+| `published` / `sold_out` | `cancelled` | Admin | Wajib alasan; seluruh order lunas masuk refund batch |
 | `published` | `postponed` | Admin | P2, belum masuk v1 |
 
 `sold_out` adalah status turunan, bukan aksi manual. Perubahan status dicatat di `audit_logs`.
@@ -309,7 +318,7 @@ Aturan:
 - Model dan migration ticketing sudah ada: `Event`, `Organizer`, `Venue`, `TicketType`, `Voucher`, `Order`, `OrderItem`, `Payment`, `Ticket`, `CheckIn`, `VoucherUsage`, `Banner`, `Faq`, `ContactMessage`, `AuditLog`.
 - Halaman publik event sudah tersedia: `/events`, `/events/{slug}`, filter, dan halaman informasi.
 - Auth, akun, dan akses guest sudah tersedia: `/login`, `/register`, `/forgot-password`, `/reset-password`, `/auth/google/*`, `/email/verify*`, `/akun`, `/akun/pesanan`, `/akun/tiket`, `/pesanan/cari`, dan signed URL `/pesanan/{order}`.
-- Checkout dan pembayaran sudah tersedia: form pilih tiket, order pending dengan reservasi stok, guest checkout, inisiasi pembayaran, halaman status dengan polling otomatis, webhook idempoten, expiry otomatis, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email, serta panel refund admin (refund penuh, retry, dan pembatalan event dengan refund batch). Dashboard dan profil organizer sudah tersedia; pengelolaan event/tiket, staff, dan admin ticketing masih menunggu kelanjutan Epik 4–6.
+- Checkout dan pembayaran sudah tersedia: form pilih tiket, order pending dengan reservasi stok, guest checkout, inisiasi pembayaran, halaman status dengan polling otomatis, webhook idempoten, expiry otomatis, rekonsiliasi, late payment, penerbitan tiket ber-QR, PDF e-tiket, resend email, serta panel refund admin (refund penuh, retry, dan pembatalan event dengan refund batch). Epik 4 selesai: dashboard, profil, pengelolaan event, jenis tiket, dan laporan penjualan organizer sudah tersedia. Epik 5 selesai: penugasan staff, gate, dan scan QR tiket dengan validasi server sudah tersedia. Epik 6 selesai: manajemen pengguna, status akun, verifikasi organizer, moderasi event, master data, serta monitoring transaksi dan refund sudah tersedia; Epik 7 berikutnya.
 - Skema aktual ada di `schema.sql`; ERD domain ada di `erd.mmd`.
 - Perluasan skema P0 sudah diterapkan dan didokumentasikan di §10.3 serta `BACKLOG.md` Epik 0.
 
@@ -362,7 +371,7 @@ Perluasan berikut **sudah ada** di migration, `schema.sql`, dan `erd.mmd`:
 |---|---|
 | Pengguna & role | `users.phone`, `users.google_id` (unique nullable), `users.is_active`, `users.last_login_at`; tabel `roles`, `role_user` |
 | Organizer | `logo_url`, `contact_email`, `contact_phone`, `bank_name`, `bank_account_no`, `bank_account_name`, `verified_at`, `verified_by`, `verification_note`; tabel `organizer_slug_redirects` untuk redirect 301 slug lama |
-| Venue | `latitude`, `longitude`, `maps_url` |
+| Venue | `slug`, `latitude`, `longitude`, `maps_url`, `is_active` |
 | Event | `short_desc`, `terms`, `poster_url`, `banner_url`, `doors_open_at`, `online_url`, `timezone`, `is_featured`, `require_identity`, `view_count`, `published_at`, `approved_by`, `approved_at`, `rejection_reason` |
 | Ticket type | `description`, `min_per_order`, `max_per_order`, `sale_start_at`, `sale_end_at` |
 | Voucher (P1) | `max_discount`, `min_purchase`, `usage_limit`, `per_user_limit`, `used_count`, `valid_from`, `valid_until` |
@@ -407,16 +416,21 @@ Setiap perubahan skema berikutnya wajib memperbarui `schema.sql` dan `erd.mmd` p
 | `/organizer/events` | Daftar event | Organizer |
 | `/organizer/events/create` | Buat event | Organizer |
 | `/organizer/events/{event}/edit` | Edit event | Organizer (owner) |
+| `/organizer/events/{event}/submit` | Ajukan review event | Organizer (owner) |
 | `/organizer/events/{event}/tickets` | Kelola jenis tiket | Organizer (owner) |
 | `/organizer/events/{event}/laporan` | Laporan penjualan | Organizer (owner) |
-| `/scan/{event}` | Scan QR | Staff event |
+| `/organizer/events/{event}/staff` | Kelola staff event | Organizer (owner) |
+| `/scan` | Daftar event untuk discan | Staff, admin |
+| `/scan/{event}` | Scan QR (kamera/input manual) | Staff yang ditugaskan, admin |
 | `/admin` | Dashboard admin | Admin |
-| `/admin/users`, `/admin/organizers` | Pengguna & organizer | Admin |
-| `/admin/events`, `/admin/events/{event}/review` | Moderasi event | Admin |
+| `/admin/users`, `/admin/users/{user}/status`, `/admin/organizers` | Pengguna, status akun, & organizer | Admin |
+| `/admin/events`, `/admin/events/{event}`, `/admin/events/{event}/approve`, `/admin/events/{event}/reject`, `/admin/events/cancel` | Moderasi event | Admin |
+| `/admin/events/{event}/staff` | Kelola staff event | Admin |
 | `/admin/categories`, `/admin/venues`, `/admin/faqs`, `/admin/banners` | Master data | Admin |
 | `/admin/orders`, `/admin/payments` | Monitoring transaksi | Admin |
-| `/admin/pesanan`, `/admin/pesanan/{order}/pdf` | Monitoring pesanan & unduh e-tiket | Admin |
+| `/admin/pesanan`, `/admin/pesanan/{order}`, `/admin/pesanan/{order}/pdf` | Monitoring pesanan, detail order, & unduh e-tiket | Admin |
 | `/admin/pesanan/{order}/kirim-tiket` | Kirim ulang email e-tiket | Admin |
+| `/admin/pesanan/{order}/pembayaran/{payment}/rekonsiliasi` | Rekonsiliasi manual pembayaran | Admin |
 | `/admin/refunds` | Refund | Admin |
 | `/admin/payouts` | Pencairan | Admin (P1) |
 | `/admin/contact-messages`, `/admin/audit-logs` | Kontak & audit | Admin (P1) |

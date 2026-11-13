@@ -26,7 +26,7 @@ class DomainSeeder extends Seeder
             'is_verified' => true,
         ]);
         $category = Category::query()->firstOrCreate(['slug' => 'seminar'], ['name' => 'Seminar', 'is_active' => true]);
-        $venue = Venue::query()->firstOrCreate(['name' => 'Gedung Merdeka'], ['address' => 'Jl. Merdeka No. 10', 'city' => 'Makassar', 'province' => 'Sulawesi Selatan', 'capacity' => 500]);
+        $venue = Venue::query()->firstOrCreate(['name' => 'Gedung Merdeka'], ['slug' => 'gedung-merdeka', 'address' => 'Jl. Merdeka No. 10', 'city' => 'Makassar', 'province' => 'Sulawesi Selatan', 'capacity' => 500, 'is_active' => true]);
         $event = Event::query()->firstOrCreate(['slug' => 'seminar-kepemimpinan'], [
             'organizer_id' => $organizer->id, 'category_id' => $category->id, 'venue_id' => $venue->id,
             'title' => 'Seminar Kepemimpinan', 'description' => 'Seminar pengembangan kepemimpinan.',

@@ -178,6 +178,7 @@ DROP TABLE IF EXISTS `event_staff`;
 CREATE TABLE `event_staff` (
   `event_id` char(36) NOT NULL,
   `user_id` bigint(20) unsigned NOT NULL,
+  `gate` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`event_id`,`user_id`),
   KEY `event_staff_user_id_foreign` (`user_id`),
   CONSTRAINT `event_staff_event_id_foreign` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
@@ -326,6 +327,7 @@ CREATE TABLE `order_items` (
   PRIMARY KEY (`id`),
   KEY `order_items_order_id_foreign` (`order_id`),
   KEY `order_items_ticket_type_id_foreign` (`ticket_type_id`),
+  KEY `order_items_order_ticket_type_index` (`order_id`,`ticket_type_id`),
   CONSTRAINT `order_items_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   CONSTRAINT `order_items_ticket_type_id_foreign` FOREIGN KEY (`ticket_type_id`) REFERENCES `ticket_types` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -614,6 +616,7 @@ DROP TABLE IF EXISTS `venues`;
 CREATE TABLE `venues` (
   `id` char(36) NOT NULL,
   `name` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
   `address` text NOT NULL,
   `city` varchar(255) NOT NULL,
   `province` varchar(255) NOT NULL,
@@ -621,9 +624,11 @@ CREATE TABLE `venues` (
   `longitude` decimal(10,7) DEFAULT NULL,
   `maps_url` varchar(2048) DEFAULT NULL,
   `capacity` int(10) unsigned DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `venues_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `voucher_usages`;

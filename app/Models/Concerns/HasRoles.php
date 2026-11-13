@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 trait HasRoles
@@ -103,6 +104,10 @@ trait HasRoles
             return 'organizer.dashboard';
         }
 
+        if ($this->isStaff() && ! $this->isAdmin()) {
+            return 'scan.index';
+        }
+
         return 'dashboard';
     }
 
@@ -123,7 +128,7 @@ trait HasRoles
 
         try {
             $route = app('router')->getRoutes()->match(
-                \Illuminate\Http\Request::create($url, 'GET')
+                Request::create($url, 'GET')
             );
         } catch (\Throwable) {
             return false;

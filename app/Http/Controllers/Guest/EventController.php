@@ -8,6 +8,7 @@ use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\Venue;
+use App\Support\PublicCache;
 use App\Support\SiteContent;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,14 +21,14 @@ class EventController extends Controller
 
         $events = $this->filteredQuery($request, $filters)->paginate(12)->withQueryString();
 
-        $banners = Banner::query()
+        $banners = PublicCache::remember(PublicCache::BANNERS, fn () => Banner::query()
             ->activeNow()
             ->with('event')
             ->orderBy('sort_order')
             ->limit(5)
             ->get()
-            ->filter(fn (Banner $banner) => $banner->event && $banner->event->isOnSale())
-            ->values();
+            ->filter(fn (Banner $banner) => $banner->event === null || $banner->event->isOnSale())
+            ->values());
 
         $featured = Event::query()
             ->visible()
@@ -141,22 +142,23 @@ class EventController extends Controller
 
     private function categories()
     {
-        return Category::query()
+        return PublicCache::remember(PublicCache::CATEGORIES, fn () => Category::query()
             ->where('is_active', true)
             ->whereHas('events', fn ($query) => $query->visible())
             ->orderBy('sort_order')
-            ->get();
+            ->get());
     }
 
     private function cities()
     {
-        return Venue::query()
+        return PublicCache::remember(PublicCache::CITIES, fn () => Venue::query()
+            ->where('is_active', true)
             ->whereHas('events', fn ($query) => $query->visible())
             ->orderBy('city')
             ->pluck('city')
             ->filter()
             ->unique()
-            ->values();
+            ->values());
     }
 
     private function siteName(): string

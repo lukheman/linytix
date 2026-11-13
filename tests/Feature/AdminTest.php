@@ -33,10 +33,10 @@ test('admin pages require authentication', function () {
 
 test('authenticated users can view the admin pages', function () {
     $user = User::factory()->create();
+    $admin = User::factory()->admin()->create();
     $otherUser = User::factory()->create();
 
     $this->actingAs($user)->get('/admin/dashboard')->assertOk()->assertSee('Dashboard Ticketing');
-    $this->actingAs($user)->get('/admin/users')->assertOk()->assertSee('User Management');
     $this->actingAs($user)->get('/admin/profile')
         ->assertOk()
         ->assertSee('Informasi Profile')
@@ -46,14 +46,17 @@ test('authenticated users can view the admin pages', function () {
         ->assertOk()
         ->assertSee('Components for displaying and uploading media.');
 
-    $this->actingAs($user)->get('/admin/users?create=1')->assertOk()->assertSee('Create New User');
-    $this->actingAs($user)->get('/admin/users?edit='.$otherUser->id)->assertOk()->assertSee('Edit User');
-    $this->actingAs($user)->get('/admin/users?delete='.$otherUser->id)->assertOk()->assertSee('Confirm Delete');
+    $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee('User Management');
+    $this->actingAs($admin)->get('/admin/users?create=1')->assertOk()->assertSee('Create New User');
+    $this->actingAs($admin)->get('/admin/users?edit='.$otherUser->id)->assertOk()->assertSee('Edit User');
+    $this->actingAs($admin)->get('/admin/users?delete='.$otherUser->id)->assertOk()->assertSee('Confirm Delete');
 
-    $this->actingAs($user)->get('/admin/users')
+    $this->actingAs($admin)->get('/admin/users')
         ->assertOk()
         ->assertSee('href="'.route('admin.users', ['edit' => $otherUser->id]).'"', false)
         ->assertSee('href="'.route('admin.users', ['delete' => $otherUser->id]).'"', false);
+
+    $this->actingAs($user)->get('/admin/users')->assertForbidden();
 });
 
 test('users can log in', function () {
@@ -81,7 +84,7 @@ test('users can register', function () {
 });
 
 test('users can be created updated and deleted', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->admin()->create();
 
     $this->actingAs($admin)->post('/admin/users', [
         'name' => 'New User',
@@ -105,7 +108,7 @@ test('users can be created updated and deleted', function () {
 });
 
 test('invalid user data reopens the create modal', function () {
-    $admin = User::factory()->create();
+    $admin = User::factory()->admin()->create();
 
     $this->actingAs($admin)
         ->from('/admin/users?create=1')

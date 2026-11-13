@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\Refund;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\EventCancelled;
 use App\Notifications\RefundSucceeded;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -138,11 +139,19 @@ class RefundService
             ]);
         }
 
+        if (! in_array($event->status, [Event::STATUS_PUBLISHED, Event::STATUS_SOLD_OUT], true)) {
+            throw ValidationException::withMessages([
+                'event_id' => 'Hanya event berstatus Published atau Sold Out yang dapat dibatalkan.',
+            ]);
+        }
+
         DB::transaction(function () use ($event, $admin, $reason, $ip): void {
             $locked = Event::query()->whereKey($event->getKey())->lockForUpdate()->first();
 
-            if (! $locked || $locked->status === Event::STATUS_CANCELLED) {
-                return;
+            if (! $locked || ! in_array($locked->status, [Event::STATUS_PUBLISHED, Event::STATUS_SOLD_OUT], true)) {
+                throw ValidationException::withMessages([
+                    'event_id' => 'Hanya event berstatus Published atau Sold Out yang dapat dibatalkan.',
+                ]);
             }
 
             $locked->forceFill(['status' => Event::STATUS_CANCELLED])->save();
@@ -185,6 +194,15 @@ class RefundService
             'failed' => $failed,
             'reason' => $reason,
         ], $ip);
+
+        $event->loadMissing('organizer.owner');
+        $organizerEmail = $event->organizer?->owner?->email
+            ?? $event->organizer?->contact_email;
+
+        if (filled($organizerEmail)) {
+            Notification::route('mail', $organizerEmail)
+                ->notify(new EventCancelled($event, $reason));
+        }
 
         return [
             'orders' => $orders->count(),
