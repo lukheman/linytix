@@ -41,6 +41,20 @@
     :description="$seo['description']"
     :canonical="route('organizer.guide')"
 >
+    @push('styles')
+        <style>
+            .guide-content .card-clean {
+                height: auto;
+            }
+
+            .guide-aside-card {
+                position: sticky;
+                top: 6rem;
+                height: auto;
+            }
+        </style>
+    @endpush
+
     <section class="section" style="padding-top: 8.5rem;">
         <div class="container">
             <nav aria-label="breadcrumb" class="mb-4">
@@ -50,7 +64,7 @@
             </nav>
 
             <div class="row g-5">
-                <div class="col-lg-7">
+                <div class="col-lg-7 guide-content">
                     <span class="eyebrow">Panduan organizer</span>
                     <h1 class="display-5 mt-2 mb-3">Panduan mendaftarkan event.</h1>
                     <p class="lead text-secondary mb-4">
@@ -139,7 +153,7 @@
                 </div>
 
                 <div class="col-lg-5">
-                    <div class="card-clean p-4 p-md-5" style="position: sticky; top: 6rem;">
+                    <div class="card-clean p-4 p-md-5 guide-aside-card">
                         <span class="eyebrow">Siap mulai?</span>
                         <h2 class="h3 mt-2 mb-3">Daftarkan event Anda di {{ $siteName }}.</h2>
                         <p class="text-secondary small mb-4">

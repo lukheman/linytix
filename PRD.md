@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versi** | 1.27 |
+| **Versi** | 1.28 |
 | **Tanggal** | 13 November 2026 |
 | **Status** | Draft untuk review |
 | **Dokumen terkait** | `schema.sql`, `erd.mmd`, `BACKLOG.md` |
@@ -40,6 +40,7 @@
 | 1.25 | Panduan organizer: halaman publik `/panduan-organizer` berisi alur pendaftaran organizer dan pendaftaran event, section "Daftarkan event Anda di sini" di beranda, pengayaan halaman `/organizer/daftar`, checklist onboarding di dashboard organizer, dan FAQ organizer. Suite menjadi 258 test / 1.646 assertion |
 | 1.26 | Konsistensi UI autentikasi: layout `x-layouts.auth` baru yang membungkus `x-layouts.public`, halaman login/register/lupa password/reset password/verifikasi email memakai desain, navigasi, dan footer yang sama dengan landing page, copy Bahasa Indonesia, serta toggle password yang aksesibel. Layout guest legacy dihapus. Suite menjadi 259 test / 1.652 assertion |
 | 1.27 | Perbaikan CTA organizer untuk guest: tombol "Daftar sebagai Organizer" di beranda, panduan, dan footer langsung menuju halaman registrasi akun dengan konteks `intent=organizer`, bukan lagi melewati halaman login. Halaman registrasi menampilkan banner konteks organizer dan status setelah pendaftaran mengarahkan user untuk melanjutkan pengajuan profil. Suite menjadi 260 test / 1.661 assertion |
+| 1.28 | Perbaikan tampilan `/panduan-organizer`: style `.cta-band` dan `.step-number` dipindahkan ke layout publik agar dipakai semua halaman, serta override `height: auto` untuk kartu bertumpuk di kolom panduan sehingga footer dan section lanjutan tidak lagi terdorong keluar alur |
 
 ---
 

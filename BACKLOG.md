@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Versi** | 1.26 |
+| **Versi** | 1.27 |
 | **Tanggal** | 13 November 2026 |
-| **Basis** | `PRD.md` v1.27 |
+| **Basis** | `PRD.md` v1.28 |
 | **Status** | Tahap 0–3 selesai; Epik 4 selesai (registrasi organizer self-service + panduan organizer); Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
 | **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd`, `docs/README.md` |
 

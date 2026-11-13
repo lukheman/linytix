@@ -473,33 +473,6 @@
                 font-size: 1.1rem;
                 flex-shrink: 0;
             }
-
-            .step-number {
-                font-family: 'Archivo', sans-serif;
-                font-weight: 900;
-                color: var(--gold);
-                font-size: 1.75rem;
-                line-height: 1;
-                letter-spacing: -.03em;
-            }
-
-            .cta-band {
-                background: var(--teal-dark);
-                border-radius: 0;
-                position: relative;
-                overflow: hidden;
-            }
-
-            .cta-band .btn {
-                border-radius: 0;
-                font-weight: 600;
-                padding: .7rem 1.2rem;
-            }
-
-            .cta-band .btn-outline-light:hover {
-                color: var(--ink);
-                background: #fff;
-            }
         </style>
     @endpush
 </x-layouts.public>
