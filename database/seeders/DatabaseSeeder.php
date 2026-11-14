@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             'site_name' => 'LinyTix',
             'footer_tagline' => 'Temukan event dari berbagai kota di Indonesia dan terima e-tiket QR langsung di email.',
             'hero_eyebrow' => 'Event di seluruh Indonesia',
-            'hero_title' => 'Temukan event pilihan di seluruh Indonesia.',
+            'hero_title' => 'Temukan event di seluruh Indonesia, beli tiketnya, atau daftarkan eventmu.',
             'hero_subtitle' => 'Cari konser, seminar, workshop, festival, dan event lainnya berdasarkan kota, kategori, atau tanggal. Pesan tiket online dan terima e-tiket QR langsung di email.',
             'hero_note' => 'E-tiket QR · Akses pesanan tanpa akun · Informasi event transparan',
             'email' => 'halo@LinyTix.id',

@@ -1,7 +1,7 @@
 @php
     $siteName = $settings['site_name'] ?? 'LinyTix';
     $heroEyebrow = $settings['hero_eyebrow'] ?? 'Event di seluruh Indonesia';
-    $heroTitle = $settings['hero_title'] ?? 'Temukan event pilihan di seluruh Indonesia.';
+    $heroTitle = $settings['hero_title'] ?? 'Temukan event di seluruh Indonesia, beli tiketnya, atau daftarkan eventmu.';
     $heroSubtitle = $settings['hero_subtitle'] ?? 'Cari konser, seminar, workshop, festival, dan event lainnya berdasarkan kota, kategori, atau tanggal. Pesan tiket online dan terima e-tiket QR langsung di email.';
     $heroNote = $settings['hero_note'] ?? 'E-tiket QR · Akses pesanan tanpa akun · Informasi event transparan';
 
@@ -60,29 +60,6 @@
                         </div>
                     </form>
 
-                    <p class="small text-secondary mb-4">
-                        <i class="fa-solid fa-circle-check me-1" style="color: var(--teal)"></i>
-                        {{ $heroNote }}
-                    </p>
-
-                    <div class="d-flex flex-wrap gap-4">
-                        <div>
-                            <div class="stat-value">{{ number_format($stats['events']) }}</div>
-                            <div class="small text-secondary">Event aktif</div>
-                        </div>
-                        <div>
-                            <div class="stat-value">{{ number_format($stats['cities']) }}</div>
-                            <div class="small text-secondary">Kota</div>
-                        </div>
-                        <div>
-                            <div class="stat-value">{{ number_format($stats['categories']) }}</div>
-                            <div class="small text-secondary">Kategori</div>
-                        </div>
-                        <div>
-                            <div class="stat-value">{{ number_format($stats['organizers']) }}</div>
-                            <div class="small text-secondary">Organizer</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="col-lg-6">

@@ -7,7 +7,7 @@ use App\Models\Venue;
 use Illuminate\Support\Str;
 
 it('shows ticketing public pages', function () {
-    $this->get('/')->assertSuccessful()->assertSee('Temukan event pilihan di seluruh Indonesia.');
+    $this->get('/')->assertSuccessful()->assertSee('Temukan event di seluruh Indonesia, beli tiketnya, atau daftarkan eventmu.');
     $this->get('/events')->assertSuccessful()->assertSee('Temukan pengalaman berikutnya.');
     $this->get('/faq')->assertSuccessful()->assertSee('FAQ')->assertSee('<h1 class="display-4 mt-2">FAQ</h1>', false);
     $this->get('/panduan-organizer')->assertSuccessful()->assertSee('Panduan mendaftarkan event');

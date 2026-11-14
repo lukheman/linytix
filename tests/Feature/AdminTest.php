@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 test('the landing page renders with its styles', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('Temukan event pilihan di seluruh Indonesia.')
+        ->assertSee('Temukan event di seluruh Indonesia, beli tiketnya, atau daftarkan eventmu.')
         ->assertSee('.hero {', false);
 });
 
