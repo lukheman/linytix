@@ -68,12 +68,26 @@
             border-radius: 0 !important;
         }
 
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 5rem;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             font-weight: 400;
             color: var(--ink);
             background: var(--canvas);
             -webkit-font-smoothing: antialiased;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
         }
 
         h1, h2, h3, h4, h5, h6, .display-font {
@@ -120,9 +134,60 @@
             color: var(--gold);
         }
 
+        .navbar-toggler {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+        }
+
         .navbar .nav-link {
             color: var(--muted) !important;
             font-weight: 600;
+            padding-block: .6rem;
+        }
+
+        .navbar-collapse {
+            background: var(--canvas);
+            border: 1px solid var(--line);
+            border-radius: 0;
+            margin-top: .75rem;
+            padding: 1rem;
+            max-height: calc(100dvh - 5rem);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .navbar .btn-main {
+            width: 100%;
+            margin-top: .5rem;
+        }
+
+        @media (min-width: 992px) {
+            .navbar .nav-link {
+                padding-block: .5rem;
+            }
+
+            .navbar-collapse {
+                background: transparent;
+                border: 0;
+                margin-top: 0;
+                padding: 0;
+                max-height: none;
+                overflow: visible;
+                overscroll-behavior: auto;
+            }
+
+            .navbar .btn-main {
+                width: auto;
+                margin-top: 0;
+            }
+
+            html {
+                scroll-padding-top: 6.5rem;
+            }
         }
 
         .navbar .nav-link:hover,
@@ -277,16 +342,16 @@
 
         .whatsapp {
             position: fixed;
-            right: 1.25rem;
-            bottom: 1.25rem;
+            right: 1rem;
+            bottom: calc(1rem + env(safe-area-inset-bottom));
             background: #25d366;
             color: #fff;
-            width: 3.25rem;
-            height: 3.25rem;
+            width: 3rem;
+            height: 3rem;
             border-radius: 0;
             display: grid;
             place-items: center;
-            font-size: 1.45rem;
+            font-size: 1.3rem;
             z-index: 1040;
             box-shadow: 0 8px 20px rgba(37, 211, 102, .3);
         }
@@ -294,6 +359,16 @@
         .whatsapp:hover {
             color: #fff;
             background: #1ebe5b;
+        }
+
+        @media (min-width: 992px) {
+            .whatsapp {
+                right: 1.25rem;
+                bottom: 1.25rem;
+                width: 3.25rem;
+                height: 3.25rem;
+                font-size: 1.45rem;
+            }
         }
 
         .footer {
@@ -324,13 +399,17 @@
             border-top: 1px solid rgba(213, 216, 213, .18);
         }
 
-        @media (max-width: 991.98px) {
-            .navbar-collapse {
-                background: var(--canvas);
-                border: 1px solid var(--line);
-                border-radius: 0;
-                margin-top: .75rem;
-                padding: 1rem;
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
             }
         }
 
@@ -350,7 +429,7 @@
     @stack('styles')
 </head>
 <body>
-<nav class="navbar navbar-expand-lg py-3 fixed-top border-bottom">
+<nav class="navbar navbar-expand-lg py-2 py-lg-3 fixed-top border-bottom">
     <div class="container">
         <a class="brand d-flex align-items-center gap-2" href="{{ route('home') }}">
             <i class="fa-solid fa-sparkles"></i>

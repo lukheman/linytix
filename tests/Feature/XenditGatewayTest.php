@@ -517,6 +517,30 @@ it('rejects a refund callback whose amount does not match the refund', function 
         ->and(WebhookEvent::query()->firstOrFail()->status)->toBe(WebhookEvent::STATUS_FAILED);
 });
 
+it('reconciles a pending xendit payment from the checkout status endpoint', function () {
+    xenditConfig();
+
+    Http::fake([
+        'api.xendit.co/sessions/ps-123' => Http::response([
+            'payment_session_id' => 'ps-123',
+            'status' => 'COMPLETED',
+        ], 200),
+    ]);
+
+    [$order] = xenditOrder();
+    $payment = xenditPayment($order);
+
+    $statusUrl = URL::temporarySignedRoute('checkout.status', now()->addHour(), ['order' => $order->getKey()]);
+
+    $this->getJson($statusUrl)
+        ->assertOk()
+        ->assertJson(['status' => Order::STATUS_PAID]);
+
+    expect($order->fresh()->status)->toBe(Order::STATUS_PAID)
+        ->and($payment->fresh()->status)->toBe(Payment::STATUS_SUCCESS)
+        ->and(Ticket::query()->where('order_id', $order->getKey())->count())->toBe(1);
+});
+
 it('reconciles a pending xendit payment using the session status', function () {
     xenditConfig();
 

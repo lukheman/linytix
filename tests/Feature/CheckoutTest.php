@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\TicketType;
 use App\Models\User;
 use App\Services\Payment\FakeGateway;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Mockery\MockInterface;
@@ -322,7 +323,9 @@ it('exposes a json status endpoint for payment polling', function () {
         ]);
 });
 
-it('reports a pending order past its deadline as expired through polling', function () {
+it('expires a pending order past its deadline through polling', function () {
+    Notification::fake();
+
     [$event] = checkoutEvent();
 
     $order = Order::factory()->create([
@@ -336,9 +339,11 @@ it('reports a pending order past its deadline as expired through polling', funct
     $this->getJson($statusUrl)
         ->assertOk()
         ->assertJson([
-            'status' => Order::STATUS_PENDING,
-            'expired' => true,
+            'status' => Order::STATUS_EXPIRED,
+            'expired' => false,
         ]);
+
+    expect($order->fresh()->status)->toBe(Order::STATUS_EXPIRED);
 });
 
 it('protects the polling endpoint with signed urls or ownership', function () {

@@ -23,12 +23,16 @@ class ExpireOrders implements ShouldQueue
             ->orderBy('expires_at')
             ->chunkById(100, function ($orders): void {
                 foreach ($orders as $order) {
-                    $this->expire($order);
+                    $this->expireOrder($order);
                 }
             });
     }
 
-    private function expire(Order $order): void
+    /**
+     * Kedaluwarsakan satu order secara idempoten. Dipakai job terjadwal dan
+     * polling checkout agar status tidak bergantung pada worker yang berjalan.
+     */
+    public function expireOrder(Order $order): bool
     {
         $expired = false;
 
@@ -60,5 +64,7 @@ class ExpireOrders implements ShouldQueue
             Notification::route('mail', $order->buyer_email)
                 ->notify(new OrderExpired($order->loadMissing('event')));
         }
+
+        return $expired;
     }
 }

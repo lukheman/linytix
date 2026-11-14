@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Guest;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCheckoutRequest;
+use App\Jobs\ExpireOrders;
 use App\Models\Event;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\TicketType;
 use App\Services\Checkout\OrderService;
 use App\Services\Payment\PaymentManager;
+use App\Services\Payment\PaymentReconciliationService;
 use App\Support\GuestOrderAccess;
 use App\Support\SiteContent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -100,6 +103,9 @@ class CheckoutController extends Controller
     {
         $this->authorizeAccess($request, $order);
 
+        $this->syncPendingPayment($order);
+        $this->expireIfPastDeadline($order);
+
         $order->load([
             'event.venue',
             'items.ticketType',
@@ -139,6 +145,9 @@ class CheckoutController extends Controller
     {
         $this->authorizeAccess($request, $order);
 
+        $this->syncPendingPayment($order);
+        $this->expireIfPastDeadline($order);
+
         $order->load(['payments' => fn ($query) => $query->latest()]);
 
         return response()
@@ -157,6 +166,9 @@ class CheckoutController extends Controller
     public function pay(Request $request, Order $order): RedirectResponse
     {
         $this->authorizeAccess($request, $order);
+
+        $this->syncPendingPayment($order);
+        $this->expireIfPastDeadline($order);
 
         $availableMethods = array_keys($this->availableMethods());
 
@@ -215,6 +227,52 @@ class CheckoutController extends Controller
         }
 
         return back()->with('status', 'Instruksi pembayaran berhasil dibuat.');
+    }
+
+    /**
+     * Sinkronkan pembayaran pending dengan gateway saat halaman status dibuka
+     * atau dipolling. Ini menjadi fallback bila webhook tidak sampai atau
+     * worker/scheduler belum berjalan.
+     */
+    private function syncPendingPayment(Order $order): void
+    {
+        if (! $order->isPending()) {
+            return;
+        }
+
+        $payment = $order->payments()->latest()->first();
+
+        if (! $payment || $payment->status !== Payment::STATUS_PENDING || blank($payment->gateway_ref)) {
+            return;
+        }
+
+        // Batasi panggilan gateway agar polling 5 detik tidak membanjiri API.
+        if (! Cache::add('payment-reconcile:'.$payment->getKey(), true, now()->addSeconds(30))) {
+            return;
+        }
+
+        try {
+            app(PaymentReconciliationService::class)->reconcile($payment);
+        } catch (Throwable $exception) {
+            report($exception);
+        }
+
+        $order->refresh();
+    }
+
+    /**
+     * Kedaluwarsakan order yang sudah melewati batas waktu tanpa menunggu
+     * job terjadwal berjalan.
+     */
+    private function expireIfPastDeadline(Order $order): void
+    {
+        if (! $order->isPending() || ! $order->isExpired()) {
+            return;
+        }
+
+        app(ExpireOrders::class)->expireOrder($order);
+
+        $order->refresh();
     }
 
     /**
