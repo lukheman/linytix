@@ -55,7 +55,7 @@
                                 <div class="eyebrow">{{ $settings['site_name'] ?? 'LinyTix' }}</div>
                                 <h2 class="h3 mb-1">{{ $event?->title ?? 'Event' }}</h2>
                                 <div class="text-secondary">
-                                    <i class="fa-regular fa-calendar me-2"></i>{{ $event?->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} WIB
+                                    <i class="fa-regular fa-calendar me-2"></i>{{ $event?->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} {{ $event?->startsAtLocal()?->format('T') }}
                                 </div>
                                 <div class="text-secondary">
                                     <i class="fa-solid fa-location-dot me-2"></i>

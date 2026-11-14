@@ -4,6 +4,7 @@ namespace App\Contracts;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Refund;
 use Illuminate\Http\Request;
 
 interface PaymentGateway
@@ -12,6 +13,13 @@ interface PaymentGateway
      * Nama gateway yang disimpan pada tabel payments.
      */
     public function name(): string;
+
+    /**
+     * Daftar kode metode pembayaran internal yang didukung gateway ini.
+     *
+     * @return array<int, string>
+     */
+    public function supportedMethods(): array;
 
     /**
      * Buat transaksi pembayaran untuk order.
@@ -28,7 +36,7 @@ interface PaymentGateway
     /**
      * Normalisasi payload webhook ke bentuk internal.
      *
-     * @return array{external_id: string, event_type: ?string, status: string, order_number: ?string, amount: ?int, raw: array<string, mixed>}
+     * @return array{external_id: string, payment_ref: ?string, event_type: ?string, status: string, order_number: ?string, amount: ?int, currency: ?string, raw: array<string, mixed>}
      */
     public function parseWebhook(Request $request): array;
 
@@ -43,4 +51,11 @@ interface PaymentGateway
      * Ambil status terkini pembayaran dari gateway.
      */
     public function getStatus(Payment $payment): string;
+
+    /**
+     * Ambil status terkini refund dari gateway.
+     *
+     * @return string salah satu: succeeded, pending, failed
+     */
+    public function getRefundStatus(Refund $refund): string;
 }

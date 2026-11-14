@@ -406,7 +406,7 @@
         <div class="row g-4 pb-4">
             <div class="col-lg-5">
                 <div class="h4 display-font text-white mb-2">{{ $siteName }}</div>
-                <p class="mb-3 text-white-50">{{ $settings['footer_tagline'] ?? 'Beli tiket event favoritmu dengan pembayaran aman dan e-tiket QR.' }}</p>
+                    <p class="mb-3 text-white-50">{{ $settings['footer_tagline'] ?? 'Temukan event dari berbagai kota di Indonesia dan terima e-tiket QR langsung di email.' }}</p>
                 <div class="footer-social d-flex gap-2">
                     @foreach ($socialLinks as $link)
                         <a href="{{ $link->url }}" target="_blank" rel="noopener" aria-label="{{ $link->platform }}" title="{{ $link->platform }}">

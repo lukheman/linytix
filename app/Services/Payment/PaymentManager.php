@@ -14,6 +14,7 @@ class PaymentManager
         return match ($name) {
             'fake' => app(FakeGateway::class),
             'midtrans' => app(MidtransGateway::class),
+            'xendit' => app(XenditGateway::class),
             default => throw new InvalidArgumentException("Payment gateway [{$name}] tidak dikenal."),
         };
     }

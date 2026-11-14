@@ -33,7 +33,7 @@
                                     <h2 class="h5 mb-1">{{ $event?->title ?? 'Event' }}</h2>
                                     <div class="small text-secondary">
                                         <i class="fa-regular fa-calendar me-2"></i>
-                                        {{ $event?->startsAtLocal()?->translatedFormat('d M Y, H.i') }} WIB
+                                         {{ $event?->startsAtLocal()?->translatedFormat('d M Y, H.i') }} {{ $event?->startsAtLocal()?->format('T') }}
                                         <span class="mx-2">·</span>
                                         {{ $event?->is_online ? 'Online' : ($event->venue?->city ?? 'Lokasi menyusul') }}
                                     </div>

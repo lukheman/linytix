@@ -33,7 +33,7 @@
                         <div class="eyebrow">{{ $siteName }}</div>
                         <h1>{{ $order->event?->title ?? 'Event' }}</h1>
                         <div class="muted">
-                            {{ $order->event?->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} WIB
+                            {{ $order->event?->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} {{ $order->event?->startsAtLocal()?->format('T') }}
                         </div>
                         <div class="muted">
                             {{ $order->event?->is_online ? 'Online' : ($order->event?->venue?->name ?? 'Lokasi menyusul') }}

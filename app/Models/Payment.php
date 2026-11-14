@@ -31,6 +31,7 @@ class Payment extends Model
         'gateway',
         'method',
         'gateway_ref',
+        'gateway_payment_ref',
         'amount',
         'status',
         'payment_url',

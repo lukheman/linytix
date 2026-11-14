@@ -135,10 +135,47 @@ class TicketingLaunchCheck extends Command
             $this->check(
                 $gateway !== 'fake',
                 'PAYMENT_GATEWAY',
-                'midtrans',
+                'midtrans/xendit',
                 $gateway,
             ),
         ];
+
+        if ($gateway === 'xendit') {
+            $checks[] = $this->check(
+                filled(config('payment.xendit.secret_key')),
+                'XENDIT_SECRET_KEY',
+                'terisi',
+                filled(config('payment.xendit.secret_key')) ? 'terisi' : 'kosong',
+            );
+
+            $checks[] = $this->check(
+                filled(config('payment.xendit.callback_token')),
+                'XENDIT_CALLBACK_TOKEN',
+                'terisi',
+                filled(config('payment.xendit.callback_token')) ? 'terisi' : 'kosong',
+            );
+
+            $checks[] = $this->check(
+                config('payment.xendit.is_production') === true,
+                'XENDIT_IS_PRODUCTION',
+                'true',
+                config('payment.xendit.is_production') ? 'true' : 'false',
+            );
+
+            $checks[] = $this->check(
+                str_starts_with((string) config('payment.xendit.secret_key'), 'xnd_production_'),
+                'XENDIT_SECRET_KEY_MODE',
+                'xnd_production_...',
+                str_starts_with((string) config('payment.xendit.secret_key'), 'xnd_production_') ? 'produksi' : 'bukan produksi',
+            );
+
+            $checks[] = $this->check(
+                (int) config('payment.xendit.session_duration_minutes', 0) >= 10,
+                'XENDIT_SESSION_DURATION',
+                '>= 10 menit',
+                (string) config('payment.xendit.session_duration_minutes', 0).' menit',
+            );
+        }
 
         if ($gateway === 'midtrans') {
             $checks[] = $this->check(

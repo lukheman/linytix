@@ -214,6 +214,7 @@ it('keeps the order pending when the payment gateway fails', function () {
     $payUrl = URL::temporarySignedRoute('checkout.pay', now()->addHour(), ['order' => $order->getKey()]);
 
     $this->mock(FakeGateway::class, function (MockInterface $mock): void {
+        $mock->shouldReceive('supportedMethods')->andReturn(array_keys(config('ticketing.payment_methods')));
         $mock->shouldReceive('createCharge')->once()->andThrow(new RuntimeException('Gateway down'));
     });
 

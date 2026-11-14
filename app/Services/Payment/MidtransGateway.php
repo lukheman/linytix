@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Contracts\PaymentGateway;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Refund;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -21,6 +22,11 @@ class MidtransGateway implements PaymentGateway
     public function name(): string
     {
         return 'midtrans';
+    }
+
+    public function supportedMethods(): array
+    {
+        return array_keys((array) config('ticketing.payment_methods', []));
     }
 
     public function createCharge(Order $order, string $method): array
@@ -79,10 +85,12 @@ class MidtransGateway implements PaymentGateway
     {
         return [
             'external_id' => (string) $request->input('transaction_id', ''),
+            'payment_ref' => null,
             'event_type' => $request->input('transaction_status'),
             'status' => $this->mapStatus((string) $request->input('transaction_status')),
             'order_number' => $request->input('order_id'),
             'amount' => $request->filled('gross_amount') ? (int) $request->input('gross_amount') : null,
+            'currency' => $request->input('currency'),
             'raw' => $request->all(),
         ];
     }
@@ -113,6 +121,11 @@ class MidtransGateway implements PaymentGateway
     public function getStatus(Payment $payment): string
     {
         return $payment->status;
+    }
+
+    public function getRefundStatus(Refund $refund): string
+    {
+        return $refund->status === Refund::STATUS_SUCCEEDED ? 'succeeded' : 'pending';
     }
 
     private function mapStatus(string $status): string

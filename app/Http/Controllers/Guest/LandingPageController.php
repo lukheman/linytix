@@ -76,8 +76,8 @@ class LandingPageController extends Controller
                     ->count(),
             ],
             'seo' => [
-                'title' => $siteName.' — Beli Tiket Konser, Seminar & Festival',
-                'description' => 'Temukan konser, seminar, workshop, dan festival pilihan. Beli tiket online, bayar aman, dan terima e-tiket QR langsung di email.',
+                'title' => $siteName.' — Beli Tiket Event di Indonesia',
+                'description' => 'Temukan dan beli tiket konser, seminar, workshop, festival, serta event online dari berbagai kota di Indonesia. Dapatkan e-tiket QR langsung melalui email.',
                 'jsonLd' => [
                     '@context' => 'https://schema.org',
                     '@type' => 'WebSite',

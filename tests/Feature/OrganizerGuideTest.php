@@ -16,7 +16,7 @@ it('shows the public organizer guide', function () {
 it('shows the organizer call to action on the landing page', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee('Punya event? Daftarkan event Anda di sini.')
+        ->assertSee('Punya event? Jual tiketnya dari satu platform.')
         ->assertSee(route('register', ['intent' => 'organizer']), false)
         ->assertSee(route('organizer.guide'), false);
 });

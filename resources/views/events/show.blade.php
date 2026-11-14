@@ -62,7 +62,7 @@
 
                     <div class="d-flex flex-wrap gap-2 mb-4">
                         <span class="meta-pill"><i class="fa-regular fa-calendar text-success"></i>{{ $start?->format('d M Y') }}</span>
-                        <span class="meta-pill"><i class="fa-regular fa-clock text-success"></i>{{ $start?->format('H.i') }} – {{ $end?->format('H.i') }} WIB</span>
+                        <span class="meta-pill"><i class="fa-regular fa-clock text-success"></i>{{ $start?->format('H.i') }} – {{ $end?->format('H.i') }} {{ $start?->format('T') }}</span>
                         <span class="meta-pill"><i class="fa-solid fa-location-dot text-success"></i>{{ $event->is_online ? 'Online' : ($event->venue?->name ?? 'Lokasi menyusul') }}</span>
                     </div>
 

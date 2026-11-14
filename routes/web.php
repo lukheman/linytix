@@ -33,6 +33,7 @@ use App\Http\Controllers\Guest\LandingPageController;
 use App\Http\Controllers\Guest\OrganizerController as GuestOrganizerController;
 use App\Http\Controllers\Guest\PaymentWebhookController;
 use App\Http\Controllers\Guest\SitemapController;
+use App\Http\Controllers\Guest\XenditRefundWebhookController;
 use App\Http\Controllers\Organizer\DashboardController as OrganizerDashboardController;
 use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
 use App\Http\Controllers\Organizer\ProfileController as OrganizerProfileController;
@@ -68,6 +69,10 @@ Route::post('/checkout/{order}/pay', [CheckoutController::class, 'pay'])
     ->name('checkout.pay');
 
 // Webhook gateway pembayaran
+Route::post('/webhooks/payment/xendit/refund', XenditRefundWebhookController::class)
+    ->middleware('throttle:payment-webhook')
+    ->name('webhooks.payment.xendit.refund');
+
 Route::post('/webhooks/payment/{gateway}', PaymentWebhookController::class)
     ->middleware('throttle:payment-webhook')
     ->name('webhooks.payment');

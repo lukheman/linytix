@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Contracts\PaymentGateway;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Refund;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -16,6 +17,11 @@ class FakeGateway implements PaymentGateway
     public function name(): string
     {
         return 'fake';
+    }
+
+    public function supportedMethods(): array
+    {
+        return array_keys((array) config('ticketing.payment_methods', []));
     }
 
     public function createCharge(Order $order, string $method): array
@@ -43,10 +49,12 @@ class FakeGateway implements PaymentGateway
     {
         return [
             'external_id' => (string) $request->input('external_id', ''),
+            'payment_ref' => null,
             'event_type' => $request->input('event_type'),
             'status' => (string) $request->input('status', 'pending'),
             'order_number' => $request->input('order_number'),
             'amount' => $request->filled('amount') ? (int) $request->input('amount') : null,
+            'currency' => $request->input('currency'),
             'raw' => $request->all(),
         ];
     }
@@ -63,6 +71,11 @@ class FakeGateway implements PaymentGateway
     public function getStatus(Payment $payment): string
     {
         return $payment->status;
+    }
+
+    public function getRefundStatus(Refund $refund): string
+    {
+        return $refund->status === Refund::STATUS_SUCCEEDED ? 'succeeded' : 'pending';
     }
 
     /**

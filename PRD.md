@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Versi** | 1.29 |
-| **Tanggal** | 13 November 2026 |
+| **Versi** | 1.31 |
+| **Tanggal** | 14 November 2026 |
 | **Status** | Draft untuk review |
 | **Dokumen terkait** | `schema.sql`, `erd.mmd`, `BACKLOG.md` |
 | **Referensi UX** | mortix.id (inspirasi alur dan tampilan, bukan acuan teknis) |
@@ -42,6 +42,7 @@
 | 1.27 | Perbaikan CTA organizer untuk guest: tombol "Daftar sebagai Organizer" di beranda, panduan, dan footer langsung menuju halaman registrasi akun dengan konteks `intent=organizer`, bukan lagi melewati halaman login. Halaman registrasi menampilkan banner konteks organizer dan status setelah pendaftaran mengarahkan user untuk melanjutkan pengajuan profil. Suite menjadi 260 test / 1.661 assertion |
 | 1.28 | Perbaikan tampilan `/panduan-organizer`: style `.cta-band` dan `.step-number` dipindahkan ke layout publik agar dipakai semua halaman, serta override `height: auto` untuk kartu bertumpuk di kolom panduan sehingga footer dan section lanjutan tidak lagi terdorong keluar alur |
 | 1.29 | Perbaikan tampilan `/faq`, halaman checkout status pembayaran, dan halaman informasi lain: default `height: 100%` pada `.card-clean` dihapus agar kartu bertumpuk tidak melar, equal-height dijadikan opt-in via `h-100` pada kartu grid, dan judul halaman FAQ dikoreksi dari "Informasi" menjadi "FAQ". Kartu bantuan pada halaman status pembayaran juga dirapikan: tautan duplikat "Buka FAQ" diganti menjadi "Konsultasi via WhatsApp" |
+| 1.31 | Migrasi integrasi Xendit dari Invoice API ke Payment Sessions (`POST /sessions`, `PAYMENT_LINK`) dan Refund API v3 (`/v3/refunds`, `api-version: 2024-11-11`): callback session/refund, validasi token/nominal/mata uang/referensi, deduplikasi event berdasarkan `event_type + primary_id`, penyimpanan `gateway_payment_ref`, rekonsiliasi session/refund, dan refund VA manual. Suite menjadi 281 test / 1.756 assertion |
 
 ---
 
@@ -314,7 +315,7 @@ Aturan:
 | Queue | `database` | Redis + Laravel Horizon | Dev boleh database |
 | Cache/session | `database` | Redis | Session tetap database bila lebih sederhana |
 | Storage | Local public disk | S3-compatible | Poster, banner, galeri |
-| Pembayaran | Belum ada | Midtrans utama, abstraksi gateway | Xendit dapat ditambahkan tanpa ubah domain |
+| Pembayaran | Midtrans (abstraksi gateway) + Xendit Payment Sessions/Refund API v3 | Midtrans/Xendit produksi, abstraksi gateway | Gateway dipilih via `PAYMENT_GATEWAY`; `fake` untuk lokal/CI |
 | Email | Laravel Mail | Provider transaksional (Resend/SES) | Diputuskan sebelum MVP |
 | Auth | Controller auth kustom + Socialite (Google), verifikasi email, reset password, rate limit | Sama + kebijakan password produksi | Login Google memakai `laravel/socialite`; QR tiket dirender inline dengan `bacon/bacon-qr-code` |
 | Hosting | Lokal | VPS + Docker/Nginx + PHP-FPM | Worker dan scheduler terpisah |
@@ -338,7 +339,7 @@ Aturan:
 - Event/Listener Laravel untuk efek samping (mis. `OrderPaid` → terbitkan tiket → kirim email).
 - Tidak ada `env()` di luar config; tidak ada query mentah kecuali operasi atomik stok/check-in.
 - Semua route memakai named route dan middleware auth/role/policy.
-- Payment gateway dibungkus interface: `createCharge`, `handleWebhook`, `refund`, `getStatus`.
+- Payment gateway dibungkus interface: `createCharge`, `verifyWebhookSignature`, `parseWebhook`, `refund`, `getStatus`, `getRefundStatus`, dan `supportedMethods`.
 - Dependency produksi yang dipakai: `laravel/socialite` untuk login Google dan `bacon/bacon-qr-code` untuk QR SVG. Paket PDF e-tiket dipilih saat Epik 3.
 
 ---
@@ -490,7 +491,7 @@ Asumsi tim: 2 backend Laravel, 1 frontend/design, QA part-time. Jika solo, estim
 | ID | Keputusan |
 |---|---|
 | D1 | Monolit Laravel 12 + Blade + MySQL/MariaDB. Tidak memakai Next.js/Prisma/BullMQ di v1 |
-| D2 | Midtrans sebagai gateway utama; platform menjadi merchant of record; Xendit dapat ditambahkan lewat abstraksi |
+| D2 | Midtrans dan Xendit (Payment Sessions + Refund API v3) tersedia di balik abstraksi gateway; gateway aktif dipilih via `PAYMENT_GATEWAY`; platform menjadi merchant of record |
 | D3 | Batas bayar default 15 menit dan disinkronkan dengan expiry gateway |
 | D4 | Guest mengakses tiket lewat signed URL + email; lookup order dengan order number + email |
 | D5 | Organizer mendaftar self-service, tetapi wajib diverifikasi admin sebelum event dapat tayang |

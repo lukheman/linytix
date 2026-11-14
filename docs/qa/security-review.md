@@ -1,6 +1,6 @@
 # E7-02 — Security Review
 
-Tanggal review: 2026-11-13
+Tanggal review: 2026-11-14
 
 ## Ruang Lingkup
 
@@ -22,7 +22,7 @@ Tanggal review: 2026-11-13
 | Mass assignment | `SecurityReviewTest` — register, checkout, update user; `OrganizerRegistrationTest` — input `role`/`is_verified` diabaikan |
 | Rate limit pengajuan organizer | `OrganizerRegistrationTest` — 5 pengajuan/menit per user, percobaan ke-6 ditolak 429 |
 | Upload berbahaya | `SecurityReviewTest` — poster PHP dan avatar SVG |
-| Webhook | `SecurityReviewTest` + `tests/Feature/PaymentWebhookTest.php` — signature, replay, rate limit |
+| Webhook | `SecurityReviewTest` + `tests/Feature/PaymentWebhookTest.php` + `tests/Feature/XenditGatewayTest.php` — signature/token, replay, rate limit |
 | Signed URL | `SecurityReviewTest` + `tests/Feature/CheckoutTest.php` — tamper/expiry |
 | Secret/PII | `SecurityReviewTest` — `.env` dan `storage/logs` tidak tracked; review kode logging |
 
@@ -32,7 +32,7 @@ Jalankan:
 php artisan test --compact tests/Feature/SecurityReviewTest.php tests/Feature/PaymentWebhookTest.php tests/Feature/CheckoutTest.php
 ```
 
-Hasil 2026-11-13: `SecurityReviewTest` 13 test lulus; suite penuh 260 test / 1.662 assertion; `vendor/bin/pint --test` bersih untuk seluruh repo.
+Hasil 2026-11-14: `SecurityReviewTest` 13 test lulus; suite penuh 281 test / 1.756 assertion; `vendor/bin/pint --test` bersih untuk seluruh repo.
 
 ## Temuan & Perbaikan
 
@@ -51,11 +51,13 @@ Tidak ada temuan critical/high yang terbuka.
 
 - Middleware `ValidateCsrfToken` aktif pada grup `web`.
 - Satu-satunya pengecualian: `webhooks/*` karena gateway tidak dapat mengirim token CSRF.
-- Webhook tetap dilindungi signature HMAC dan rate limit.
+- Webhook tetap dilindungi signature/token gateway dan rate limit.
 
 ## Webhook
 
 - Signature diverifikasi sebelum order diproses.
+- Midtrans memakai signature HMAC; Xendit memakai token statis `x-callback-token` yang dibandingkan dengan `hash_equals` dan gagal tertutup bila token belum dikonfigurasi.
+- Callback refund Xendit memakai endpoint terpisah dan memvalidasi token, mata uang, serta nominal refund.
 - Payload invalid disimpan sebagai `webhook_events.signature_valid = false` dan ditolak 403.
 - Replay dengan `external_id` sama tidak membuat tiket ganda.
 - Rate limit default 120/menit per IP+gateway; dapat diubah lewat `TICKETING_RATE_LIMIT_PAYMENT_WEBHOOK`.

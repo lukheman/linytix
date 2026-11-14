@@ -1,9 +1,9 @@
 @php
     $siteName = $settings['site_name'] ?? 'LinyTix';
-    $heroEyebrow = $settings['hero_eyebrow'] ?? 'Platform tiket event';
-    $heroTitle = $settings['hero_title'] ?? 'Temukan event yang bikin harimu berkesan.';
-    $heroSubtitle = $settings['hero_subtitle'] ?? 'Konser, seminar, workshop, dan festival pilihan. Pesan tiket online, bayar aman, dan terima e-tiket QR langsung di email.';
-    $heroNote = $settings['hero_note'] ?? 'Tiket asli, QR unik, dan akses pesanan kapan saja.';
+    $heroEyebrow = $settings['hero_eyebrow'] ?? 'Event di seluruh Indonesia';
+    $heroTitle = $settings['hero_title'] ?? 'Temukan event pilihan di seluruh Indonesia.';
+    $heroSubtitle = $settings['hero_subtitle'] ?? 'Cari konser, seminar, workshop, festival, dan event lainnya berdasarkan kota, kategori, atau tanggal. Pesan tiket online dan terima e-tiket QR langsung di email.';
+    $heroNote = $settings['hero_note'] ?? 'E-tiket QR · Akses pesanan tanpa akun · Informasi event transparan';
 
     $heroEvent = $featured->first() ?? $upcoming->first();
     $highlighted = $featured->isNotEmpty() ? $featured->take(3) : $upcoming->take(3);
@@ -29,9 +29,9 @@
                     <form method="GET" action="{{ route('events.index') }}" class="search-card p-3 p-md-4 mb-4" role="search">
                         <div class="row g-2">
                             <div class="col-12">
-                                <label class="form-label small fw-semibold" for="home-q">Cari event</label>
+                                <label class="form-label small fw-semibold" for="home-q">Mau pergi ke event apa?</label>
                                 <input type="search" class="form-control" id="home-q" name="q"
-                                    placeholder="Nama event, artis, atau topik">
+                                     placeholder="Cari nama event, artis, topik, atau kota">
                             </div>
                             <div class="col-sm-6">
                                 <label class="form-label small fw-semibold" for="home-category">Kategori</label>
@@ -53,7 +53,7 @@
                             </div>
                             <div class="col-12 d-flex flex-column flex-sm-row gap-2 mt-3">
                                 <button type="submit" class="btn btn-main flex-grow-1">
-                                    <i class="fa-solid fa-magnifying-glass me-1"></i> Cari event
+                                    <i class="fa-solid fa-magnifying-glass me-1"></i> Temukan event
                                 </button>
                                 <a href="{{ route('events.index') }}" class="btn btn-ghost">Semua event</a>
                             </div>
@@ -90,7 +90,7 @@
                         <div class="hero-event-card card-clean">
                             <a href="{{ route('events.show', $heroEvent->slug) }}" class="hero-event-poster d-block">
                                 <img src="{{ $heroEvent->displayPosterUrl() }}" alt="Poster {{ $heroEvent->title }}" fetchpriority="high">
-                                <span class="event-badge">Event unggulan</span>
+                                <span class="event-badge">Pilihan minggu ini</span>
                             </a>
                             <div class="p-4">
                                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
@@ -110,7 +110,7 @@
                                 </h2>
                                 <div class="text-secondary small mb-1">
                                     <i class="fa-regular fa-calendar me-2"></i>
-                                    {{ $heroEvent->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} WIB
+                                    {{ $heroEvent->startsAtLocal()?->translatedFormat('l, d F Y, H.i') }} {{ $heroEvent->startsAtLocal()?->format('T') }}
                                 </div>
                                 <div class="text-secondary small mb-3">
                                     <i class="fa-solid fa-location-dot me-2"></i>
@@ -124,7 +124,7 @@
                                         </div>
                                     </div>
                                     <a href="{{ route('events.show', $heroEvent->slug) }}" class="btn btn-main">
-                                        Lihat tiket <i class="fa-solid fa-arrow-right ms-1"></i>
+                                        Pilih tiket <i class="fa-solid fa-arrow-right ms-1"></i>
                                     </a>
                                 </div>
                             </div>
@@ -148,8 +148,8 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
                     <div class="section-head">
                         <span class="eyebrow">Kategori</span>
-                        <h2 class="display-6 mt-2 mb-2">Pilih suasana yang kamu cari.</h2>
-                        <p class="text-secondary mb-0">Dari konser musik sampai workshop pengembangan diri.</p>
+                        <h2 class="display-6 mt-2 mb-2">Temukan event sesuai minatmu.</h2>
+                        <p class="text-secondary mb-0">Pilih kategori dan mulai cari pengalaman berikutnya.</p>
                     </div>
                     <a class="text-link text-nowrap" href="{{ route('events.index') }}">
                         Semua event <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -190,7 +190,7 @@
                     <div class="section-head">
                         <span class="eyebrow">Pilihan editor</span>
                         <h2 class="display-6 mt-2 mb-2">Event unggulan</h2>
-                        <p class="text-secondary mb-0">Event yang paling ditunggu dan pilihan terbaik untuk akhir pekanmu.</p>
+                        <p class="text-secondary mb-0">Jelajahi event pilihan dari berbagai kota dan kategori.</p>
                     </div>
                     <a class="text-link text-nowrap" href="{{ route('events.index') }}">
                         Lihat semua event <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -214,7 +214,7 @@
                 <div class="section-head">
                     <span class="eyebrow">Jadwal terdekat</span>
                     <h2 class="display-6 mt-2 mb-2">Event mendatang</h2>
-                    <p class="text-secondary mb-0">Amankan tiket lebih awal sebelum kuota habis.</p>
+                    <p class="text-secondary mb-0">Lihat event berdasarkan tanggal, lokasi, dan kategori.</p>
                 </div>
                 <a class="text-link text-nowrap" href="{{ route('events.index') }}">
                     Jelajahi semua <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -225,9 +225,9 @@
                 <div class="card-clean p-5 text-center">
                     <div class="icon-box mx-auto mb-3"><i class="fa-regular fa-calendar-xmark"></i></div>
                     <h3 class="h5">Belum ada event mendatang</h3>
-                    <p class="text-secondary mb-3">Event baru akan segera hadir. Sementara itu, lihat halaman bantuan atau hubungi kami.</p>
+                    <p class="text-secondary mb-3">Event baru akan segera hadir. Sementara itu, jelajahi katalog atau baca panduan pembelian.</p>
                     <div class="d-flex flex-wrap justify-content-center gap-2">
-                        <a href="{{ route('faq') }}" class="btn btn-main">Buka FAQ</a>
+                        <a href="{{ route('events.index') }}" class="btn btn-main">Jelajahi event</a>
                         <a href="{{ route('faq') }}" class="btn btn-ghost">Buka FAQ</a>
                     </div>
                 </div>
@@ -247,15 +247,15 @@
         <div class="container">
             <div class="section-head mb-4">
                 <span class="eyebrow">Cara beli tiket</span>
-                <h2 class="display-6 mt-2 mb-2">Tiga langkah, tiket langsung di tangan.</h2>
-                <p class="text-secondary mb-0">Tanpa antre dan tanpa ribet. Semua proses bisa diselesaikan online.</p>
+                <h2 class="display-6 mt-2 mb-2">Beli tiket dalam tiga langkah mudah.</h2>
+                <p class="text-secondary mb-0">Pilih event, selesaikan pembayaran, lalu siapkan e-tiket untuk hari acara.</p>
             </div>
 
             <div class="row g-3">
                 @foreach ([
-                    ['number' => '01', 'icon' => 'fa-magnifying-glass', 'title' => 'Pilih event', 'text' => 'Jelajahi event, cek jadwal, lalu pilih jenis tiket yang sesuai.'],
-                    ['number' => '02', 'icon' => 'fa-shield-halved', 'title' => 'Bayar aman', 'text' => 'Selesaikan pembayaran melalui metode yang tersedia. Data transaksi terlindungi.'],
-                    ['number' => '03', 'icon' => 'fa-qrcode', 'title' => 'Terima e-tiket', 'text' => 'E-tiket ber-QR dikirim ke email dan bisa dibuka lagi dari akun atau tautan aman.'],
+                    ['number' => '01', 'icon' => 'fa-magnifying-glass', 'title' => 'Pilih event', 'text' => 'Lihat jadwal, lokasi, deskripsi, dan jenis tiket yang tersedia.'],
+                    ['number' => '02', 'icon' => 'fa-credit-card', 'title' => 'Selesaikan pembayaran', 'text' => 'Pilih metode pembayaran yang tersedia dan cek detail pesanan sebelum membayar.'],
+                    ['number' => '03', 'icon' => 'fa-qrcode', 'title' => 'Terima e-tiket', 'text' => 'E-tiket QR dikirim ke email dan dapat dibuka kembali melalui akun atau tautan aman.'],
                 ] as $step)
                     <div class="col-md-4">
                         <div class="card-clean p-4 h-100">
@@ -276,9 +276,9 @@
         <div class="container">
             <div class="row g-5 align-items-center">
                 <div class="col-lg-4">
-                    <span class="eyebrow">Kenapa beli di sini</span>
-                    <h2 class="display-6 mt-2">Pengalaman beli tiket yang tenang.</h2>
-                    <p class="text-secondary">Dari pemilihan event sampai tiket diterima, semuanya dibuat sederhana dan aman.</p>
+                    <span class="eyebrow">Untuk pelanggan</span>
+                    <h2 class="display-6 mt-2">Semua yang kamu butuhkan untuk membeli tiket dengan tenang.</h2>
+                    <p class="text-secondary">Cek detail event, selesaikan pembelian, dan akses e-tiket dari satu tempat.</p>
                     <a class="btn btn-main mt-2" href="{{ route('faq') }}">
                         <i class="fa-regular fa-circle-question me-1"></i> Baca bantuan
                     </a>
@@ -286,10 +286,10 @@
                 <div class="col-lg-8">
                     <div class="row g-3">
                         @foreach ([
-                            ['icon' => 'fa-lock', 'title' => 'Pembayaran aman', 'text' => 'Transaksi diproses melalui payment gateway dengan verifikasi webhook.'],
+                            ['icon' => 'fa-circle-info', 'title' => 'Informasi event jelas', 'text' => 'Cek jadwal, lokasi, kategori, harga, dan detail event sebelum membeli.'],
                             ['icon' => 'fa-qrcode', 'title' => 'E-tiket QR unik', 'text' => 'Setiap tiket punya kode QR unik yang divalidasi di lokasi event.'],
-                            ['icon' => 'fa-envelope-circle-check', 'title' => 'Akses guest', 'text' => 'Beli tanpa akun tetap bisa membuka pesanan dan tiket lewat tautan aman di email.'],
-                            ['icon' => 'fa-rotate-left', 'title' => 'Kebijakan jelas', 'text' => 'Syarat pembelian dan kebijakan refund tersedia terbuka sebelum membeli.'],
+                            ['icon' => 'fa-envelope-circle-check', 'title' => 'Beli tanpa akun', 'text' => 'Selesaikan pembelian sebagai guest dan akses pesanan lewat tautan aman di email.'],
+                            ['icon' => 'fa-rotate-left', 'title' => 'Ketentuan terbuka', 'text' => 'Baca syarat pembelian dan kebijakan refund sebelum menyelesaikan pesanan.'],
                         ] as $benefit)
                             <div class="col-sm-6">
                                 <div class="card-clean p-4 h-100">
@@ -310,10 +310,10 @@
             <div class="row g-5 align-items-center">
                 <div class="col-lg-5">
                     <span class="eyebrow">Untuk organizer</span>
-                    <h2 class="display-6 mt-2 mb-3">Punya event? Daftarkan event Anda di sini.</h2>
+                    <h2 class="display-6 mt-2 mb-3">Punya event? Jual tiketnya dari satu platform.</h2>
                     <p class="text-secondary mb-4">
-                        Daftar sebagai organizer, lengkapi profil, dan buat event pertama Anda. Setelah diverifikasi
-                        admin, event dapat diajukan untuk review dan tayang di katalog {{ $siteName }}.
+                        Daftarkan event Anda, kelola tiket dan kuota, pantau penjualan, lalu gunakan e-tiket QR untuk
+                        check-in peserta dari berbagai kota di Indonesia.
                     </p>
                     <div class="d-flex flex-wrap gap-2">
                         @if (auth()->check() && auth()->user()->isOrganizer())
@@ -322,19 +322,19 @@
                             </a>
                         @else
                             <a href="{{ \App\Support\OrganizerCta::url() }}" class="btn btn-main">
-                                <i class="fas fa-building me-1"></i> Daftar sebagai Organizer
+                                <i class="fas fa-building me-1"></i> Daftarkan event
                             </a>
                         @endif
-                        <a href="{{ route('organizer.guide') }}" class="btn btn-ghost">Baca panduan lengkap</a>
+                        <a href="{{ route('organizer.guide') }}" class="btn btn-ghost">Lihat panduan organizer</a>
                     </div>
                 </div>
                 <div class="col-lg-7">
                     <div class="row g-3">
                         @foreach ([
-                            ['number' => '01', 'icon' => 'fa-user-check', 'title' => 'Daftar & verifikasi', 'text' => 'Buat akun, verifikasi email, lalu ajukan profil organizer.'],
-                            ['number' => '02', 'icon' => 'fa-shield-halved', 'title' => 'Verifikasi admin', 'text' => 'Admin meninjau profil dan mengirim catatan jika ada perbaikan.'],
+                            ['number' => '01', 'icon' => 'fa-user-check', 'title' => 'Buat akun', 'text' => 'Daftar, verifikasi email, lalu ajukan profil organizer.'],
+                            ['number' => '02', 'icon' => 'fa-shield-halved', 'title' => 'Ajukan profil', 'text' => 'Admin meninjau profil dan mengirim catatan jika ada perbaikan.'],
                             ['number' => '03', 'icon' => 'fa-calendar-plus', 'title' => 'Buat event & tiket', 'text' => 'Lengkapi detail event, unggah poster, dan tambahkan jenis tiket.'],
-                            ['number' => '04', 'icon' => 'fa-rocket', 'title' => 'Review & tayang', 'text' => 'Ajukan review. Setelah disetujui, event tayang dan tiket bisa dijual.'],
+                            ['number' => '04', 'icon' => 'fa-rocket', 'title' => 'Review & tayang', 'text' => 'Ajukan event untuk review. Setelah disetujui, tiket dapat mulai dijual.'],
                         ] as $step)
                             <div class="col-sm-6">
                                 <div class="card-clean p-4 h-100">
@@ -358,15 +358,15 @@
             <div class="cta-band p-4 p-md-5">
                 <div class="row align-items-center g-4">
                     <div class="col-lg-8">
-                        <span class="eyebrow" style="color: #a7e8e2">Akses guest</span>
-                        <h2 class="display-6 text-white mt-2 mb-2">Sudah punya pesanan?</h2>
+                        <span class="eyebrow" style="color: #a7e8e2">Akses pesanan</span>
+                        <h2 class="display-6 text-white mt-2 mb-2">Tiketmu masih tersimpan.</h2>
                         <p class="mb-0 text-white-50">
-                            Masukkan nomor order dan email pembeli. Kami kirimkan tautan aman untuk membuka pesanan dan e-tiket.
+                            Masukkan nomor pesanan dan email pembelian. Kami kirim tautan untuk membuka detail pesanan dan e-tiket.
                         </p>
                     </div>
                     <div class="col-lg-4 d-flex flex-column flex-sm-row flex-lg-column gap-2 justify-content-lg-end">
                         <a class="btn btn-light" href="{{ route('guest.orders.lookup') }}">
-                            <i class="fa-solid fa-ticket me-1"></i> Cari pesanan
+                            <i class="fa-solid fa-ticket me-1"></i> Buka e-tiket saya
                         </a>
                         <a class="btn btn-outline-light" href="{{ route('info.refund') }}">Kebijakan refund</a>
                     </div>

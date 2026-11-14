@@ -113,7 +113,7 @@ class CheckoutController extends Controller
         return view('guest.checkout.show', [
             'order' => $order,
             'settings' => SiteContent::settings(),
-            'paymentMethods' => config('ticketing.payment_methods', []),
+            'paymentMethods' => $this->availableMethods(),
             'latestPayment' => $latestPayment,
             'expired' => $order->isPending() && $order->isExpired(),
             'payUrl' => $signed
@@ -158,8 +158,10 @@ class CheckoutController extends Controller
     {
         $this->authorizeAccess($request, $order);
 
+        $availableMethods = array_keys($this->availableMethods());
+
         $validated = $request->validate([
-            'method' => ['required', 'string', 'in:'.implode(',', array_keys((array) config('ticketing.payment_methods', [])))],
+            'method' => ['required', 'string', 'in:'.implode(',', $availableMethods)],
         ]);
 
         if (! $order->canBePaid()) {
@@ -175,7 +177,7 @@ class CheckoutController extends Controller
             ->first();
 
         if ($existing && $existing->payment_url && ($existing->expires_at === null || $existing->expires_at->isFuture())) {
-            return back()->with('status', 'Instruksi pembayaran sudah tersedia. Lanjutkan melalui tombol pembayaran.');
+            return redirect()->away($existing->payment_url);
         }
 
         $gateway = $this->payments->gateway();
@@ -197,7 +199,7 @@ class CheckoutController extends Controller
             $expiresAt = $expiresAt && $expiresAt->lt($gatewayExpiresAt) ? $expiresAt : $gatewayExpiresAt;
         }
 
-        $order->payments()->create([
+        $payment = $order->payments()->create([
             'gateway' => $gateway->name(),
             'method' => $method,
             'gateway_ref' => $charge['gateway_ref'] ?? null,
@@ -208,7 +210,26 @@ class CheckoutController extends Controller
             'expires_at' => $expiresAt,
         ]);
 
+        if (filled($payment->payment_url)) {
+            return redirect()->away($payment->payment_url);
+        }
+
         return back()->with('status', 'Instruksi pembayaran berhasil dibuat.');
+    }
+
+    /**
+     * Metode pembayaran yang didukung gateway aktif dan dikonfigurasi aplikasi.
+     *
+     * @return array<string, string>
+     */
+    private function availableMethods(): array
+    {
+        $configured = (array) config('ticketing.payment_methods', []);
+        $supported = array_flip($this->payments->gateway()->supportedMethods());
+
+        $available = array_intersect_key($configured, $supported);
+
+        return $available !== [] ? $available : $configured;
     }
 
     private function authorizeAccess(Request $request, Order $order): void

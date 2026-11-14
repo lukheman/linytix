@@ -47,6 +47,41 @@ it('fails when debug, http url, or fake gateway would leak or break production',
         ->assertExitCode(1);
 });
 
+it('passes with a complete xendit production configuration', function () {
+    safeProductionConfig();
+
+    config([
+        'payment.default' => 'xendit',
+        'payment.xendit.secret_key' => 'xnd_production_example',
+        'payment.xendit.callback_token' => 'callback-token',
+        'payment.xendit.is_production' => true,
+    ]);
+
+    $this->artisan('ticketing:launch-check')
+        ->expectsOutputToContain('XENDIT_SECRET_KEY')
+        ->expectsOutputToContain('XENDIT_CALLBACK_TOKEN')
+        ->expectsOutputToContain('Launch check lulus')
+        ->assertExitCode(0);
+});
+
+it('fails when xendit credentials are missing', function () {
+    safeProductionConfig();
+
+    config([
+        'payment.default' => 'xendit',
+        'payment.xendit.secret_key' => '',
+        'payment.xendit.callback_token' => '',
+        'payment.xendit.is_production' => false,
+    ]);
+
+    $this->artisan('ticketing:launch-check')
+        ->expectsOutputToContain('XENDIT_SECRET_KEY')
+        ->expectsOutputToContain('XENDIT_CALLBACK_TOKEN')
+        ->expectsOutputToContain('XENDIT_IS_PRODUCTION')
+        ->expectsOutputToContain('Launch check gagal')
+        ->assertExitCode(1);
+});
+
 it('treats warnings as failures in strict mode', function () {
     safeProductionConfig();
 

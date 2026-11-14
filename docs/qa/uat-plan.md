@@ -1,9 +1,9 @@
 # E7-03 — Rencana UAT
 
-Tanggal: 2026-11-13
+Tanggal: 2026-11-14
 Status: **skenario otomatis tersedia; UAT manual & sign-off Product Owner menunggu**.
 
-Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario otomatis lulus melalui `php artisan test --compact` (260 test); kolom Otomasi di bawah merujuk file test yang menjadi bukti.
+Status eksekusi per 2026-11-14: **belum dijalankan manual**. Seluruh skenario otomatis lulus melalui `php artisan test --compact` (281 test); kolom Otomasi di bawah merujuk file test yang menjadi bukti.
 
 ## Peserta
 
@@ -17,7 +17,7 @@ Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario ot
 ## Environment
 
 - Staging dengan konfigurasi mendekati produksi.
-- Payment gateway sandbox (Midtrans) atau `fake` untuk skenario internal.
+- Payment gateway sandbox (Midtrans atau Xendit) atau `fake` untuk skenario internal.
 - Email memakai Mailpit/Mailtrap agar tautan dan e-tiket dapat diperiksa.
 - Data uji: 1 event published, 1 event draft, 1 organizer terverifikasi, 1 staff per gate, 1 admin.
 
@@ -27,11 +27,11 @@ Status eksekusi per 2026-11-13: **belum dijalankan manual**. Seluruh skenario ot
 |---|---|---|---|---|
 | UAT-01 | Pembelian guest | Pilih tiket → isi data → buat order → bayar → webhook sukses | Order paid, e-tiket terbit, tautan guest dapat dibuka | `UatJourneyTest` — guest purchase |
 | UAT-02 | Pembelian customer | Login → checkout → bayar → buka akun | Order dan tiket muncul di `/akun/pesanan` dan `/akun/tiket` | `UatJourneyTest` — customer account |
-| UAT-03 | Pembayaran sukses | Webhook `success` dengan nominal sesuai | Order paid, tiket aktif, email terkirim sekali | `PaymentWebhookTest` |
-| UAT-04 | Pembayaran gagal | Webhook `failed` sebelum paid | Order tetap pending/expired, tidak ada tiket | `PaymentWebhookTest` (failure sebelum dan sesudah paid) |
+| UAT-03 | Pembayaran sukses | Webhook `success` dengan nominal sesuai | Order paid, tiket aktif, email terkirim sekali | `PaymentWebhookTest` / `XenditGatewayTest` |
+| UAT-04 | Pembayaran gagal | Webhook `failed` sebelum paid | Order tetap pending/expired, tidak ada tiket | `PaymentWebhookTest` / `XenditGatewayTest` |
 | UAT-05 | Pembayaran expired | Order melewati `expires_at`, jalankan `ExpireOrders` | Order expired, stok kembali sekali, email expired | `PaymentWebhookTest` |
 | UAT-06 | Late payment | Webhook sukses setelah order expired | Jika stok ada: order paid + tiket; jika tidak: refund otomatis | `PaymentWebhookTest` |
-| UAT-07 | Refund penuh | Admin ajukan refund pada order paid | Refund sukses, tiket refunded, kuota tidak kembali | `RefundTest` |
+| UAT-07 | Refund penuh | Admin ajukan refund pada order paid | Refund sukses, tiket refunded, kuota tidak kembali | `RefundTest` / `XenditGatewayTest` |
 | UAT-08 | Pembatalan event | Admin batalkan event published | Event cancelled, semua order paid direfund, organizer diberi email | `AdminEventModerationTest` / `RefundTest` |
 | UAT-09 | Organizer create → tayang | Buat event → unggah poster → buat tiket → submit → admin approve | Event published dan tampil publik | `UatJourneyTest` — organizer publish |
 | UAT-10 | Scan valid | Staff scan kode tiket aktif | `success`, tiket `used`, check-in tercatat | `ScanTest` |

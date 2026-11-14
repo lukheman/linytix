@@ -153,7 +153,7 @@
                                 @endif
                                 <h2 class="h5 mb-2">{{ $event->title }}</h2>
                                 <div class="small text-secondary mb-1">
-                                    <i class="fa-regular fa-calendar me-2"></i>{{ $start?->translatedFormat('l, d F Y, H.i') }} WIB
+                                    <i class="fa-regular fa-calendar me-2"></i>{{ $start?->translatedFormat('l, d F Y, H.i') }} {{ $start?->format('T') }}
                                 </div>
                                 <div class="small text-secondary mb-1">
                                     <i class="fa-solid fa-location-dot me-2"></i>{{ $event->is_online ? 'Online' : ($event->venue?->name ?? 'Lokasi menyusul') }}

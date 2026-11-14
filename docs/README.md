@@ -1,6 +1,6 @@
 # Indeks Dokumen QA & Ops — LinyTix
 
-Terakhir diperbarui: 2026-11-13
+Terakhir diperbarui: 2026-11-14
 
 Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gunakan tabel status untuk melihat apa yang sudah terbukti dan apa yang masih menunggu eksekusi eksternal.
 
@@ -28,13 +28,14 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 | `php artisan ticketing:launch-check` | Validasi konfigurasi produksi (`--strict` untuk warning sebagai gagal) |
 | `tests/Feature/SecurityReviewTest.php` | Bukti otomasi security review |
 | `tests/Feature/UatJourneyTest.php` | Bukti otomasi alur UAT utama |
+| `tests/Feature/XenditGatewayTest.php` | Bukti integrasi Xendit: Payment Session, callback, Refund API v3, refund, rekonsiliasi |
 | `tests/Feature/LaunchCheckCommandTest.php` | Bukti command launch-check |
 
-## Status ringkas per 2026-11-13
+## Status ringkas per 2026-11-14
 
 | Area | Sudah terbukti lokal | Menunggu eksternal |
 |---|---|---|
-| Test suite | 260 test / 1.662 assertion lulus | — |
+| Test suite | 281 test / 1.756 assertion lulus | — |
 | Formatting | `vendor/bin/pint --test` bersih | Verifikasi ulang di CI/staging |
 | Blade | `php artisan view:cache` berhasil | — |
 | Security review | 13 test security lulus | Uji penetrasi eksternal (disarankan) |

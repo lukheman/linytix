@@ -59,7 +59,21 @@ class ProcessRefund implements ShouldQueue
             $result = $manager->gateway($claimed->payment->gateway)
                 ->refund($claimed->payment, $claimed->amount, $claimed->reason);
 
-            if (($result['status'] ?? null) !== 'succeeded') {
+            $status = (string) ($result['status'] ?? '');
+
+            if ($status === 'pending') {
+                // Refund asinkron: simpan referensi gateway dan tunggu callback
+                // atau job rekonsiliasi refund. Jangan tandai gagal.
+                $claimed->forceFill([
+                    'status' => Refund::STATUS_PROCESSING,
+                    'gateway_ref' => $result['gateway_ref'] ?? $claimed->gateway_ref,
+                    'error' => null,
+                ])->save();
+
+                return;
+            }
+
+            if ($status !== 'succeeded') {
                 $service->markFailed(
                     $claimed,
                     (string) ($result['message'] ?? 'Gateway tidak mengembalikan status sukses.'),

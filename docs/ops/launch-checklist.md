@@ -8,15 +8,15 @@ Status: **checklist siap; verifikasi eksternal (domain, DNS, gateway produksi, m
 | Area | Item | Bukti / perintah | Status | PIC |
 |---|---|---|---|---|
 | Aplikasi | `php artisan ticketing:launch-check --strict` lulus | Output command | [ ] | |
-| Aplikasi | `php artisan test --compact` lulus | Lokal 2026-11-13: 260 passed, 1.662 assertion | [x] | |
-| Aplikasi | `vendor/bin/pint --test` bersih | Lokal 2026-11-13: seluruh repo lulus | [x] | |
-| Aplikasi | `php artisan optimize` berhasil (config/route/view cache) | Lokal 2026-11-13: config/events/routes/views cached | [x] | |
+| Aplikasi | `php artisan test --compact` lulus | Lokal 2026-11-14: 281 passed, 1.756 assertion | [x] | |
+| Aplikasi | `vendor/bin/pint --test` bersih | Lokal 2026-11-14: seluruh repo lulus | [x] | |
+| Aplikasi | `php artisan optimize` berhasil (config/route/view cache) | Lokal 2026-11-14: config/events/routes/views cached | [x] | |
 | Aplikasi | `php artisan storage:link` aktif | `public/storage` ada | [ ] | |
 | Aplikasi | Scheduler dan queue worker aktif | `schedule:list`, supervisor status | [ ] | |
 | Aplikasi | `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...` | `.env` produksi | [ ] | |
 | Aplikasi | `SESSION_SECURE_COOKIE=true` | `.env` produksi | [ ] | |
 
-> Verifikasi lokal 2026-11-13: test suite dan Pint lulus, `php artisan optimize` berhasil. `ticketing:launch-check` sengaja masih gagal di `.env` lokal (debug aktif, URL HTTP, gateway fake, mail log, log level debug, cookie tidak secure) dan `public/storage` belum dibuat. Item lain memerlukan environment produksi/staging.
+> Verifikasi lokal 2026-11-14: test suite dan Pint lulus, `php artisan optimize` berhasil. `ticketing:launch-check` sengaja masih gagal di `.env` lokal (debug aktif, URL HTTP, gateway fake, mail log, log level debug, cookie tidak secure) dan `public/storage` belum dibuat. Item lain memerlukan environment produksi/staging.
 
 ## Domain, HTTPS, Redirect
 
@@ -43,15 +43,20 @@ Status: **checklist siap; verifikasi eksternal (domain, DNS, gateway produksi, m
 
 ## Payment Gateway
 
+Pilih satu gateway aktif (`PAYMENT_GATEWAY=midtrans` atau `xendit`); `fake` hanya untuk lokal/CI.
+
 | Item | Kriteria | Status |
 |---|---|---|
-| Mode produksi | `PAYMENT_GATEWAY=midtrans`, `MIDTRANS_IS_PRODUCTION=true` | [ ] |
-| Kredensial | Server key/client key produksi tersimpan di secret manager | [ ] |
-| Webhook URL | `https://domain/webhooks/payment/midtrans` terdaftar | [ ] |
-| Signature | Transaksi uji produksi lolos verifikasi signature | [ ] |
-| Nominal | Nominal webhook sama dengan total order | [ ] |
-| Refund | Refund uji berhasil dan tercatat | [ ] |
-| Rekonsiliasi | Job `ReconcilePayments` berjalan | [ ] |
+| Mode produksi | `PAYMENT_GATEWAY` bukan `fake`, flag produksi gateway aktif `true` | [ ] |
+| Kredensial | Secret/server key produksi tersimpan di secret manager | [ ] |
+| Webhook URL | `https://domain/webhooks/payment/<gateway>` terdaftar di dashboard gateway | [ ] |
+| Webhook refund | Xendit: `https://domain/webhooks/payment/xendit/refund` terdaftar | [ ] |
+| Callback token | Xendit: `XENDIT_CALLBACK_TOKEN` terisi dan cocok dengan dashboard | [ ] |
+| Signature | Transaksi uji produksi lolos verifikasi signature/token | [ ] |
+| Nominal | Nominal webhook Payment Session sama dengan total order memakai `amount` | [ ] |
+| Refund | Refund uji QRIS/e-wallet berhasil, kasus `PENDING` selesai via callback/rekonsiliasi, dan VA punya prosedur manual | [ ] |
+| Rekonsiliasi | Job `ReconcilePayments` dan `ReconcileRefunds` berjalan | [ ] |
+| Launch check | `php artisan ticketing:launch-check --strict` lulus | [ ] |
 
 ## Monitoring & Alert
 

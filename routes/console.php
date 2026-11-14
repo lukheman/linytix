@@ -2,6 +2,7 @@
 
 use App\Jobs\ExpireOrders;
 use App\Jobs\ReconcilePayments;
+use App\Jobs\ReconcileRefunds;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -12,3 +13,4 @@ Artisan::command('inspire', function () {
 
 Schedule::job(new ExpireOrders)->everyMinute()->withoutOverlapping();
 Schedule::job(new ReconcilePayments)->everyFiveMinutes()->withoutOverlapping();
+Schedule::job(new ReconcileRefunds)->everyTenMinutes()->withoutOverlapping();

@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Versi** | 1.28 |
-| **Tanggal** | 13 November 2026 |
-| **Basis** | `PRD.md` v1.29 |
-| **Status** | Tahap 0–3 selesai; Epik 4 selesai (registrasi organizer self-service + panduan organizer); Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
+| **Versi** | 1.30 |
+| **Tanggal** | 14 November 2026 |
+| **Basis** | `PRD.md` v1.31 |
+| **Status** | Tahap 0–3 selesai; Epik 4 selesai (registrasi organizer self-service + panduan organizer); Epik 5 selesai (penugasan staff + scan QR); Epik 6 selesai (manajemen pengguna & organizer, moderasi event, master data, monitoring transaksi & refund); Epik 7 dalam pelaksanaan — integrasi Xendit selesai, artefak QA/launch siap, eksekusi staging dan sign-off menunggu |
 | **Dokumen terkait** | `PRD.md`, `schema.sql`, `erd.mmd`, `docs/README.md` |
 
 Dokumen ini menerjemahkan seluruh fitur **P0** menjadi epik, user story, acceptance criteria (AC), task teknis, dan urutan sprint. P1/P2 tidak masuk backlog ini kecuali disebut sebagai dependency.
@@ -53,9 +53,9 @@ Urutan yang disarankan: **E0 → E1 → E2 → E3 → E4 → E5 → E6 → E7**,
 | E3-01 Pilih tiket & validasi | Selesai | Form checkout; validasi event/tiket, kuota, jadwal jual, min/max, identitas, dan perubahan harga |
 | E3-02 Order & stok atomik | Sebagian | Transaksi order + item, increment stok bersyarat, expiry 15 menit, batas pending, idempotency key. Uji dua proses paralel belum ada (disimulasikan berurutan) |
 | E3-03 Guest checkout | Selesai | Nama/email/phone, email lowercase, `user_id` null, akses via signed URL |
-| E3-04 Inisiasi pembayaran | Selesai | Payment record + FakeGateway; Midtrans charge tersedia; sukses, gagal, timeout, dan retry diuji |
+| E3-04 Inisiasi pembayaran | Selesai | Payment record + FakeGateway/Midtrans/Xendit; redirect hosted payment page; sukses, gagal, timeout, dan retry diuji |
 | E3-05 Webhook & idempotensi | Selesai | Signature, `webhook_events` unik, duplikat/out-of-order, sukses, `failed` sebelum dan sesudah paid, late payment |
-| E3-06 Expiry & rekonsiliasi | Selesai | Expiry idempoten, pengembalian stok, email expired, rekonsiliasi, late payment + refund otomatis |
+| E3-06 Expiry & rekonsiliasi | Selesai | Expiry idempoten, pengembalian stok, email expired, rekonsiliasi pembayaran + refund, late payment + refund otomatis |
 | E3-07 Penerbitan tiket & email | Selesai | Tiket idempoten, QR unik, email via queue + log, PDF per order, resend admin |
 | E3-08 Status pembayaran | Selesai | Status, countdown, polling 5 detik (maks 15 menit), tombol cek status, akses owner/signed |
 | E3-09 Refund admin | Selesai | Refund penuh beralasan, lifecycle status, retry gagal, pembatalan event batch, email, audit log |
@@ -180,11 +180,11 @@ Berlaku untuk semua story:
 
 **Task:**
 
-- Interface `PaymentGateway`: `createCharge(Order, method)`, `handleWebhook(Request)`, `refund(Refund)`, `getStatus(Payment)`.
-- Implementasi `MidtransGateway` untuk sandbox.
+- Interface `PaymentGateway`: `createCharge(Order, method)`, `verifyWebhookSignature(Request)`, `parseWebhook(Request)`, `refund(Payment, amount, reason)`, `getStatus(Payment)`, `getRefundStatus(Refund)`, `supportedMethods()`.
+- Implementasi `MidtransGateway` (Snap) dan `XenditGateway` (Payment Sessions + Refund API v3) untuk sandbox/produksi.
 - Implementasi `FakeGateway` untuk test (tanpa network).
 - Config `config/payment.php`; kredensial dari env.
-- Mapping status gateway → status internal.
+- Mapping status gateway → status internal, termasuk status refund `pending`.
 
 **AC:**
 
@@ -547,11 +547,12 @@ Berlaku untuk semua story:
 **AC:**
 
 - [x] Halaman checkout menampilkan ringkasan order, countdown, dan metode bayar yang tersedia.
-- [x] Memilih metode membuat `payments` + charge gateway; `payment_url`/QR ditampilkan.
+- [x] Memilih metode membuat `payments` + charge gateway; pembeli diarahkan ke hosted payment page atau melihat instruksi pembayaran.
+- [x] Metode pembayaran difilter sesuai dukungan gateway aktif.
 - [x] `payments.expires_at` disinkronkan dengan expiry gateway dan tidak melebihi `orders.expires_at`.
 - [x] Jika gateway gagal, order tetap `pending`, error ditampilkan, dan pembeli dapat mencoba lagi.
 - [x] Tidak ada data kartu yang disimpan.
-- [x] Feature test dengan `FakeGateway`: charge sukses, gagal, timeout, retry.
+- [x] Feature test dengan `FakeGateway` dan `XenditGateway`: charge sukses, gagal, retry, redirect Payment Session, callback, refund, dan rekonsiliasi.
 ### E3-05 — F-09 Webhook & idempotensi
 
 **Estimasi:** L  
@@ -566,6 +567,8 @@ Berlaku untuk semua story:
 - [x] Webhook out-of-order (mis. `expired` setelah `success`) tidak menurunkan status `paid`.
 - [x] Respons webhook cepat (< 2 detik); pekerjaan berat masuk queue.
 - [x] Feature test: signature invalid, duplikat, out-of-order, sukses, gagal, late payment.
+- [x] Xendit Payment Sessions: callback token statis diverifikasi dengan `hash_equals`, callback non-IDR dan refund ditolak di endpoint payment session.
+- [x] Xendit Refund API v3: callback refund diproses di endpoint terpisah dengan validasi referensi, nominal, dan mata uang; VA diarahkan ke refund manual.
 
 ### E3-06 — F-09 Expiry, rekonsiliasi, late payment
 
@@ -577,6 +580,7 @@ Berlaku untuk semua story:
 - [x] Job terjadwal menandai order `pending` yang `expires_at < now()` menjadi `expired`.
 - [x] Stok dikembalikan tepat sekali; job idempoten.
 - [x] Job rekonsiliasi memeriksa payment `pending` ke gateway dan memperbarui status.
+- [x] Job rekonsiliasi menyelesaikan refund `processing` yang callback-nya tidak datang.
 - [x] Late payment: jika stok tersedia, order diaktifkan kembali dan tiket terbit; jika tidak, refund otomatis dibuat.
 - [x] Pembeli menerima email untuk expired dan late payment.
 - [x] Feature test: expiry, double run, late payment with/without stock.

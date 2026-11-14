@@ -29,7 +29,7 @@
         </h3>
         <div class="text-secondary small mb-1">
             <i class="fa-regular fa-calendar me-2"></i>
-            {{ $start?->translatedFormat('d M Y, H.i') }} WIB
+             {{ $start?->translatedFormat('d M Y, H.i') }} {{ $start?->format('T') }}
         </div>
         <div class="text-secondary small mb-3">
             <i class="fa-solid fa-location-dot me-2"></i>
