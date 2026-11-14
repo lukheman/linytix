@@ -116,6 +116,80 @@ class TicketTypeService
         return $ticketType->refresh();
     }
 
+    /**
+     * Ubah kuota dan jadwal jual tanpa mengubah harga atau nama tiket.
+     * Boleh dilakukan kapan pun selama event tidak dibatalkan.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateSales(
+        TicketType $ticketType,
+        array $data,
+        ?User $actor = null,
+        ?string $ip = null,
+    ): TicketType {
+        $event = $ticketType->event;
+
+        if (! $event->canAdjustSalesSettings()) {
+            throw ValidationException::withMessages([
+                'status' => 'Kuota dan jadwal jual tidak dapat diubah untuk event berstatus '.$event->statusLabel().'.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($ticketType, $event, $data, $actor, $ip): TicketType {
+            $locked = TicketType::query()
+                ->whereKey($ticketType->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ((int) $data['quota'] < $locked->sold_count) {
+                throw ValidationException::withMessages([
+                    'quota' => 'Kuota tidak boleh lebih kecil dari jumlah tiket yang sudah terjual ('.$locked->sold_count.').',
+                ]);
+            }
+
+            $this->ensureCapacity(
+                $event,
+                $event->ticketQuotaTotal($locked->getKey()) + (int) $data['quota'],
+            );
+
+            $before = $locked->only([
+                'quota',
+                'sale_start_at',
+                'sale_end_at',
+                'is_active',
+            ]);
+
+            $locked->fill([
+                'quota' => (int) $data['quota'],
+                'sale_start_at' => $this->toUtc($data['sale_start_at'] ?? null, $event->timezoneLabel()),
+                'sale_end_at' => $this->toUtc($data['sale_end_at'] ?? null, $event->timezoneLabel()),
+                'is_active' => (bool) ($data['is_active'] ?? true),
+            ])->save();
+
+            $changes = [];
+
+            foreach ($before as $field => $oldValue) {
+                $newValue = $locked->getAttribute($field);
+
+                if ($oldValue != $newValue) {
+                    $changes[$field] = [
+                        'from' => $oldValue,
+                        'to' => $newValue,
+                    ];
+                }
+            }
+
+            $this->audit($actor, 'ticket_type.sales_updated', $locked, [
+                'event_id' => $event->getKey(),
+                'name' => $locked->name,
+                'changes' => $changes,
+            ], $ip);
+
+            return $locked->refresh();
+        });
+    }
+
     public function delete(TicketType $ticketType, ?User $actor = null, ?string $ip = null): void
     {
         $event = $ticketType->event;

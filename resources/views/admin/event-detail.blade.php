@@ -223,6 +223,59 @@
                 </div>
             </x-layout.modern-card>
 
+            @if ($event->canAdjustSalesSettings())
+                <x-layout.modern-card title="Pengaturan Penjualan Tiket" class="mb-4">
+                    <p class="small text-muted">
+                        Kuota dan jadwal jual dapat diubah kapan pun tanpa mengubah harga atau nama tiket.
+                    </p>
+
+                    @forelse ($event->ticketTypes as $ticketType)
+                        <form method="POST" action="{{ route('admin.events.tickets.sales', [$event, $ticketType]) }}" class="border rounded p-3 mb-3">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <div class="fw-semibold">{{ $ticketType->name }}</div>
+                                    <div class="small text-muted">
+                                        Rp {{ number_format((int) $ticketType->price, 0, ',', '.') }} · Terjual {{ $ticketType->sold_count }}
+                                    </div>
+                                </div>
+                                <x-ui.badge :variant="$ticketType->is_active ? 'success' : 'secondary'">
+                                    {{ $ticketType->saleStatusLabel() }}
+                                </x-ui.badge>
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small" for="admin-quota-{{ $ticketType->getKey() }}">Kuota</label>
+                                    <input type="number" id="admin-quota-{{ $ticketType->getKey() }}" name="quota" value="{{ $ticketType->quota }}" class="form-control form-control-sm" min="{{ max(1, $ticketType->sold_count) }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small" for="admin-sale-start-{{ $ticketType->getKey() }}">Jual mulai</label>
+                                    <input type="datetime-local" id="admin-sale-start-{{ $ticketType->getKey() }}" name="sale_start_at" value="{{ $ticketType->sale_start_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small" for="admin-sale-end-{{ $ticketType->getKey() }}">Jual sampai</label>
+                                    <input type="datetime-local" id="admin-sale-end-{{ $ticketType->getKey() }}" name="sale_end_at" value="{{ $ticketType->sale_end_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-12 d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input type="hidden" name="is_active" value="0">
+                                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="admin-active-{{ $ticketType->getKey() }}" @checked($ticketType->is_active)>
+                                        <label class="form-check-label small" for="admin-active-{{ $ticketType->getKey() }}">Aktif dijual</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-floppy-disk me-1"></i>Simpan Penjualan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    @empty
+                        <p class="text-muted mb-0">Belum ada jenis tiket.</p>
+                    @endforelse
+                </x-layout.modern-card>
+            @endif
+
             <x-layout.modern-card title="Aksi Moderasi">
                 @if ($event->status === \App\Models\Event::STATUS_REJECTED && $event->rejection_reason)
                     <div class="alert alert-danger mb-3">

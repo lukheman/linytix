@@ -196,6 +196,15 @@ class Event extends Model
     }
 
     /**
+     * Kuota dan jadwal jual tiket masih boleh diubah kapan pun selama event
+     * tidak dibatalkan, termasuk setelah event tayang.
+     */
+    public function canAdjustSalesSettings(): bool
+    {
+        return $this->status !== self::STATUS_CANCELLED;
+    }
+
+    /**
      * Event yang sudah tayang hanya boleh diubah pada konten non-penjualan.
      */
     public function allowsNonCriticalEdits(): bool

@@ -9,7 +9,8 @@
 
     @if (! $event->isFullyEditable())
         <div class="alert alert-warning">
-            Jenis tiket tidak dapat diubah karena event berstatus <strong>{{ $event->statusLabel() }}</strong>.
+            Event berstatus <strong>{{ $event->statusLabel() }}</strong>. Harga dan nama tiket terkunci,
+            tetapi <strong>kuota dan jadwal jual masih dapat diubah</strong>.
         </div>
     @endif
 
@@ -49,60 +50,60 @@
         <div class="col-lg-7">
             <x-layout.modern-card title="Daftar Jenis Tiket">
                 @forelse ($event->ticketTypes as $ticketType)
-                    <form method="POST" action="{{ route('organizer.events.tickets.update', [$event, $ticketType]) }}" class="border rounded p-3 mb-3">
-                        @csrf
-                        @method('PUT')
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="fw-semibold">{{ $ticketType->name }}</div>
-                            <span class="badge text-bg-{{ $ticketType->is_active ? 'success' : 'secondary' }}">
-                                {{ $ticketType->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </span>
-                        </div>
+                    @if ($event->isFullyEditable())
+                        <form method="POST" action="{{ route('organizer.events.tickets.update', [$event, $ticketType]) }}" class="border rounded p-3 mb-3">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fw-semibold">{{ $ticketType->name }}</div>
+                                <span class="badge text-bg-{{ $ticketType->is_active ? 'success' : 'secondary' }}">
+                                    {{ $ticketType->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </div>
 
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <label class="form-label small">Nama</label>
-                                <input type="text" name="name" value="{{ $ticketType->name }}" class="form-control form-control-sm" required maxlength="255" @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Harga</label>
-                                <input type="number" name="price" value="{{ $ticketType->price }}" class="form-control form-control-sm" min="0" required @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Kuota</label>
-                                <input type="number" name="quota" value="{{ $ticketType->quota }}" class="form-control form-control-sm" min="{{ max(1, $ticketType->sold_count) }}" required @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Min/order</label>
-                                <input type="number" name="min_per_order" value="{{ $ticketType->min_per_order }}" class="form-control form-control-sm" min="1" max="10" required @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Maks/order</label>
-                                <input type="number" name="max_per_order" value="{{ $ticketType->max_per_order }}" class="form-control form-control-sm" min="1" max="10" required @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Jual mulai</label>
-                                <input type="datetime-local" name="sale_start_at" value="{{ $ticketType->sale_start_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm" @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label small">Jual sampai</label>
-                                <input type="datetime-local" name="sale_end_at" value="{{ $ticketType->sale_end_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm" @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small">Deskripsi</label>
-                                <input type="text" name="description" value="{{ $ticketType->description }}" class="form-control form-control-sm" maxlength="2000" @disabled(! $event->isFullyEditable())>
-                            </div>
-                            <div class="col-12 d-flex justify-content-between align-items-center">
-                                <div class="form-check">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input class="form-check-input" type="checkbox" name="is_active" value="1" id="active-{{ $ticketType->getKey() }}" @checked($ticketType->is_active) @disabled(! $event->isFullyEditable())>
-                                    <label class="form-check-label small" for="active-{{ $ticketType->getKey() }}">Aktif dijual</label>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small">Nama</label>
+                                    <input type="text" name="name" value="{{ $ticketType->name }}" class="form-control form-control-sm" required maxlength="255">
                                 </div>
-                                <div class="small text-muted">Terjual: {{ $ticketType->sold_count }}</div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Harga</label>
+                                    <input type="number" name="price" value="{{ $ticketType->price }}" class="form-control form-control-sm" min="0" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Kuota</label>
+                                    <input type="number" name="quota" value="{{ $ticketType->quota }}" class="form-control form-control-sm" min="{{ max(1, $ticketType->sold_count) }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Min/order</label>
+                                    <input type="number" name="min_per_order" value="{{ $ticketType->min_per_order }}" class="form-control form-control-sm" min="1" max="10" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Maks/order</label>
+                                    <input type="number" name="max_per_order" value="{{ $ticketType->max_per_order }}" class="form-control form-control-sm" min="1" max="10" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Jual mulai</label>
+                                    <input type="datetime-local" name="sale_start_at" value="{{ $ticketType->sale_start_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small">Jual sampai</label>
+                                    <input type="datetime-local" name="sale_end_at" value="{{ $ticketType->sale_end_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small">Deskripsi</label>
+                                    <input type="text" name="description" value="{{ $ticketType->description }}" class="form-control form-control-sm" maxlength="2000">
+                                </div>
+                                <div class="col-12 d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input type="hidden" name="is_active" value="0">
+                                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="active-{{ $ticketType->getKey() }}" @checked($ticketType->is_active)>
+                                        <label class="form-check-label small" for="active-{{ $ticketType->getKey() }}">Aktif dijual</label>
+                                    </div>
+                                    <div class="small text-muted">Terjual: {{ $ticketType->sold_count }}</div>
+                                </div>
                             </div>
-                        </div>
 
-                        @if ($event->isFullyEditable())
                             <div class="d-flex gap-2 mt-3">
                                 <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="fas fa-floppy-disk me-1"></i>Simpan
@@ -113,14 +114,66 @@
                                     </button>
                                 @endif
                             </div>
-                        @endif
-                    </form>
-
-                    @if ($event->isFullyEditable() && $ticketType->sold_count === 0)
-                        <form method="POST" action="{{ route('organizer.events.tickets.destroy', [$event, $ticketType]) }}" id="delete-ticket-{{ $ticketType->getKey() }}" class="d-none" onsubmit="return confirm('Hapus jenis tiket ini?');">
-                            @csrf
-                            @method('DELETE')
                         </form>
+
+                        @if ($ticketType->sold_count === 0)
+                            <form method="POST" action="{{ route('organizer.events.tickets.destroy', [$event, $ticketType]) }}" id="delete-ticket-{{ $ticketType->getKey() }}" class="d-none" onsubmit="return confirm('Hapus jenis tiket ini?');">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        @endif
+                    @elseif ($event->canAdjustSalesSettings())
+                        <form method="POST" action="{{ route('organizer.events.tickets.sales', [$event, $ticketType]) }}" class="border rounded p-3 mb-3">
+                            @csrf
+                            @method('PUT')
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <div class="fw-semibold">{{ $ticketType->name }}</div>
+                                    <div class="small text-muted">
+                                        Rp {{ number_format((int) $ticketType->price, 0, ',', '.') }} · Terjual {{ $ticketType->sold_count }}
+                                    </div>
+                                </div>
+                                <span class="badge text-bg-{{ $ticketType->is_active ? 'success' : 'secondary' }}">
+                                    {{ $ticketType->saleStatusLabel() }}
+                                </span>
+                            </div>
+
+                            <div class="alert alert-light border small mb-3">
+                                Harga dan nama tiket terkunci setelah event diajukan. Kuota dan jadwal jual masih dapat diubah.
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label small">Kuota</label>
+                                    <input type="number" name="quota" value="{{ $ticketType->quota }}" class="form-control form-control-sm" min="{{ max(1, $ticketType->sold_count) }}" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Jual mulai</label>
+                                    <input type="datetime-local" name="sale_start_at" value="{{ $ticketType->sale_start_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small">Jual sampai</label>
+                                    <input type="datetime-local" name="sale_end_at" value="{{ $ticketType->sale_end_at?->copy()->setTimezone($event->timezoneLabel())->format('Y-m-d\TH:i') }}" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-12 d-flex justify-content-between align-items-center">
+                                    <div class="form-check">
+                                        <input type="hidden" name="is_active" value="0">
+                                        <input class="form-check-input" type="checkbox" name="is_active" value="1" id="sales-active-{{ $ticketType->getKey() }}" @checked($ticketType->is_active)>
+                                        <label class="form-check-label small" for="sales-active-{{ $ticketType->getKey() }}">Aktif dijual</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-floppy-disk me-1"></i>Simpan Penjualan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    @else
+                        <div class="border rounded p-3 mb-3">
+                            <div class="fw-semibold">{{ $ticketType->name }}</div>
+                            <div class="small text-muted mt-1">
+                                Event dibatalkan. Kuota dan jadwal jual tidak dapat diubah.
+                            </div>
+                        </div>
                     @endif
                 @empty
                     <p class="text-muted mb-0">Belum ada jenis tiket. Tambahkan minimal satu jenis tiket aktif agar event dapat diajukan review.</p>

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\OrganizerController as AdminOrganizerController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RefundController as AdminRefundController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TicketTypeController as AdminTicketTypeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VenueController as AdminVenueController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -201,6 +202,10 @@ Route::prefix('organizer')->middleware(['auth', 'active', 'role:organizer'])->na
         ->whereUuid('event')
         ->whereUuid('ticketType')
         ->name('events.tickets.update');
+    Route::put('/events/{event}/tickets/{ticketType}/sales', [OrganizerTicketTypeController::class, 'updateSales'])
+        ->whereUuid('event')
+        ->whereUuid('ticketType')
+        ->name('events.tickets.sales');
     Route::delete('/events/{event}/tickets/{ticketType}', [OrganizerTicketTypeController::class, 'destroy'])
         ->whereUuid('event')
         ->whereUuid('ticketType')
@@ -288,6 +293,10 @@ Route::prefix('admin')->middleware(['auth', 'active'])->group(function () {
         Route::post('/events/{event}/reject', [AdminEventController::class, 'reject'])
             ->whereUuid('event')
             ->name('admin.events.reject');
+        Route::put('/events/{event}/tickets/{ticketType}/sales', [AdminTicketTypeController::class, 'updateSales'])
+            ->whereUuid('event')
+            ->whereUuid('ticketType')
+            ->name('admin.events.tickets.sales');
 
         Route::get('/events/{event}/staff', [EventStaffController::class, 'index'])
             ->whereUuid('event')

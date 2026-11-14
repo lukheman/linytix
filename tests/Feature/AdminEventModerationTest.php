@@ -331,3 +331,59 @@ it('restricts event moderation and cancellation to admins', function () {
     expect($event->fresh()->status)->toBe(Event::STATUS_PENDING_REVIEW)
         ->and($published->fresh()->status)->toBe(Event::STATUS_PUBLISHED);
 });
+
+it('allows admins to adjust ticket sales settings from the event detail page', function () {
+    $admin = User::factory()->admin()->create();
+    [, $organizer] = moderationOrganizer();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    $ticket = TicketType::factory()->forEvent($event)->create([
+        'quota' => 100,
+        'sold_count' => 10,
+    ]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 120,
+            'is_active' => '1',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    expect($ticket->fresh()->quota)->toBe(120)
+        ->and(AuditLog::query()->where('action', 'ticket_type.sales_updated')->count())->toBe(1);
+});
+
+it('rejects invalid ticket sales settings from the admin event page', function () {
+    $admin = User::factory()->admin()->create();
+    [, $organizer] = moderationOrganizer();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    $ticket = TicketType::factory()->forEvent($event)->create([
+        'quota' => 100,
+        'sold_count' => 10,
+    ]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 5,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('quota');
+
+    expect($ticket->fresh()->quota)->toBe(100);
+});
+
+it('shows ticket sales settings on the admin event detail page', function () {
+    $admin = User::factory()->admin()->create();
+    [, $organizer] = moderationOrganizer();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    TicketType::factory()->forEvent($event)->create(['quota' => 100, 'is_active' => true]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.events.show', $event))
+        ->assertOk()
+        ->assertSee('Pengaturan Penjualan Tiket')
+        ->assertSee('Simpan Penjualan');
+});

@@ -657,3 +657,158 @@ it('renders the ticket management page with venue capacity information', functio
         ->assertSee('Kapasitas')
         ->assertSee('Total kuota tiket');
 });
+
+it('allows organizers to adjust quota and sale window after submission', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->pendingReview()->create([
+        'timezone' => 'Asia/Jakarta',
+        'start_at' => Carbon::parse('2026-12-01 19:00', 'Asia/Jakarta')->utc(),
+    ]);
+    $ticket = TicketType::factory()->forEvent($event)->create([
+        'quota' => 20,
+        'sold_count' => 5,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 30,
+            'sale_start_at' => '2026-11-20T10:00',
+            'sale_end_at' => '2026-11-30T22:00',
+            'is_active' => '1',
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('success');
+
+    $ticket->refresh();
+
+    expect($ticket->quota)->toBe(30)
+        ->and($ticket->sale_start_at?->utc()->toDateTimeString())->toBe('2026-11-20 03:00:00')
+        ->and($ticket->sale_end_at?->utc()->toDateTimeString())->toBe('2026-11-30 15:00:00')
+        ->and(AuditLog::query()->where('action', 'ticket_type.sales_updated')->count())->toBe(1);
+});
+
+it('allows organizers to adjust sales settings after publication', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    $ticket = TicketType::factory()->forEvent($event)->create([
+        'quota' => 50,
+        'sold_count' => 10,
+    ]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 60,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasNoErrors();
+
+    expect($ticket->fresh()->quota)->toBe(60);
+});
+
+it('still blocks ticket price changes after the event is submitted', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->pendingReview()->create();
+    $ticket = TicketType::factory()->forEvent($event)->create(['price' => 100000]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.update', [$event, $ticket]), ticketTypePayload([
+            'price' => 200000,
+        ]))
+        ->assertSessionHasErrors('status');
+
+    expect($ticket->fresh()->price)->toBe(100000);
+});
+
+it('rejects a quota below sold tickets when adjusting sales settings', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    $ticket = TicketType::factory()->forEvent($event)->create([
+        'quota' => 20,
+        'sold_count' => 8,
+    ]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 5,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('quota');
+
+    expect($ticket->fresh()->quota)->toBe(20);
+});
+
+it('blocks sales settings that exceed the venue capacity after publication', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $venue = Venue::factory()->create(['capacity' => 100]);
+    $event = Event::factory()->forOrganizer($organizer)->create([
+        'venue_id' => $venue->getKey(),
+        'is_online' => false,
+    ]);
+
+    TicketType::factory()->forEvent($event)->create(['quota' => 60, 'is_active' => true]);
+    $ticket = TicketType::factory()->forEvent($event)->create(['quota' => 20, 'is_active' => true]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 60,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('quota');
+
+    expect($ticket->fresh()->quota)->toBe(20);
+});
+
+it('rejects a sale window ending after the event starts when adjusting sales settings', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->create([
+        'timezone' => 'Asia/Jakarta',
+        'start_at' => Carbon::parse('2026-12-01 19:00', 'Asia/Jakarta')->utc(),
+    ]);
+    $ticket = TicketType::factory()->forEvent($event)->create(['quota' => 20]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 20,
+            'sale_end_at' => '2026-12-01T20:00',
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('sale_end_at');
+});
+
+it('blocks sales settings changes for a cancelled event', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->create([
+        'status' => Event::STATUS_CANCELLED,
+    ]);
+    $ticket = TicketType::factory()->forEvent($event)->create(['quota' => 20]);
+
+    $this->actingAs($user)
+        ->put(route('organizer.events.tickets.sales', [$event, $ticket]), [
+            'quota' => 30,
+            'is_active' => '1',
+        ])
+        ->assertSessionHasErrors('status');
+
+    expect($ticket->fresh()->quota)->toBe(20);
+});
+
+it('shows the sales settings form on the organizer ticket page after publication', function () {
+    [$user, $organizer] = eventOrganizerOwner();
+
+    $event = Event::factory()->forOrganizer($organizer)->create();
+    TicketType::factory()->forEvent($event)->create(['quota' => 50, 'is_active' => true]);
+
+    $this->actingAs($user)
+        ->get(route('organizer.events.tickets.index', $event))
+        ->assertOk()
+        ->assertSee('Simpan Penjualan')
+        ->assertSee('kuota dan jadwal jual masih dapat diubah');
+});

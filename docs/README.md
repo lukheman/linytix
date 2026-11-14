@@ -37,7 +37,7 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 
 | Area | Sudah terbukti lokal | Menunggu eksternal |
 |---|---|---|
-| Test suite | 287 test / 1.775 assertion lulus | — |
+| Test suite | 298 test / 1.810 assertion lulus | — |
 | Formatting | `vendor/bin/pint --test` bersih | Verifikasi ulang di CI/staging |
 | Blade | `php artisan view:cache` berhasil | — |
 | Security review | 13 test security lulus | Uji penetrasi eksternal (disarankan) |

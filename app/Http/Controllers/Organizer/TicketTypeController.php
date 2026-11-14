@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TicketTypeRequest;
+use App\Http\Requests\TicketTypeSalesRequest;
 use App\Models\Event;
 use App\Models\TicketType;
 use App\Services\Organizer\TicketTypeService;
@@ -46,6 +47,21 @@ class TicketTypeController extends Controller
         $tickets->update($ticketType, $request->validated(), $request->user(), $request->ip());
 
         return back()->with('success', 'Jenis tiket berhasil diperbarui.');
+    }
+
+    public function updateSales(
+        TicketTypeSalesRequest $request,
+        Event $event,
+        TicketType $ticketType,
+        TicketTypeService $tickets,
+    ): RedirectResponse {
+        $this->ensureBelongsToEvent($event, $ticketType);
+
+        Gate::authorize('manageTickets', $event);
+
+        $tickets->updateSales($ticketType, $request->validated(), $request->user(), $request->ip());
+
+        return back()->with('success', 'Kuota dan jadwal penjualan tiket berhasil diperbarui.');
     }
 
     public function destroy(Event $event, TicketType $ticketType, TicketTypeService $tickets): RedirectResponse
