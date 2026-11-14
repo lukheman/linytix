@@ -22,12 +22,18 @@ class EventStaffController extends Controller
 
         $event->loadMissing(['organizer', 'venue']);
 
+        $isAdmin = $request->routeIs('admin.*');
+
         return view('events.staff', [
             'event' => $event,
             'staff' => $event->staff()->orderBy('name')->get(),
-            'backRoute' => $request->routeIs('admin.*') ? 'admin.events' : 'organizer.events.index',
-            'storeRoute' => $request->routeIs('admin.*') ? 'admin.events.staff.store' : 'organizer.events.staff.store',
-            'destroyRoute' => $request->routeIs('admin.*') ? 'admin.events.staff.destroy' : 'organizer.events.staff.destroy',
+            'invitations' => $event->staffInvitations()->pending()->orderBy('created_at')->get(),
+            'backRoute' => $isAdmin ? 'admin.events' : 'organizer.events.index',
+            'storeRoute' => $isAdmin ? 'admin.events.staff.store' : 'organizer.events.staff.store',
+            'destroyRoute' => $isAdmin ? 'admin.events.staff.destroy' : 'organizer.events.staff.destroy',
+            'invitationStoreRoute' => $isAdmin ? 'admin.events.staff.invitations.store' : 'organizer.events.staff.invitations.store',
+            'invitationResendRoute' => $isAdmin ? 'admin.events.staff.invitations.resend' : 'organizer.events.staff.invitations.resend',
+            'invitationDestroyRoute' => $isAdmin ? 'admin.events.staff.invitations.destroy' : 'organizer.events.staff.invitations.destroy',
         ]);
     }
 

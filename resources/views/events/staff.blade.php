@@ -66,17 +66,69 @@
                     </table>
                 </div>
             </x-layout.modern-card>
+
+            <x-layout.modern-card title="Undangan Menunggu" class="mt-4">
+                <div class="table-responsive">
+                    <table class="table table-modern align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Gate</th>
+                                <th>Berlaku sampai</th>
+                                <th class="text-end">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($invitations as $invitation)
+                                <tr>
+                                    <td class="small">{{ $invitation->email }}</td>
+                                    <td>
+                                        <span class="badge text-bg-info">{{ $invitation->gate }}</span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ $invitation->expires_at?->translatedFormat('d M Y, H.i') }}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <form method="POST" action="{{ route($invitationResendRoute, [$event, $invitation]) }}">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Kirim ulang undangan">
+                                                    <i class="fas fa-paper-plane me-1"></i>Kirim Ulang
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route($invitationDestroyRoute, [$event, $invitation]) }}" onsubmit="return confirm('Batalkan undangan untuk {{ $invitation->email }}?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Batalkan undangan">
+                                                    <i class="fas fa-xmark me-1"></i>Batalkan
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Tidak ada undangan yang menunggu.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </x-layout.modern-card>
         </div>
 
         <div class="col-xl-5">
-            <x-layout.modern-card title="Tambah Staff">
-                <form method="POST" action="{{ route($storeRoute, $event) }}" class="vstack gap-3">
+            <x-layout.modern-card title="Undang Staff">
+                <form method="POST" action="{{ route($invitationStoreRoute, $event) }}" class="vstack gap-3">
                     @csrf
 
                     <div>
-                        <label for="email" class="form-label small fw-semibold">Email pengguna</label>
+                        <label for="email" class="form-label small fw-semibold">Email staff</label>
                         <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="staff@example.com" required>
-                        <div class="form-text">Pengguna harus sudah terdaftar. Role staff diberikan otomatis.</div>
+                        <div class="form-text">
+                            Jika email sudah terdaftar, staff langsung ditugaskan. Jika belum, sistem mengirim
+                            undangan untuk membuat akun.
+                        </div>
                     </div>
 
                     <div>
@@ -85,7 +137,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-user-plus me-1"></i>Tugaskan Staff
+                        <i class="fas fa-paper-plane me-1"></i>Kirim Undangan
                     </button>
                 </form>
             </x-layout.modern-card>
@@ -95,6 +147,7 @@
                     <li>Staff hanya dapat membuka halaman scan untuk event yang ditugaskan.</li>
                     <li>Staff tidak dapat mengubah data event maupun jenis tiket.</li>
                     <li>Gate ditampilkan pada halaman scan sebagai lokasi penugasan.</li>
+                    <li>Link undangan berlaku 7 hari dan hanya dapat dipakai satu kali.</li>
                 </ul>
             </x-layout.modern-card>
         </div>

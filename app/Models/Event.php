@@ -137,6 +137,11 @@ class Event extends Model
         return $this->belongsToMany(User::class, 'event_staff')->withPivot(['user_id', 'gate']);
     }
 
+    public function staffInvitations(): HasMany
+    {
+        return $this->hasMany(EventStaffInvitation::class);
+    }
+
     public function wishlists(): HasMany
     {
         return $this->hasMany(Wishlist::class);

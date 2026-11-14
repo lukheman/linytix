@@ -68,6 +68,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Undangan staff event
+    |--------------------------------------------------------------------------
+    |
+    | Link undangan disimpan sebagai hash dan hanya berlaku selama TTL di
+    | bawah. Kirim ulang dibatasi cooldown agar tidak membanjiri penerima.
+    |
+    */
+    'staff_invitation_ttl_days' => (int) env('TICKETING_STAFF_INVITATION_TTL_DAYS', 7),
+
+    'staff_invitation_resend_cooldown_seconds' => (int) env('TICKETING_STAFF_INVITATION_RESEND_COOLDOWN', 60),
+
+    /*
+    |--------------------------------------------------------------------------
     | Rate limit per menit
     |--------------------------------------------------------------------------
     |

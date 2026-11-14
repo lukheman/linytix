@@ -8,6 +8,10 @@
     <form method="POST" action="{{ route('login.store') }}" id="login-form">
         @csrf
 
+        @if (request('redirect'))
+            <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+        @endif
+
         @if (session('status'))
             <div class="alert alert-success small" role="status">{{ session('status') }}</div>
         @endif

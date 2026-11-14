@@ -16,6 +16,12 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 | [`ops/launch-checklist.md`](ops/launch-checklist.md) | Go/No-Go, domain/HTTPS, email domain, gateway, monitoring, legal, rollback | Sebagian item lokal terverifikasi; item eksternal belum | Ops + Tech Lead |
 | [`ops/incident-runbook.md`](ops/incident-runbook.md) | Severity, kontak, playbook insiden, rollback, postmortem | Tersedia; kontak & jadwal on-call perlu diisi | Ops |
 
+## Dokumen fitur
+
+| Dokumen | Cakupan |
+|---|---|
+| [`features/staff-invitation.md`](features/staff-invitation.md) | Undangan staff event via email: perilaku akun lama/baru, token, registrasi, keamanan, audit, dan test |
+
 ## Artefak pendukung
 
 | Artefak | Fungsi |
@@ -37,7 +43,7 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 
 | Area | Sudah terbukti lokal | Menunggu eksternal |
 |---|---|---|
-| Test suite | 298 test / 1.810 assertion lulus | — |
+| Test suite | 322 test / 1.913 assertion lulus | — |
 | Formatting | `vendor/bin/pint --test` bersih | Verifikasi ulang di CI/staging |
 | Blade | `php artisan view:cache` berhasil | — |
 | Security review | 13 test security lulus | Uji penetrasi eksternal (disarankan) |

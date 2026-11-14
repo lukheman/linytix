@@ -8,6 +8,17 @@
     <form method="POST" action="{{ route('register.store') }}" id="register-form">
         @csrf
 
+        @if (! empty($invitation))
+            <input type="hidden" name="invitation" value="{{ $invitationToken }}">
+            <div class="alert alert-info small" role="status">
+                <strong>Anda diundang menjadi staff.</strong>
+                Event: {{ $invitation->event?->title }} · Gate: {{ $invitation->gate }}.
+                Email di bawah sudah dikunci sesuai undangan.
+            </div>
+        @elseif (! empty($invitationError))
+            <div class="alert alert-warning small" role="status">{{ $invitationError }}</div>
+        @endif
+
         @if (request('intent') === 'organizer' || old('intent') === 'organizer')
             <input type="hidden" name="intent" value="organizer">
             <div class="alert alert-info small" role="status">
@@ -29,9 +40,10 @@
 
         <div class="mb-3">
             <label class="auth-label" for="email">Email</label>
-            <input type="email" name="email" value="{{ old('email') }}"
+            <input type="email" name="email" value="{{ old('email', $invitation->email ?? '') }}"
                 class="auth-input @error('email') is-invalid @enderror" id="email"
-                placeholder="nama@email.com" autocomplete="email" required>
+                placeholder="nama@email.com" autocomplete="email" required
+                @readonly(! empty($invitation))>
             @error('email')
                 <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
@@ -93,10 +105,12 @@
 
     <div class="auth-divider">atau</div>
 
-    <a href="{{ route('auth.google.redirect') }}"
-        class="btn btn-ghost w-100 d-inline-flex align-items-center justify-content-center gap-2">
-        <i class="fab fa-google"></i> Daftar dengan Google
-    </a>
+    @if (empty($invitation))
+        <a href="{{ route('auth.google.redirect') }}"
+            class="btn btn-ghost w-100 d-inline-flex align-items-center justify-content-center gap-2">
+            <i class="fab fa-google"></i> Daftar dengan Google
+        </a>
+    @endif
 
     <p class="auth-note text-center mt-4 mb-0">
         Sudah punya akun? <a href="{{ route('login') }}" class="text-link">Masuk</a>

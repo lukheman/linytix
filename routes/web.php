@@ -41,6 +41,7 @@ use App\Http\Controllers\Organizer\ProfileController as OrganizerProfileControll
 use App\Http\Controllers\Organizer\RegistrationController as OrganizerRegistrationController;
 use App\Http\Controllers\Organizer\TicketTypeController as OrganizerTicketTypeController;
 use App\Http\Controllers\ScanController;
+use App\Http\Controllers\StaffInvitationController;
 use Illuminate\Support\Facades\Route;
 
 // Guest Routes
@@ -113,6 +114,16 @@ Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('p
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirect'])->name('auth.google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
+
+// Undangan staff event
+Route::get('/staff/invitations/{token}', [StaffInvitationController::class, 'show'])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:30,1')
+    ->name('staff.invitations.show');
+Route::post('/staff/invitations/{token}/accept', [StaffInvitationController::class, 'accept'])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware(['auth', 'active', 'throttle:10,1'])
+    ->name('staff.invitations.accept');
 
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
@@ -191,6 +202,18 @@ Route::prefix('organizer')->middleware(['auth', 'active', 'role:organizer'])->na
     Route::delete('/events/{event}/staff/{user}', [EventStaffController::class, 'destroy'])
         ->whereUuid('event')
         ->name('events.staff.destroy');
+
+    Route::post('/events/{event}/staff/invitations', [StaffInvitationController::class, 'store'])
+        ->whereUuid('event')
+        ->name('events.staff.invitations.store');
+    Route::post('/events/{event}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend'])
+        ->whereUuid('event')
+        ->whereUuid('invitation')
+        ->name('events.staff.invitations.resend');
+    Route::delete('/events/{event}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy'])
+        ->whereUuid('event')
+        ->whereUuid('invitation')
+        ->name('events.staff.invitations.destroy');
 
     Route::get('/events/{event}/tickets', [OrganizerTicketTypeController::class, 'index'])
         ->whereUuid('event')
@@ -307,6 +330,18 @@ Route::prefix('admin')->middleware(['auth', 'active'])->group(function () {
         Route::delete('/events/{event}/staff/{user}', [EventStaffController::class, 'destroy'])
             ->whereUuid('event')
             ->name('admin.events.staff.destroy');
+
+        Route::post('/events/{event}/staff/invitations', [StaffInvitationController::class, 'store'])
+            ->whereUuid('event')
+            ->name('admin.events.staff.invitations.store');
+        Route::post('/events/{event}/staff/invitations/{invitation}/resend', [StaffInvitationController::class, 'resend'])
+            ->whereUuid('event')
+            ->whereUuid('invitation')
+            ->name('admin.events.staff.invitations.resend');
+        Route::delete('/events/{event}/staff/invitations/{invitation}', [StaffInvitationController::class, 'destroy'])
+            ->whereUuid('event')
+            ->whereUuid('invitation')
+            ->name('admin.events.staff.invitations.destroy');
 
         Route::get('/refunds', [AdminRefundController::class, 'index'])->name('admin.refunds');
         Route::post('/pesanan/{order}/refund', [AdminRefundController::class, 'store'])

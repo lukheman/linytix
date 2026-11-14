@@ -64,6 +64,12 @@ class LoginController extends Controller
         $user->forceFill(['last_login_at' => now()])->save();
 
         $home = route($user->homeRouteName());
+        $redirect = $this->localRedirect($request->input('redirect'));
+
+        if ($redirect && $user->canAccessUrl($redirect)) {
+            return redirect()->to($redirect);
+        }
+
         $intended = $request->session()->pull('url.intended');
 
         if ($intended && $user->canAccessUrl($intended)) {
@@ -76,5 +82,35 @@ class LoginController extends Controller
         }
 
         return redirect()->to($home);
+    }
+
+    /**
+     * Validasi tujuan redirect setelah login agar hanya URL lokal yang dipakai.
+     */
+    private function localRedirect(?string $redirect): ?string
+    {
+        $redirect = trim((string) $redirect);
+
+        if ($redirect === '') {
+            return null;
+        }
+
+        $parts = parse_url($redirect);
+
+        if ($parts === false) {
+            return null;
+        }
+
+        if (isset($parts['host']) && $parts['host'] !== request()->getHost()) {
+            return null;
+        }
+
+        $path = $parts['path'] ?? '/';
+
+        if (! str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return null;
+        }
+
+        return $redirect;
     }
 }
