@@ -182,7 +182,6 @@
             border-radius: 0;
             background: var(--paper);
             box-shadow: none;
-            height: 100%;
             transition: border-color .2s ease;
         }
 

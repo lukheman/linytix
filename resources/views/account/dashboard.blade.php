@@ -39,19 +39,19 @@
 
             <div class="row g-4 mb-5">
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card-clean p-4">
+                    <div class="card-clean p-4 h-100">
                         <div class="small text-secondary">Total pesanan</div>
                         <div class="display-6 text-success">{{ $orderCount }}</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card-clean p-4">
+                    <div class="card-clean p-4 h-100">
                         <div class="small text-secondary">Tiket aktif</div>
                         <div class="display-6 text-success">{{ $ticketCount }}</div>
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card-clean p-4">
+                    <div class="card-clean p-4 h-100">
                         <div class="small text-secondary">Status email</div>
                         <div class="h4 mt-2 mb-0">
                             @if ($verified)
@@ -63,7 +63,7 @@
                     </div>
                 </div>
                 <div class="col-sm-6 col-lg-3">
-                    <div class="card-clean p-4">
+                    <div class="card-clean p-4 h-100">
                         <div class="small text-secondary">Cari pesanan guest</div>
                         <a href="{{ route('guest.orders.lookup') }}" class="text-link d-inline-block mt-2">Buka pencarian →</a>
                     </div>
@@ -100,7 +100,7 @@
                 <div class="row g-4">
                     @foreach ($upcoming as $order)
                         <div class="col-md-6 col-lg-4">
-                            <div class="card-clean p-4 d-flex flex-column">
+                            <div class="card-clean p-4 d-flex flex-column h-100">
                                 <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                                     <div class="small text-secondary">{{ $order->order_number }}</div>
                                     <x-order-status :status="$order->status" />

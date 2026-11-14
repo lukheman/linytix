@@ -42,7 +42,7 @@
     ];
 
     $page = $pages[$pageKey] ?? null;
-    $title = $pageTitle ?? $page['title'] ?? 'Informasi';
+    $title = $pageTitle ?? $page['title'] ?? ($pageKey === 'faq' ? 'FAQ' : 'Informasi');
 @endphp
 
 <x-layouts.public

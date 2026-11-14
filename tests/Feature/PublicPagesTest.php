@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 it('shows ticketing public pages', function () {
     $this->get('/')->assertSuccessful()->assertSee('Temukan event yang bikin harimu berkesan.');
     $this->get('/events')->assertSuccessful()->assertSee('Temukan pengalaman berikutnya.');
-    $this->get('/faq')->assertSuccessful()->assertSee('FAQ');
+    $this->get('/faq')->assertSuccessful()->assertSee('FAQ')->assertSee('<h1 class="display-4 mt-2">FAQ</h1>', false);
     $this->get('/panduan-organizer')->assertSuccessful()->assertSee('Panduan mendaftarkan event');
     $this->get('/tentang-kami')->assertSuccessful()->assertSee('Tentang Kami');
 });

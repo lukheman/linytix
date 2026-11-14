@@ -8,7 +8,7 @@ Status: **checklist siap; verifikasi eksternal (domain, DNS, gateway produksi, m
 | Area | Item | Bukti / perintah | Status | PIC |
 |---|---|---|---|---|
 | Aplikasi | `php artisan ticketing:launch-check --strict` lulus | Output command | [ ] | |
-| Aplikasi | `php artisan test --compact` lulus | Lokal 2026-11-13: 260 passed, 1.661 assertion | [x] | |
+| Aplikasi | `php artisan test --compact` lulus | Lokal 2026-11-13: 260 passed, 1.662 assertion | [x] | |
 | Aplikasi | `vendor/bin/pint --test` bersih | Lokal 2026-11-13: seluruh repo lulus | [x] | |
 | Aplikasi | `php artisan optimize` berhasil (config/route/view cache) | Lokal 2026-11-13: config/events/routes/views cached | [x] | |
 | Aplikasi | `php artisan storage:link` aktif | `public/storage` ada | [ ] | |

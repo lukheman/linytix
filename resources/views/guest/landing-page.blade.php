@@ -169,7 +169,7 @@
                         @endphp
                         <div class="col-6 col-md-3">
                             <a href="{{ route('events.index', ['category' => $category->slug]) }}"
-                                class="card-clean category-card p-3 p-md-4 d-flex align-items-center gap-3 text-decoration-none text-dark">
+                                class="card-clean category-card p-3 p-md-4 d-flex align-items-center gap-3 text-decoration-none text-dark h-100">
                                 <div class="category-icon"><i class="fa-solid {{ $categoryIcon }}"></i></div>
                                 <div>
                                     <div class="fw-semibold">{{ $category->name }}</div>

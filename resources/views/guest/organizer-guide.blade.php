@@ -43,14 +43,9 @@
 >
     @push('styles')
         <style>
-            .guide-content .card-clean {
-                height: auto;
-            }
-
             .guide-aside-card {
                 position: sticky;
                 top: 6rem;
-                height: auto;
             }
         </style>
     @endpush
@@ -64,7 +59,7 @@
             </nav>
 
             <div class="row g-5">
-                <div class="col-lg-7 guide-content">
+                <div class="col-lg-7">
                     <span class="eyebrow">Panduan organizer</span>
                     <h1 class="display-5 mt-2 mb-3">Panduan mendaftarkan event.</h1>
                     <p class="lead text-secondary mb-4">

@@ -46,7 +46,7 @@
                             <div class="row g-3">
                                 @foreach ($tickets as $ticket)
                                     <div class="col-md-6">
-                                        <a href="{{ route('akun.tickets.show', $ticket) }}" class="card-clean p-3 d-flex justify-content-between align-items-center gap-2 text-reset text-decoration-none">
+                                        <a href="{{ route('akun.tickets.show', $ticket) }}" class="card-clean p-3 d-flex justify-content-between align-items-center gap-2 text-reset text-decoration-none h-100">
                                             <div>
                                                 <div class="fw-semibold">{{ $ticket->ticketType?->name ?? 'Tiket' }}</div>
                                                 <div class="small text-secondary">{{ $ticket->holder_name }}</div>

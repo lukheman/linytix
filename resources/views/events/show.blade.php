@@ -95,7 +95,7 @@
                             <div class="row g-3">
                                 @foreach ($event->lineups as $lineup)
                                     <div class="col-sm-6">
-                                        <div class="card-clean p-3 d-flex align-items-center gap-3">
+                                        <div class="card-clean p-3 d-flex align-items-center gap-3 h-100">
                                             <div class="lineup-avatar">{{ str($lineup->name)->substr(0, 1)->upper() }}</div>
                                             <div>
                                                 <div class="fw-semibold">{{ $lineup->name }}</div>

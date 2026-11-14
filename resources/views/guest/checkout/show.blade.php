@@ -209,10 +209,10 @@
                     </div>
 
                     <div class="card-clean p-4 mt-4">
-                        <div class="small text-secondary">Butuh bantuan?</div>
+                        <div class="small text-secondary mb-1">Butuh bantuan?</div>
                         <a href="{{ route('faq') }}" class="text-link">Baca FAQ</a>
                         <span class="text-secondary">·</span>
-                        <a href="{{ route('faq') }}" class="text-link">Buka FAQ</a>
+                        <a href="{{ \App\Support\SiteContent::whatsappUrl($settings) }}" target="_blank" rel="noopener" class="text-link">Konsultasi via WhatsApp</a>
                     </div>
                 </div>
             </div>
