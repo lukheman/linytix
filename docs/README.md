@@ -12,6 +12,7 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 | [`qa/security-review.md`](qa/security-review.md) | Otorisasi, CSRF, XSS, SQLi, mass assignment, upload, webhook, signed URL, secret/PII | Review selesai; 4 temuan high/medium fixed, 2 low accepted | Backend |
 | [`qa/uat-plan.md`](qa/uat-plan.md) | 16 skenario UAT, defect log, sign-off Product Owner | Skenario otomatis lulus; UAT manual & sign-off belum | QA + PO |
 | [`ops/backup-restore.md`](ops/backup-restore.md) | Backup harian, restore drill, runbook restore produksi | Drill lokal lulus; cron & drill produksi belum | Ops |
+| [`ops/mail-delivery.md`](ops/mail-delivery.md) | Konfigurasi SMTP (Mailtrap/Gmail), verifikasi kirim, kirim ulang e-tiket, troubleshooting | Konfigurasi tersedia; verifikasi inbox menunggu kredensial | Backend + Ops |
 | [`ops/launch-checklist.md`](ops/launch-checklist.md) | Go/No-Go, domain/HTTPS, email domain, gateway, monitoring, legal, rollback | Sebagian item lokal terverifikasi; item eksternal belum | Ops + Tech Lead |
 | [`ops/incident-runbook.md`](ops/incident-runbook.md) | Severity, kontak, playbook insiden, rollback, postmortem | Tersedia; kontak & jadwal on-call perlu diisi | Ops |
 
@@ -26,6 +27,7 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 | `scripts/backup-database.sh` | Backup MySQL/MariaDB atau SQLite + checksum + retensi |
 | `scripts/restore-drill.sh` | Restore ke database uji + ukur durasi terhadap RTO |
 | `php artisan ticketing:launch-check` | Validasi konfigurasi produksi (`--strict` untuk warning sebagai gagal) |
+| `php artisan ticketing:mail-test <email>` | Kirim email uji untuk memverifikasi konfigurasi SMTP |
 | `tests/Feature/SecurityReviewTest.php` | Bukti otomasi security review |
 | `tests/Feature/UatJourneyTest.php` | Bukti otomasi alur UAT utama |
 | `tests/Feature/XenditGatewayTest.php` | Bukti integrasi Xendit: Payment Session, callback, Refund API v3, refund, rekonsiliasi |
@@ -35,7 +37,7 @@ Halaman ini merangkum dokumen QA dan operasional untuk Epik 7 (QA & Launch). Gun
 
 | Area | Sudah terbukti lokal | Menunggu eksternal |
 |---|---|---|
-| Test suite | 281 test / 1.756 assertion lulus | — |
+| Test suite | 287 test / 1.775 assertion lulus | — |
 | Formatting | `vendor/bin/pint --test` bersih | Verifikasi ulang di CI/staging |
 | Blade | `php artisan view:cache` berhasil | — |
 | Security review | 13 test security lulus | Uji penetrasi eksternal (disarankan) |

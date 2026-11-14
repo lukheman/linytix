@@ -16,7 +16,7 @@ Status: **checklist siap; verifikasi eksternal (domain, DNS, gateway produksi, m
 | Aplikasi | `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...` | `.env` produksi | [ ] | |
 | Aplikasi | `SESSION_SECURE_COOKIE=true` | `.env` produksi | [ ] | |
 
-> Verifikasi lokal 2026-11-14: test suite dan Pint lulus, `php artisan optimize` berhasil. `ticketing:launch-check` sengaja masih gagal di `.env` lokal (debug aktif, URL HTTP, gateway fake, mail log, log level debug, cookie tidak secure) dan `public/storage` belum dibuat. Item lain memerlukan environment produksi/staging.
+> Verifikasi lokal 2026-11-14: test suite dan Pint lulus, `php artisan optimize` berhasil. `ticketing:launch-check` sengaja masih gagal di `.env` lokal (debug aktif, log level debug, cookie tidak secure, Xendit masih sandbox) dan `public/storage` belum dibuat. Bagian `MAIL_*` sudah lulus setelah SMTP dikonfigurasi. Item lain memerlukan environment produksi/staging.
 
 ## Domain, HTTPS, Redirect
 
@@ -38,6 +38,7 @@ Status: **checklist siap; verifikasi eksternal (domain, DNS, gateway produksi, m
 | DKIM | Selector aktif dan signature valid | [ ] |
 | DMARC | `v=DMARC1; p=quarantine; rua=mailto:dmarc@domain` | [ ] |
 | MAIL_FROM | Domain terverifikasi, bukan `example.com` | [ ] |
+| Mailer test | `php artisan ticketing:mail-test <email>` berhasil, email masuk inbox | [ ] |
 | Uji kirim | Mail-tester score ≥ 9/10, masuk inbox | [ ] |
 | Email transaksional | Verifikasi, tiket, refund, pembatalan terkirim | [ ] |
 

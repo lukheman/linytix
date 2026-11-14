@@ -11,6 +11,10 @@ function safeProductionConfig(): void
         'queue.default' => 'redis',
         'cache.default' => 'redis',
         'mail.default' => 'smtp',
+        'mail.from.address' => 'no-reply@ticketing.example.test',
+        'mail.mailers.smtp.host' => 'live.smtp.mailtrap.io',
+        'mail.mailers.smtp.username' => 'api',
+        'mail.mailers.smtp.password' => 'mailtrap-token',
         'logging.default' => 'stack',
         'logging.channels.single.level' => 'warning',
         'payment.default' => 'midtrans',
@@ -45,6 +49,33 @@ it('fails when debug, http url, or fake gateway would leak or break production',
         ->expectsOutputToContain('PAYMENT_GATEWAY')
         ->expectsOutputToContain('Launch check gagal')
         ->assertExitCode(1);
+});
+
+it('fails when smtp credentials or the sender address are incomplete', function () {
+    safeProductionConfig();
+
+    config([
+        'mail.mailers.smtp.password' => '',
+        'mail.from.address' => 'hello@example.com',
+    ]);
+
+    $this->artisan('ticketing:launch-check')
+        ->expectsOutputToContain('MAIL_PASSWORD')
+        ->expectsOutputToContain('MAIL_FROM_ADDRESS')
+        ->expectsOutputToContain('Launch check gagal')
+        ->assertExitCode(1);
+});
+
+it('warns when the mailtrap sandbox host is used', function () {
+    safeProductionConfig();
+
+    config([
+        'mail.mailers.smtp.host' => 'sandbox.smtp.mailtrap.io',
+    ]);
+
+    $this->artisan('ticketing:launch-check')
+        ->expectsOutputToContain('MAIL_HOST_SANDBOX')
+        ->assertExitCode(0);
 });
 
 it('passes with a complete xendit production configuration', function () {

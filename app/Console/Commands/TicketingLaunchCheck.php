@@ -76,6 +76,7 @@ class TicketingLaunchCheck extends Command
     private function checks(): array
     {
         $gateway = (string) config('payment.default', 'fake');
+        $mailer = (string) config('mail.default', 'log');
         $checks = [
             $this->check(
                 config('app.env') === 'production',
@@ -121,10 +122,17 @@ class TicketingLaunchCheck extends Command
                 (string) config('cache.default'),
             ),
             $this->check(
-                ! in_array(config('mail.default'), ['log', 'array'], true),
+                ! in_array($mailer, ['log', 'array'], true),
                 'MAIL_MAILER',
                 'smtp/resend/mailgun',
-                (string) config('mail.default'),
+                $mailer,
+            ),
+            $this->check(
+                filled(config('mail.from.address'))
+                    && ! str_contains((string) config('mail.from.address'), 'example.com'),
+                'MAIL_FROM_ADDRESS',
+                'domain terverifikasi',
+                (string) config('mail.from.address'),
             ),
             $this->check(
                 ! in_array(mb_strtolower((string) $this->logLevel()), ['debug'], true),
@@ -139,6 +147,40 @@ class TicketingLaunchCheck extends Command
                 $gateway,
             ),
         ];
+
+        if ($mailer === 'smtp') {
+            $smtp = (array) config('mail.mailers.smtp', []);
+            $hasEndpoint = filled($smtp['host'] ?? null) || filled($smtp['url'] ?? null);
+
+            $checks[] = $this->check(
+                $hasEndpoint,
+                'MAIL_HOST',
+                'terisi',
+                $hasEndpoint ? 'terisi' : 'kosong',
+            );
+
+            $checks[] = $this->check(
+                filled($smtp['username'] ?? null),
+                'MAIL_USERNAME',
+                'terisi',
+                filled($smtp['username'] ?? null) ? 'terisi' : 'kosong',
+            );
+
+            $checks[] = $this->check(
+                filled($smtp['password'] ?? null),
+                'MAIL_PASSWORD',
+                'terisi',
+                filled($smtp['password'] ?? null) ? 'terisi' : 'kosong',
+            );
+
+            $checks[] = $this->check(
+                ! str_contains((string) ($smtp['host'] ?? ''), 'sandbox.smtp.mailtrap.io'),
+                'MAIL_HOST_SANDBOX',
+                'bukan sandbox',
+                (string) ($smtp['host'] ?? ''),
+                warningOnly: true,
+            );
+        }
 
         if ($gateway === 'xendit') {
             $checks[] = $this->check(

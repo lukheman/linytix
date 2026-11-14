@@ -153,6 +153,33 @@ php artisan queue:listen
 php artisan pail
 ```
 
+### Email Delivery
+
+Local development defaults to `MAIL_MAILER=log`, which writes emails to `storage/logs/laravel.log` instead of sending them. To deliver real email (tickets, verification, refunds), configure SMTP in `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=live.smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=api
+MAIL_PASSWORD=your-api-token
+MAIL_FROM_ADDRESS=no-reply@your-domain.com
+```
+
+Verify the configuration:
+
+```bash
+php artisan ticketing:mail-test you@example.com
+```
+
+Then keep a queue worker running so ticket emails are processed:
+
+```bash
+php artisan queue:work --tries=3
+```
+
+See [`docs/ops/mail-delivery.md`](docs/ops/mail-delivery.md) for Mailtrap, Gmail SMTP, DNS, and troubleshooting.
+
 ## 📁 Project Structure
 
 ```
